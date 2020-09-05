@@ -6,12 +6,12 @@ import com.crrcdt.silly.base.core.SillyVariable;
 import java.util.List;
 
 /**
- * 傻瓜工作流 流程节点 Bean （对应每个节点的操作人）
+ * 傻瓜 流程任务数据 （对应每个节点任务的操作人）
  *
  * @author QINY
  * @since 1.0
  */
-public interface SillyNodeBean<N extends SillyNode<V>, V extends SillyVariable> {
+public interface SillyTaskData<N extends SillyNode<V>, V extends SillyVariable> {
 
     N getNode();
 

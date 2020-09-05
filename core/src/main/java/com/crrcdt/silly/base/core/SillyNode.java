@@ -8,6 +8,7 @@ import java.util.Map;
  * 傻瓜工作流 节点接口 （对应流程图节点）
  *
  * @author QINY
+ * @since 1.0
  */
 public interface SillyNode<V extends SillyVariable> {
 

@@ -1,13 +1,14 @@
-package com.crrcdt.silly;
+package com.crrcdt.silly.service.base;
 
+import com.crrcdt.silly.base.SillyFactory;
 import com.crrcdt.silly.base.core.SillyMaster;
 import com.crrcdt.silly.base.core.SillyNode;
 import com.crrcdt.silly.base.core.SillyVariable;
 import com.crrcdt.silly.convertor.SillyVariableConvertor;
 import com.crrcdt.silly.service.SillyWriteService;
 import com.iqiny.silly.common.Constant;
+import com.iqiny.silly.common.util.CurrentUserUtil;
 import com.iqiny.silly.common.util.StringUtils;
-import com.iqiny.silly.common.util.ThreadUtil;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -21,14 +22,28 @@ import java.util.Map;
  * @param <N> 节点
  * @param <V> 变量
  */
-public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable>
-        extends AbstractSillyService<M, N, V> implements SillyWriteService<M, N, V> {
+public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> implements SillyWriteService<M, N, V> {
 
-    protected volatile Map<String, SillyVariableConvertor<?>> sillyHandlerMap;
+    protected SillyFactory<M, N, V> sillyFactory;
+
+    protected CurrentUserUtil currentUserUtil;
+
+    protected Map<String, SillyVariableConvertor<?>> sillyHandlerMap;
+
+    @Override
+    public void init() {
+        this.sillyFactory = createSillyFactory();
+        this.currentUserUtil = sillyFactory.currentUserUtil();
+        this.sillyHandlerMap = initSillyHandlerMap();
+    }
 
     protected abstract String startProcess(M master, Map<String, Object> varMap);
 
     protected abstract void forceEndProcess(String actProcessId);
+
+    protected abstract SillyFactory<M, N, V> createSillyFactory();
+
+    protected abstract Map<String, SillyVariableConvertor<?>> initSillyHandlerMap();
 
     private SillyVariableConvertor<?> getSillyHandler(String handleKey) {
         if (sillyHandlerMap == null) {
@@ -44,8 +59,6 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
 
         return sillyHandlerMap.get(handleKey);
     }
-
-    protected abstract Map<String, SillyVariableConvertor<?>> initSillyHandlerMap();
 
     /**
      * 提交主数据 流程开始流转
@@ -198,7 +211,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
 
     private void updateToHistory(N node, boolean isParallel) {
         // （若有）更新之前的流程信息 为历史状态
-        final N whereNode = getSillyFactory().newNode();
+        final N whereNode = sillyFactory.newNode();
         whereNode.setMasterId(node.getMasterId());
         whereNode.setNodeKey(node.getNodeKey());
         if (isParallel) {
@@ -206,18 +219,18 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         } else {
             node.setParallelFlag(Constant.ActivitiParallel.NOT_PARALLEL);
         }
-        final N sillyNode = getSillyFactory().newNode();
+        final N sillyNode = sillyFactory.newNode();
         sillyNode.setStatus(Constant.ActivitiNode.STATUS_HISTORY);
         update(sillyNode, whereNode);
 
         // （若有）更新之前的流程变量信息 为历史状态
-        final V whereVariable = getSillyFactory().newVariable();
+        final V whereVariable = sillyFactory.newVariable();
         whereVariable.setMasterId(node.getMasterId());
         whereVariable.setNodeKey(node.getMasterId());
         if (isParallel) {
             whereVariable.setTaskId(node.getTaskId());
         }
-        V sillyVariable = getSillyFactory().newVariable();
+        V sillyVariable = sillyFactory.newVariable();
         sillyVariable.setMasterId(node.getMasterId());
         sillyVariable.setNodeKey(node.getNodeKey());
         sillyVariable.setTaskId(node.getTaskId());
@@ -301,11 +314,11 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
     protected void close(N node) {
         saveNodeInfo(node);
         // 更新状态 关闭
-        M master = getSillyFactory().newMaster();
+        M master = sillyFactory.newMaster();
         master.setId(node.getMasterId());
         master.setStatus(master.getEndStatus());
         master.setCloseDate(new Date());
-        master.setCloseUserId(ThreadUtil.currentUserId());
+        master.setCloseUserId(currentUserUtil.currentUserId());
         if (!updateById(master)) {
             throw new RuntimeException("更新主表状态发生异常！");
         }

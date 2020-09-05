@@ -4,6 +4,7 @@ package com.crrcdt.silly.base.core;
  * 傻瓜工作流 流程变量接口 （对应每个操作节点的具体内容）
  *
  * @author QINY
+ * @since 1.0
  */
 public interface SillyVariable {
 

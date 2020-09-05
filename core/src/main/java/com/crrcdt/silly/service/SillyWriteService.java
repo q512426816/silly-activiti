@@ -1,5 +1,6 @@
 package com.crrcdt.silly.service;
 
+import com.crrcdt.silly.base.Initializable;
 import com.crrcdt.silly.base.core.SillyMaster;
 import com.crrcdt.silly.base.core.SillyNode;
 import com.crrcdt.silly.base.core.SillyVariable;
@@ -10,7 +11,7 @@ import com.crrcdt.silly.base.core.SillyVariable;
  * @author QINY
  * @since 1.0
  */
-public interface SillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> {
+public interface SillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> extends Initializable {
 
     /**
      * 新增主表数据

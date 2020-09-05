@@ -6,6 +6,7 @@ import java.util.Date;
  * 傻瓜工作流 主表接口
  *
  * @author QINY
+ * @since 1.0
  */
 public interface SillyMaster {
 

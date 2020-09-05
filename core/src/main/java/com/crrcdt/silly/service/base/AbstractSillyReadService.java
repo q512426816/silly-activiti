@@ -1,14 +1,15 @@
-package com.crrcdt.silly;
+package com.crrcdt.silly.service.base;
 
-import com.crrcdt.silly.base.SillyNodeBean;
+import com.crrcdt.silly.base.SillyFactory;
+import com.crrcdt.silly.base.SillyTaskData;
 import com.crrcdt.silly.base.core.SillyMaster;
 import com.crrcdt.silly.base.core.SillyNode;
 import com.crrcdt.silly.base.core.SillyVariable;
-import com.crrcdt.silly.service.SillyReadService;
-import com.iqiny.silly.common.Constant;
 import com.crrcdt.silly.convertor.SillyListConvertor;
 import com.crrcdt.silly.convertor.SillyStringConvertor;
 import com.crrcdt.silly.convertor.SillyVariableConvertor;
+import com.crrcdt.silly.service.SillyReadService;
+import com.iqiny.silly.common.Constant;
 import com.iqiny.silly.common.util.StringUtils;
 
 import java.beans.BeanInfo;
@@ -27,11 +28,10 @@ import java.util.*;
  * @param <V> 变量
  */
 @SuppressWarnings("unchecked")
-public abstract class AbstractSillyReadService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable>
-        extends AbstractSillyService<M, N, V> implements SillyReadService<M, N, V> {
+public abstract class AbstractSillyReadService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> implements SillyReadService<M, N, V> {
 
-    protected volatile AbstractSillyFactory<M, N, V> sillyFactory;
-
+    protected SillyFactory<M, N, V> sillyFactory;
+    
     private Map<String, SillyVariableConvertor<?>> sillyHandlerMap;
 
     /**
@@ -54,7 +54,7 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
     /**
      * 节点处置时间字符串
      */
-    public static final String KEY_NODE_HANDLE_DATE = "processDate";
+    public static final String KEY_NODE_HANDLE_DATE = "nodeTime";
     /**
      * 节点处置的工作流任务ID
      */
@@ -88,6 +88,8 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
         return sillyHandlerMap;
     }
 
+    protected abstract SillyFactory<M, N, V> createSillyFactory();
+    
     /**
      * 查询主表数据
      *
@@ -110,11 +112,11 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
      * @param masterId
      * @return
      */
-    public List<? extends SillyNodeBean<N, V>> getProcessBeanList(String masterId) {
-        List<SillyNodeBean<N, V>> list = new ArrayList<>();
+    public List<? extends SillyTaskData<N, V>> getProcessBeanList(String masterId) {
+        List<SillyTaskData<N, V>> list = new ArrayList<>();
         final List<N> nodeList = getNodeList(masterId);
         for (N node : nodeList) {
-            SillyNodeBean<N, V> sillyNodeBean = sillyFactory.newSillyNodeBean();
+            SillyTaskData<N, V> sillyNodeBean = sillyFactory.newSillyTaskData();
             sillyNodeBean.setVariableList(getVariableList(masterId, node.getId()));
             sillyNodeBean.setNode(node);
             list.add(sillyNodeBean);
@@ -130,10 +132,10 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
      * @return
      */
     public Map<String, Object> processVariableMap(String masterId) {
-        final List<? extends SillyNodeBean<N, V>> processBeanList = getProcessBeanList(masterId);
+        final List<? extends SillyTaskData<N, V>> processBeanList = getProcessBeanList(masterId);
         Map<String, Object> bigMap = new LinkedHashMap<>();
         if (processBeanList != null && !processBeanList.isEmpty()) {
-            for (SillyNodeBean<N, V> processBean : processBeanList) {
+            for (SillyTaskData<N, V> processBean : processBeanList) {
                 if (processBean != null) {
                     Map<String, Object> nodeMap = createSillyNodeProcess(processBean.getNode(), bigMap);
                     final List<V> variableList = processBean.getVariableList();
