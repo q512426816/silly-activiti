@@ -2,14 +2,40 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>act-parent</artifactId>
-        <groupId>com.iqiny.silly</groupId>
-        <version>${revision}</version>
-    </parent>
+
+    <groupId>com.iqiny.silly</groupId>
+    <artifactId>silly-bom</artifactId>
+    <version>1.0</version>
+    
     <modelVersion>4.0.0</modelVersion>
+    <packaging>pom</packaging>
 
-    <artifactId>bom</artifactId>
+    <properties>
+        <activiti.version>5.15.1</activiti.version>
 
+        <!-- Compiler settings properties -->
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- activiti-engine -->
+            <dependency>
+                <groupId>org.activiti</groupId>
+                <artifactId>activiti-engine</artifactId>
+                <version>${activiti.version}</version>
+            </dependency>
+            <!-- activiti-spring -->
+            <dependency>
+                <groupId>org.activiti</groupId>
+                <artifactId>activiti-spring</artifactId>
+                <version>${activiti.version}</version>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+    
 </project>

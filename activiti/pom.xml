@@ -5,21 +5,32 @@
     <parent>
         <artifactId>silly-parent</artifactId>
         <groupId>com.iqiny.silly</groupId>
-        <version>${revision}</version>
+        <version>1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>silly-core</artifactId>
+    <artifactId>activiti</artifactId>
     <packaging>jar</packaging>
-    <name>silly-core ${project.version}</name>
-
+    <name>silly-activiti ${project.version}</name>
+    
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>silly-common</artifactId>
+            <artifactId>silly-core</artifactId>
             <version>${project.version}</version>
         </dependency>
 
-    </dependencies>
+        <!-- activiti-engine -->
+        <dependency>
+            <groupId>org.activiti</groupId>
+            <artifactId>activiti-engine</artifactId>
+        </dependency>
+        <!-- activiti-spring -->
+        <dependency>
+            <groupId>org.activiti</groupId>
+            <artifactId>activiti-spring</artifactId>
+        </dependency>
 
+
+    </dependencies>
 </project>

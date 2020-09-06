@@ -16,6 +16,29 @@ public class Constant {
          */
         public static final String STATUS_HISTORY = "20";
 
+        // ===================================== ACTIVITI_HANDLER ==============================================
+        /**
+         * 流程变量描述 nextUserId 流程下一步人ID信息存储 前端 act-var="nextUserId" （使用 list 类型）
+         */
+        public static final String ACTIVITI_HANDLER_NEXT_USER_ID = "nextUserId";
+        /**
+         * 流程变量描述 nextUserId 流程下一步人ID信息存储 前端 act-var="nextUserId" （使用 list 类型）
+         * 此类型后续升级可能会去除，建议使用 ACTIVITI_HANDLER_LIST_LIST 类型代替！！！
+         */
+        public static final String ACTIVITI_HANDLER_NEXT_OFFICE_ID = "nextOfficeId";
+        /**
+         * 流程变量描述 使用 list 类型
+         */
+        public static final String ACTIVITI_HANDLER_LIST = "list";
+        /**
+         * 流程变量描述 使用 List<List<Object>> 类型
+         */
+        public static final String ACTIVITI_HANDLER_LIST_LIST = "list&list";
+        /**
+         * 流程变量描述 使用 string 类型
+         */
+        public static final String ACTIVITI_HANDLER_STRING = "string";
+
     }
 
 
