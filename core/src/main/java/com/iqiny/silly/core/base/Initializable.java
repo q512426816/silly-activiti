@@ -1,4 +1,4 @@
-package com.crrcdt.silly.base;
+package com.iqiny.silly.core.base;
 
 /**
  * 可初始化的对象

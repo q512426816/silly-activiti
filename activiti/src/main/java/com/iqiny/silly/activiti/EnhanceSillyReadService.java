@@ -1,9 +1,9 @@
 package com.iqiny.silly.activiti;
 
-import com.crrcdt.silly.base.core.SillyMaster;
-import com.crrcdt.silly.base.core.SillyNode;
-import com.crrcdt.silly.base.core.SillyVariable;
-import com.crrcdt.silly.service.base.AbstractSillyReadService;
+import com.iqiny.silly.core.base.core.SillyMaster;
+import com.iqiny.silly.core.base.core.SillyNode;
+import com.iqiny.silly.core.base.core.SillyVariable;
+import com.iqiny.silly.core.service.base.AbstractSillyReadService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 

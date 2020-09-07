@@ -1,10 +1,10 @@
-package com.crrcdt.silly.base;
+package com.iqiny.silly.core.base;
 
-import com.crrcdt.silly.base.core.SillyMaster;
-import com.crrcdt.silly.base.core.SillyNode;
-import com.crrcdt.silly.base.core.SillyVariable;
-import com.crrcdt.silly.service.SillyReadService;
-import com.crrcdt.silly.service.SillyWriteService;
+import com.iqiny.silly.core.base.core.SillyMaster;
+import com.iqiny.silly.core.base.core.SillyNode;
+import com.iqiny.silly.core.base.core.SillyVariable;
+import com.iqiny.silly.core.service.SillyReadService;
+import com.iqiny.silly.core.service.SillyWriteService;
 import com.iqiny.silly.common.util.CurrentUserUtil;
 
 /**

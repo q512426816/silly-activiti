@@ -5,11 +5,14 @@
 
     <groupId>com.iqiny.silly</groupId>
     <artifactId>silly-bom</artifactId>
-    <version>1.0</version>
-    
+    <version>1.0-SNAPSHOT</version>
+
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
-
+    <name>silly-bom ${project.version}</name>
+    <description>silly bom</description>
+    <url>http://silly.iqiny.com</url>
+    
     <properties>
         <activiti.version>5.15.1</activiti.version>
 
@@ -37,5 +40,126 @@
 
         </dependencies>
     </dependencyManagement>
-    
+
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>iqiny</id>
+            <name>qiny</name>
+            <email>qy-1994-2008@163.com.com</email>
+            <url>https://gitee.com/iqiny/silly</url>
+        </developer>
+    </developers>
+
+    <organization>
+        <name>iqiny</name>
+        <url>https://gitee.com/iqiny/silly</url>
+    </organization>
+
+    <issueManagement>
+        <system>gitee</system>
+        <url>https://gitee.com/iqiny/silly/issues</url>
+    </issueManagement>
+
+    <scm>
+        <url>https://gitee.com/iqiny/silly</url>
+        <connection>https://gitee.com/iqiny/silly.git</connection>
+        <developerConnection>https://gitee.com/iqiny/silly</developerConnection>
+    </scm>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <!-- 发布Jar到Maven仓库 Begin -->
+                    <!--生成Source jar文件-->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>2.2.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!--生成Javadoc，关闭doclint,避免注解检查不通过-->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.9.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                                <configuration>
+                                    <additionalparam>-Xdoclint:none</additionalparam>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!--Maven GPG插件用于使用以下配置对组件进行签名-->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!--Nexus Staging Maven插件是将组件部署到oss_silly并将其发布到Central Repository的推荐方法-->
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>1.6.7</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>oss_silly</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+                    <!-- release plugin,用于发布到release仓库部署插件 -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-release-plugin</artifactId>
+                        <version>2.4.2</version>
+                    </plugin>
+                    <!-- 发布Jar到Maven仓库 End -->
+                </plugins>
+            </build>
+
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>oss_silly</id>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                </snapshotRepository>
+                <repository>
+                    <id>oss_silly</id>
+                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                </repository>
+            </distributionManagement>
+        </profile>
+    </profiles>
+
 </project>

@@ -1,7 +1,7 @@
-package com.crrcdt.silly.base;
+package com.iqiny.silly.core.base;
 
-import com.crrcdt.silly.base.core.SillyNode;
-import com.crrcdt.silly.base.core.SillyVariable;
+import com.iqiny.silly.core.base.core.SillyNode;
+import com.iqiny.silly.core.base.core.SillyVariable;
 
 import java.util.List;
 

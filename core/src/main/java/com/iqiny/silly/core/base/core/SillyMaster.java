@@ -1,4 +1,4 @@
-package com.crrcdt.silly.base.core;
+package com.iqiny.silly.core.base.core;
 
 import java.util.Date;
 

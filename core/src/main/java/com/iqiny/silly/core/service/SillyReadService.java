@@ -1,9 +1,9 @@
-package com.crrcdt.silly.service;
+package com.iqiny.silly.core.service;
 
-import com.crrcdt.silly.base.Initializable;
-import com.crrcdt.silly.base.core.SillyMaster;
-import com.crrcdt.silly.base.core.SillyNode;
-import com.crrcdt.silly.base.core.SillyVariable;
+import com.iqiny.silly.core.base.Initializable;
+import com.iqiny.silly.core.base.core.SillyMaster;
+import com.iqiny.silly.core.base.core.SillyNode;
+import com.iqiny.silly.core.base.core.SillyVariable;
 
 import java.util.List;
 import java.util.Map;
