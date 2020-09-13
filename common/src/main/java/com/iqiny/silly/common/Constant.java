@@ -6,6 +6,8 @@ public class Constant {
 
     public class ActivitiNode {
 
+        public static final String KEY_END = "end";
+
         // ===================================== STATUS ==============================================
         /**
          * 当前状态数据
@@ -16,39 +18,20 @@ public class Constant {
          */
         public static final String STATUS_HISTORY = "20";
 
-        // ===================================== ACTIVITI_HANDLER ==============================================
-        /**
-         * 流程变量描述 nextUserId 流程下一步人ID信息存储 前端 act-var="nextUserId" （使用 list 类型）
-         */
-        public static final String ACTIVITI_HANDLER_NEXT_USER_ID = "nextUserId";
-        /**
-         * 流程变量描述 nextUserId 流程下一步人ID信息存储 前端 act-var="nextUserId" （使用 list 类型）
-         * 此类型后续升级可能会去除，建议使用 ACTIVITI_HANDLER_LIST_LIST 类型代替！！！
-         */
-        public static final String ACTIVITI_HANDLER_NEXT_OFFICE_ID = "nextOfficeId";
+        // ===================================== ACTIVITI_CONVERTOR ==============================================
         /**
          * 流程变量描述 使用 list 类型
          */
-        public static final String ACTIVITI_HANDLER_LIST = "list";
+        public static final String CONVERTOR_LIST = "list";
         /**
          * 流程变量描述 使用 List<List<Object>> 类型
          */
-        public static final String ACTIVITI_HANDLER_LIST_LIST = "list&list";
+        public static final String CONVERTOR_LIST_LIST = "list_list";
         /**
          * 流程变量描述 使用 string 类型
          */
-        public static final String ACTIVITI_HANDLER_STRING = "string";
+        public static final String CONVERTOR_STRING = "string";
 
-    }
-
-
-    public class ActivitiLabel {
-        /**
-         * 标签-字符串  数据使用String存储 前端 my-var="string" (默认值) 空及string 使用String 操作数据 其他 使用list 操作
-         */
-        public static final String LABEL_STRING = "string";
-
-        public static final String LABEL_LIST = "list";
     }
 
     public class ActivitiParallel {
@@ -60,6 +43,25 @@ public class Constant {
          * 非并行
          */
         public static final String NOT_PARALLEL = "0";
+    }
+
+    public class ActivitiDataMap{
+        /**
+         * 存储全部扁平化数据
+         */
+        public static final String KEY_ALL_MAP = "all";
+        /**
+         * 节点处置时间字符串
+         */
+        public static final String KEY_NODE_HANDLE_DATE = "nodeTime";
+        /**
+         * 节点处置的工作流任务ID
+         */
+        public static final String KEY_NODE_TASK_ID = "taskId";
+        /**
+         * 集合数据存储地方
+         */
+        public static final String KEY_GROUP = "group";
     }
 
 }

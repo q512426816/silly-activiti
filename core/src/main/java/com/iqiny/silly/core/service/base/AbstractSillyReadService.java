@@ -1,16 +1,16 @@
 package com.iqiny.silly.core.service.base;
 
+import com.iqiny.silly.common.Constant;
+import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.base.SillyTaskData;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
-import com.iqiny.silly.core.convertor.SillyListConvertor;
-import com.iqiny.silly.core.convertor.SillyStringConvertor;
+import com.iqiny.silly.core.config.SillyConfig;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
+import com.iqiny.silly.core.service.SillyEngineService;
 import com.iqiny.silly.core.service.SillyReadService;
-import com.iqiny.silly.common.Constant;
-import com.iqiny.silly.common.util.StringUtils;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
@@ -30,62 +30,43 @@ import java.util.*;
 @SuppressWarnings("unchecked")
 public abstract class AbstractSillyReadService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> implements SillyReadService<M, N, V> {
 
-    protected SillyFactory<M, N, V> sillyFactory;
+    protected SillyConfig sillyConfig;
     
-    private Map<String, SillyVariableConvertor<?>> sillyHandlerMap;
+    protected SillyFactory<M, N, V> sillyFactory;
 
-    /**
-     * 存储全部扁平化数据
-     */
-    public static final String KEY_ALL_MAP = "all";
+    protected SillyEngineService sillyEngineService;
+    
+    private Map<String, SillyVariableConvertor> sillyHandlerMap;
 
-    /**
-     * 节点处置人ID
-     */
-    public static final String KEY_NODE_USER_ID = "userId";
-    /**
-     * 节点处置人名称
-     */
-    public static final String KEY_NODE_USER_NAME = "userName";
-    /**
-     * 节点处置附件组ID
-     */
-    public static final String KEY_NODE_ATTACH_GROUP_ID = "attachGroupId";
-    /**
-     * 节点处置时间字符串
-     */
-    public static final String KEY_NODE_HANDLE_DATE = "nodeTime";
-    /**
-     * 节点处置的工作流任务ID
-     */
-    public static final String KEY_NODE_TASK_ID = "taskId";
+    @Override
+    public void init() {
+        setSillyFactory(createSillyFactory());
+        setSillyEngineService(sillyConfig.getSillyEngineService());
+        setSillyHandlerMap(sillyConfig.getSillyConvertorMap());
+    }
 
-    /**
-     * 集合数据存储地方
-     */
-    public static final String KEY_GROUP = "group";
+    public void setSillyConfig(SillyConfig sillyConfig) {
+        this.sillyConfig = sillyConfig;
+    }
+
+    public void setSillyFactory(SillyFactory<M, N, V> sillyFactory) {
+        this.sillyFactory = sillyFactory;
+    }
+
+    public void setSillyEngineService(SillyEngineService sillyEngineService) {
+        this.sillyEngineService = sillyEngineService;
+    }
+
+    public void setSillyHandlerMap(Map<String, SillyVariableConvertor> sillyHandlerMap) {
+        this.sillyHandlerMap = sillyHandlerMap;
+    }
 
     private SillyVariableConvertor<?> getSillyHandler(String handleKey) {
         if (sillyHandlerMap == null) {
-            synchronized (this) {
-                if (sillyHandlerMap == null) {
-                    sillyHandlerMap = initSillyHandlerMap();
-                }
-            }
-            if (sillyHandlerMap == null) {
-                throw new RuntimeException("Silly处理类初始化为null！");
-            }
+            throw new RuntimeException("Silly处理类初始化为null！");
         }
         final SillyVariableConvertor<?> handler = sillyHandlerMap.get(handleKey);
-        return handler == null ? sillyHandlerMap.get(Constant.ActivitiLabel.LABEL_STRING) : handler;
-    }
-
-
-    private Map<String, SillyVariableConvertor<?>> initSillyHandlerMap() {
-        Map<String, SillyVariableConvertor<?>> sillyHandlerMap = new LinkedHashMap<>();
-        sillyHandlerMap.put(Constant.ActivitiLabel.LABEL_STRING, new SillyStringConvertor());
-        sillyHandlerMap.put(Constant.ActivitiLabel.LABEL_LIST, new SillyListConvertor());
-        return sillyHandlerMap;
+        return handler == null ? sillyHandlerMap.get(Constant.ActivitiNode.CONVERTOR_STRING) : handler;
     }
 
     protected abstract SillyFactory<M, N, V> createSillyFactory();
@@ -144,7 +125,7 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
                 }
             }
         }
-        bigMap.put(KEY_ALL_MAP, mergeAllMap(bigMap, new LinkedHashMap<>(128)));
+        bigMap.put(Constant.ActivitiDataMap.KEY_ALL_MAP, mergeAllMap(bigMap, new LinkedHashMap<>(128)));
         return bigMap;
     }
 
@@ -204,9 +185,9 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         if (np.getProcessDate() != null) {
-            nodeMap.put(KEY_NODE_HANDLE_DATE, sdf.format(np.getProcessDate()));
+            nodeMap.put(Constant.ActivitiDataMap.KEY_NODE_HANDLE_DATE, sdf.format(np.getProcessDate()));
         }
-        nodeMap.put(KEY_NODE_TASK_ID, np.getTaskId());
+        nodeMap.put(Constant.ActivitiDataMap.KEY_NODE_TASK_ID, np.getTaskId());
         return nodeMap;
     }
 
@@ -227,8 +208,8 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
             final String label = variable.getVariableLabel();
             final String key = variable.getVariableName();
             final String value = variable.getVariableText();
-            if (StringUtils.isEmpty(label) || Constant.ActivitiLabel.LABEL_STRING.equals(label)) {
-                final SillyVariableConvertor<?> handle = getSillyHandler(Constant.ActivitiLabel.LABEL_STRING);
+            if (StringUtils.isEmpty(label) || Constant.ActivitiNode.CONVERTOR_STRING.equals(label)) {
+                final SillyVariableConvertor<?> handle = getSillyHandler(Constant.ActivitiNode.CONVERTOR_STRING);
                 handle.convert(nodeMap, key, value);
             } else {
                 Map<String, Object> myMap = variableMap.computeIfAbsent(label, k -> new HashMap<>());
@@ -251,7 +232,7 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
             for (String key : variableMap.keySet()) {
                 list.add(variableMap.get(key));
             }
-            nodeMap.put(KEY_GROUP, list);
+            nodeMap.put(Constant.ActivitiDataMap.KEY_GROUP, list);
         }
     }
 

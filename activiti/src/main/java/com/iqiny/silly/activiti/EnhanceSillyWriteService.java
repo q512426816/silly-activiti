@@ -1,46 +1,23 @@
 package com.iqiny.silly.activiti;
 
+import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
-import com.iqiny.silly.core.convertor.SillyListConvertor;
-import com.iqiny.silly.core.convertor.SillyListListConvertor;
-import com.iqiny.silly.core.convertor.SillyStringConvertor;
-import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.service.base.AbstractSillyWriteService;
-import com.iqiny.silly.common.Constant;
-import com.iqiny.silly.common.util.StringUtils;
-import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
+@SuppressWarnings("unchecked")
 public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> extends AbstractSillyWriteService<M, N, V> {
-
-    @Autowired
-    protected SillyActivitiService sillyActivitiService;
-
-    /**
-     * 启动流程 同时主表设置流程实例ID
-     *
-     * @param master
-     * @param varMap
-     * @return
-     */
-    @Override
-    protected String startProcess(M master, Map<String, Object> varMap) {
-        // 流程启动
-        ProcessInstance pi = sillyActivitiService.start(master.actProcessKey(), master.getId(), varMap);
-        final String instanceId = pi.getProcessInstanceId();
-        // 设置主表的流程实例ID
-        master.setActProcessId(instanceId);
-        return sillyActivitiService.getTaskIdByProcessId(instanceId);
-    }
 
     @Override
     protected void completeTask(String taskId, String orgHandleInfo, Map<String, Object> varMap) {
-        Task task = sillyActivitiService.findTaskById(taskId);
+        Task task = (Task) sillyEngineService.findTaskById(taskId);
         String nextUserIds = complete(varMap, task);
         // 保存流程履历信息
         saveProcessResume(task, nextUserIds, orgHandleInfo);
@@ -54,8 +31,8 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
      * @param orgHandleInfo
      */
     protected void saveProcessResume(Task task, String nextUserIds, String orgHandleInfo) {
-        final Long dueTime = sillyActivitiService.getTaskDueTime(task);
-        final String masterId = sillyActivitiService.getBusinessKey(task.getProcessInstanceId());
+        //final Long dueTime = sillyActivitiService.getTaskDueTime(task);
+        //final String masterId = sillyActivitiService.getBusinessKey(task.getProcessInstanceId());
         // 履历内容
        /* String handleInfo = getSillyResumeService().makeResumeHandleInfo(nextUserIds, task.getName(), orgHandleInfo);
 
@@ -104,9 +81,9 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
     protected String complete(Map<String, Object> variableMap, Task task) {
         String actProcessId = task.getProcessInstanceId();
         // 完成此步骤流程
-        sillyActivitiService.complete(task.getId(), variableMap);
+        sillyEngineService.complete(task, currentUserUtil.currentUserId(), variableMap);
         // 判断是否结束任务了
-        List<Task> taskList = sillyActivitiService.findTaskList(actProcessId);
+        List<Task> taskList = sillyEngineService.findTaskByProcessInstanceId(actProcessId);
         String nextUserIds = null;
         if (taskList.isEmpty()) {
             preCloseProcess(task);
@@ -116,24 +93,14 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         return nextUserIds;
     }
 
-    @Override
-    protected Map<String, SillyVariableConvertor<?>> initSillyHandlerMap() {
-        Map<String, SillyVariableConvertor<?>> sillyHandlerMap = new LinkedHashMap<>();
-        sillyHandlerMap.put(Constant.ActivitiNode.ACTIVITI_HANDLER_NEXT_USER_ID, new SillyListConvertor());
-        sillyHandlerMap.put(Constant.ActivitiNode.ACTIVITI_HANDLER_LIST_LIST, new SillyListListConvertor());
-        sillyHandlerMap.put(Constant.ActivitiNode.ACTIVITI_HANDLER_LIST, new SillyListConvertor());
-        sillyHandlerMap.put(Constant.ActivitiNode.ACTIVITI_HANDLER_STRING, new SillyStringConvertor());
-        return sillyHandlerMap;
-    }
-
     /**
      * 强制结束流程
      *
-     * @param actProcessId
+     * @param processInstanceId
      */
     @Override
-    protected void forceEndProcess(String actProcessId) {
-        sillyActivitiService.endProcessByActId(actProcessId);
+    protected void forceEndProcess(String processInstanceId, String userId) {
+        sillyEngineService.endProcessByProcessInstanceId(processInstanceId, userId);
     }
 
     /**
@@ -143,11 +110,11 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
      * @return
      */
     protected Long taskDueTime(Task task) {
-        return sillyActivitiService.getTaskDueTime(task);
+        return sillyEngineService.getTaskDueTime(task);
     }
 
     protected String preCloseProcess(Task task) {
-        String masterId = sillyActivitiService.getBusinessKey(task.getProcessInstanceId());
+        String masterId = sillyEngineService.getBusinessKey(task.getProcessInstanceId());
         if (masterId == null) {
             throw new RuntimeException("通过任务流程实例ID获取主表数据ID异常！");
         }
@@ -165,7 +132,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
     protected String nextProcess(List<Task> taskList) {
         List<String> userIds = new ArrayList<>();
         for (Task task1 : taskList) {
-            final List<String> taskUserIds = sillyActivitiService.getTaskUserIds(task1.getId());
+            final List<String> taskUserIds = sillyEngineService.getTaskUserIds(task1.getId());
             if (taskUserIds == null || taskUserIds.isEmpty()) {
                 throw new RuntimeException("下一步任务处置人不可为空！");
             }

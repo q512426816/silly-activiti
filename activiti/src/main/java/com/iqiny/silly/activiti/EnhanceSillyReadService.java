@@ -5,7 +5,6 @@ import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.service.base.AbstractSillyReadService;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 结合工作流Activiti的傻瓜读取服务
@@ -15,9 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @param <V>
  */
 public abstract class EnhanceSillyReadService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> extends AbstractSillyReadService<M, N, V> {
-
-    @Autowired
-    protected SillyActivitiService sillyActivitiService;
 
     /**
      * 获取此主业务的版本号
@@ -34,7 +30,7 @@ public abstract class EnhanceSillyReadService<M extends SillyMaster, N extends S
         if (processId == null) {
             return StringUtils.lowerCase(master.getActVersion());
         }
-        final String key = sillyActivitiService.getActKeyNameByActProcessId(processId);
+        final String key = sillyEngineService.getActKeyNameByProcessInstanceId(processId);
         return getVersionByKey(key);
     }
 
@@ -50,6 +46,6 @@ public abstract class EnhanceSillyReadService<M extends SillyMaster, N extends S
     }
 
     public String getTaskNodeKey(String taskId) {
-        return sillyActivitiService.getTaskNodeKey(taskId);
+        return sillyEngineService.getTaskNodeKey(taskId);
     }
 }

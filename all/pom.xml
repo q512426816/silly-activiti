@@ -84,18 +84,6 @@
             <version>${project.version}</version>
         </dependency>
 
-
-        <!-- activiti-engine -->
-        <dependency>
-            <groupId>org.activiti</groupId>
-            <artifactId>activiti-engine</artifactId>
-        </dependency>
-        <!-- activiti-spring -->
-        <dependency>
-            <groupId>org.activiti</groupId>
-            <artifactId>activiti-spring</artifactId>
-        </dependency>
-
     </dependencies>
 
     <build>
