@@ -1,6 +1,7 @@
 # 傻瓜工作流 -  SILLY ACTIVITI
 
 20200915 - 1.0.1-RELEASE 本工具目前正处于孵化阶段，正式版本及demo敬请期待
+20210207 - 1.0.1 集成简易DEMO，未完成
 
 #### 介绍
 傻瓜式操作工作流业务数据
@@ -29,6 +30,7 @@
       <artifactId>silly-all</artifactId>
       <version>1.0.1-RELEASE</version>
   </dependency>
+    <!-- PS: MAVEN 私钥弄丢了，密码忘记了怎么办 -->  
 ```
 实现 AbstractSillyReadService 及 AbstractSillyWriteService
 
