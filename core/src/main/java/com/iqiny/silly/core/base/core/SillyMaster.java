@@ -20,9 +20,9 @@ public interface SillyMaster {
     /**
      * 流程实例ID
      */
-    String getActProcessId();
+    String getProcessId();
 
-    void setActProcessId(String actProcessId);
+    void setProcessId(String processId);
 
     /**
      * 主表状态
@@ -32,43 +32,56 @@ public interface SillyMaster {
     void setStatus(String status);
 
     /**
+     * 开启时间
+     */
+    Date getStartDate();
+
+    void setStartDate(Date date);
+
+    /**
+     * 开启人
+     */
+    String getStartUserId();
+
+    void setStartUserId(String userId);
+
+    /**
      * 关闭时间
      */
+    Date getCloseDate();
+
     void setCloseDate(Date date);
 
     /**
      * 关闭人
      */
-    void setCloseUserId(String userId);
+    String getCloseUserId();
 
-    /**
-     * 插入前的操作
-     */
-    void preInsert();
+    void setCloseUserId(String userId);
 
     /**
      * 获取流程KEY
      */
-    String actProcessKey();
+    String processKey();
 
     /**
      * 获取流程版本
      */
-    String getActVersion();
+    String processVersion();
 
     /**
      * 获取 主表启动的状态值
      */
-    String getStartStatus();
+    String startStatus();
 
     /**
      * 获取 主表进行中的状态值
      */
-    String getDoingStatus();
+    String doingStatus();
 
     /**
      * 获取 主表结束的状态值
      */
-    String getEndStatus();
+    String endStatus();
 
 }

@@ -1,11 +1,13 @@
 package com.iqiny.silly.activiti;
 
+import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.service.base.AbstractSillyWriteService;
 import org.activiti.engine.task.Task;
+import org.springframework.beans.factory.InitializingBean;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,11 +15,18 @@ import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
-public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> extends AbstractSillyWriteService<M, N, V> {
+public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable>
+        extends AbstractSillyWriteService<M, N, V> implements InitializingBean {
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        super.init();
+    }
 
     @Override
     protected void completeTask(String taskId, String orgHandleInfo, Map<String, Object> varMap) {
         Task task = (Task) sillyEngineService.findTaskById(taskId);
+        SillyAssert.notNull(task, "任务获取失败！");
         String nextUserIds = complete(varMap, task);
         // 保存流程履历信息
         saveProcessResume(task, nextUserIds, orgHandleInfo);
@@ -119,7 +128,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
             throw new RuntimeException("通过任务流程实例ID获取主表数据ID异常！");
         }
         M master = sillyFactory.newMaster();
-        master.setStatus(master.getEndStatus());
+        master.setStatus(master.endStatus());
         master.setCloseDate(new Date());
         master.setCloseUserId(currentUserUtil.currentUserId());
         master.setId(masterId);

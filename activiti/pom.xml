@@ -12,7 +12,7 @@
     <artifactId>silly-activiti</artifactId>
     <packaging>jar</packaging>
     <name>silly-activiti ${project.version}</name>
-    
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>

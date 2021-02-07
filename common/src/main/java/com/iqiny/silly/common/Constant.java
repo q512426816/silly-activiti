@@ -45,7 +45,7 @@ public class Constant {
         public static final String NOT_PARALLEL = "0";
     }
 
-    public class ActivitiDataMap{
+    public class ActivitiDataMap {
         /**
          * 存储全部扁平化数据
          */

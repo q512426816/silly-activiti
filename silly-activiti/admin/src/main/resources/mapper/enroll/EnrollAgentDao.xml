@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.iqiny.example.sillyactiviti.admin.modules.enroll.dao.EnrollAgentDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.iqiny.example.sillyactiviti.admin.modules.enroll.entity.EnrollAgentEntity" id="agentMap">
+        <result property="id" column="id"/>
+        <result property="personId" column="person_id"/>
+        <result property="grade" column="grade"/>
+        <result property="dividend" column="dividend"/>
+        <result property="rebate" column="rebate"/>
+        <result property="enrollment" column="enrollment"/>
+        <result property="joinDate" column="join_date"/>
+        <result property="yearEndBonus" column="year_end_bonus"/>
+        <result property="extraBonus" column="extra_bonus"/>
+        <result property="coupon" column="coupon"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createDate" column="create_date"/>
+        <result property="createUserId" column="create_user_id"/>
+        <result property="updateDate" column="update_date"/>
+        <result property="updateUserId" column="update_user_id"/>
+    </resultMap>
+
+
+</mapper>

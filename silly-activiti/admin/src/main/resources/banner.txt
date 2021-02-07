@@ -1,0 +1,9 @@
+${AnsiColor.BRIGHT_YELLOW}
+====================================================================================================================
+
+                    欢迎使用 CRRCDT SILLY-ACTIVITI 系统 - Powered By iqiny
+                    ${AnsiColor.BRIGHT_RED}
+                    Spring Version: ${application.version}${application.formatted-version}
+                    Spring Boot Version: ${spring-boot.version}${spring-boot.formatted-version}
+${AnsiColor.BRIGHT_YELLOW}
+====================================================================================================================

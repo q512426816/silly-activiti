@@ -24,7 +24,7 @@ import java.util.Map;
  * @param <V> 变量
  */
 public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> implements SillyWriteService<M, N, V> {
-
+    
     protected SillyConfig sillyConfig;
 
     protected SillyFactory<M, N, V> sillyFactory;
@@ -38,10 +38,15 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
     @Override
     public void init() {
         setSillyFactory(createSillyFactory());
+        if (sillyConfig == null) {
+            sillyConfig = initSillyConfig();
+        }
         setSillyEngineService(sillyConfig.getSillyEngineService());
         setCurrentUserUtil(sillyConfig.getCurrentUserUtil());
         setSillyConvertorMap(sillyConfig.getSillyConvertorMap());
     }
+
+    public abstract SillyConfig initSillyConfig();
 
     public void setSillyConfig(SillyConfig sillyConfig) {
         this.sillyConfig = sillyConfig;
@@ -149,7 +154,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         Map<String, Object> varMap = saveNodeInfo(node);
         // 完成任务
         if (complete) {
-            completeTask(node.getTaskId(), node.getProcessInfo(), varMap);
+            completeTask(node.getTaskId(), node.getNodeInfo(), varMap);
         }
     }
 
@@ -189,9 +194,9 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
             // 设置主表启动的状态
             if (StringUtils.isEmpty(master.getStatus())) {
                 if (complete) {
-                    master.setStatus(master.getDoingStatus());
+                    master.setStatus(master.doingStatus());
                 } else {
-                    master.setStatus(master.getStartStatus());
+                    master.setStatus(master.startStatus());
                 }
             }
             // 插入主表
@@ -201,7 +206,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
             }
             // 流程启动  返回任务ID
             String processInstanceId = sillyEngineService.start(master, varMap);
-            master.setActProcessId(processInstanceId);
+            master.setProcessId(processInstanceId);
             final List<Object> tasks = sillyEngineService.findTaskByProcessInstanceId(processInstanceId);
             if (tasks.size() != 1) {
                 throw new RuntimeException("任务启动第一位节点任务不可为多个！");
@@ -271,6 +276,10 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
     private void doInsertVariable(N node) {
         // 保存变量
         List<V> variableList = node.getVariableList();
+        if (variableList == null) {
+            return;
+        }
+        
         for (V variable : variableList) {
             if (variable != null) {
                 if (variable.getVariableName() == null) {
@@ -280,7 +289,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
                 variable.setTaskId(node.getTaskId());
                 variable.setMasterId(node.getMasterId());
                 variable.setNodeKey(node.getNodeKey());
-                variable.setProcessId(node.getId());
+                variable.setNodeId(node.getId());
                 variable.setStatus(Constant.ActivitiNode.STATUS_CURRENT);
                 boolean flag = insert(variable);
                 if (!flag) {
@@ -302,6 +311,9 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         }
         Map<String, Object> varMap = node.getVariableMap();
         List<? extends SillyVariable> variableList = node.getVariableList();
+        if (variableList == null) {
+            return null;
+        }
         for (SillyVariable variable : variableList) {
             final SillyVariableConvertor<?> handler = getSillyConvertor(variable.getActivitiHandler());
             if (handler != null) {

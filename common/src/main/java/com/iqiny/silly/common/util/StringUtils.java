@@ -12,7 +12,7 @@ public class StringUtils {
     }
 
     public static boolean isNotEmpty(String str) {
-        return StringUtils.isEmpty(str);
+        return !StringUtils.isEmpty(str);
     }
 
     public static String join(List<String> list, String split) {

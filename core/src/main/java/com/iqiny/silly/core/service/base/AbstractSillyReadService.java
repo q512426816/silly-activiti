@@ -31,11 +31,11 @@ import java.util.*;
 public abstract class AbstractSillyReadService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> implements SillyReadService<M, N, V> {
 
     protected SillyConfig sillyConfig;
-    
+
     protected SillyFactory<M, N, V> sillyFactory;
 
     protected SillyEngineService sillyEngineService;
-    
+
     private Map<String, SillyVariableConvertor> sillyHandlerMap;
 
     @Override
@@ -70,7 +70,7 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
     }
 
     protected abstract SillyFactory<M, N, V> createSillyFactory();
-    
+
     /**
      * 查询主表数据
      *
@@ -184,8 +184,8 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
         }
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        if (np.getProcessDate() != null) {
-            nodeMap.put(Constant.ActivitiDataMap.KEY_NODE_HANDLE_DATE, sdf.format(np.getProcessDate()));
+        if (np.getNodeDate() != null) {
+            nodeMap.put(Constant.ActivitiDataMap.KEY_NODE_HANDLE_DATE, sdf.format(np.getNodeDate()));
         }
         nodeMap.put(Constant.ActivitiDataMap.KEY_NODE_TASK_ID, np.getTaskId());
         return nodeMap;
@@ -205,7 +205,7 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
         }
 
         for (SillyVariable variable : pvList) {
-            final String label = variable.getVariableLabel();
+            final String label = variable.getVariableType();
             final String key = variable.getVariableName();
             final String value = variable.getVariableText();
             if (StringUtils.isEmpty(label) || Constant.ActivitiNode.CONVERTOR_STRING.equals(label)) {

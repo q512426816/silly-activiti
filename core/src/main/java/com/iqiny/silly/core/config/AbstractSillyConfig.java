@@ -2,6 +2,7 @@ package com.iqiny.silly.core.config;
 
 import com.iqiny.silly.common.Constant;
 import com.iqiny.silly.common.util.CurrentUserUtil;
+import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.core.convertor.SillyListConvertor;
 import com.iqiny.silly.core.convertor.SillyListListConvertor;
 import com.iqiny.silly.core.convertor.SillyStringConvertor;
@@ -10,7 +11,6 @@ import com.iqiny.silly.core.service.SillyEngineService;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.ServiceLoader;
 
 /**
  * 配置类
@@ -34,34 +34,47 @@ public abstract class AbstractSillyConfig implements SillyConfig {
 
     @Override
     public void init() {
-        setCurrentUserUtil(initCurrentUserUtil(null));
-        setSillyEngineService(initSillyEngineService(null));
+        preInit();
+
         setSillyConvertorMap(initSillyConvertorMap());
+
+        initComplete();
+
+        checkConfig();
     }
 
-    protected CurrentUserUtil initCurrentUserUtil(ClassLoader classLoader) {
-        if (classLoader == null) {
-            classLoader = ClassLoader.getSystemClassLoader();
-        }
-        ServiceLoader<CurrentUserUtil> currentUserUtils = ServiceLoader.load(CurrentUserUtil.class, classLoader);
-        return currentUserUtils.iterator().next();
+    /**
+     * 初始化之前 的回调方法
+     */
+    protected abstract void preInit();
+
+    /**
+     * 初始化完成后 的回调方法
+     */
+    protected abstract void initComplete();
+
+    protected void checkConfig() {
+        SillyAssert.notNull(this.currentUserUtil);
+        SillyAssert.notNull(this.sillyEngineService);
+        SillyAssert.notNull(this.sillyConvertorMap);
     }
 
-    protected SillyEngineService initSillyEngineService(ClassLoader classLoader) {
-        if (classLoader == null) {
-            classLoader = ClassLoader.getSystemClassLoader();
-        }
-        ServiceLoader<SillyEngineService> currentUserUtils = ServiceLoader.load(SillyEngineService.class, classLoader);
-        return currentUserUtils.iterator().next();
-    }
 
     protected Map<String, SillyVariableConvertor> initSillyConvertorMap() {
         Map<String, SillyVariableConvertor> convertorMap = new LinkedHashMap<>();
         convertorMap.put(Constant.ActivitiNode.CONVERTOR_LIST, new SillyListConvertor());
         convertorMap.put(Constant.ActivitiNode.CONVERTOR_STRING, new SillyStringConvertor());
         convertorMap.put(Constant.ActivitiNode.CONVERTOR_LIST_LIST, new SillyListListConvertor());
+        hookInitSillyConvertorMap(convertorMap);
         return convertorMap;
     }
+
+    /**
+     * 初始完成 傻瓜转换器 回调方法
+     *
+     * @param convertorMap
+     */
+    protected abstract void hookInitSillyConvertorMap(Map<String, SillyVariableConvertor> convertorMap);
 
     @Override
     public CurrentUserUtil getCurrentUserUtil() {

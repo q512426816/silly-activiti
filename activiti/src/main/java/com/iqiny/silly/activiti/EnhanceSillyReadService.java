@@ -26,9 +26,9 @@ public abstract class EnhanceSillyReadService<M extends SillyMaster, N extends S
     }
 
     public String getVersion(M master) {
-        final String processId = master.getActProcessId();
+        final String processId = master.getProcessId();
         if (processId == null) {
-            return StringUtils.lowerCase(master.getActVersion());
+            return StringUtils.lowerCase(master.processVersion());
         }
         final String key = sillyEngineService.getActKeyNameByProcessInstanceId(processId);
         return getVersionByKey(key);

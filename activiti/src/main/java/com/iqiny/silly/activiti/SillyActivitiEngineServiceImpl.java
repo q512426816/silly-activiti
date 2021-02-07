@@ -8,25 +8,21 @@ import org.activiti.engine.HistoryService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
-import org.activiti.engine.delegate.Expression;
 import org.activiti.engine.history.HistoricActivityInstance;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.impl.RepositoryServiceImpl;
-import org.activiti.engine.impl.bpmn.behavior.UserTaskActivityBehavior;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
-import org.activiti.engine.impl.pvm.PvmTransition;
-import org.activiti.engine.impl.pvm.ReadOnlyProcessDefinition;
-import org.activiti.engine.impl.pvm.process.ActivityImpl;
-import org.activiti.engine.impl.pvm.process.TransitionImpl;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.IdentityLink;
 import org.activiti.engine.task.Task;
 import org.activiti.spring.ProcessEngineFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+@Component
 public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> {
 
     protected ProcessEngineFactoryBean processEngineFactoryBean;
@@ -61,13 +57,15 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
 
     @Override
     public String start(SillyMaster master, Map<String, Object> variableMap) {
-        if (StringUtils.isEmpty(master.actProcessKey())) {
+        if (StringUtils.isEmpty(master.processKey())) {
             throw new RuntimeException("流程启动时流程KEY 不可为空！");
         }
         if (StringUtils.isEmpty(master.getId())) {
             throw new RuntimeException("流程启动时 业务主键 不可为空！");
         }
-        final ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(master.actProcessKey(), master.getId(), variableMap);
+        variableMap = new HashMap<>();
+        variableMap.put("createUserId", "1");
+        final ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(master.processKey(), master.getId(), variableMap);
         return processInstance.getId();
     }
 
@@ -90,7 +88,7 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
         if (StringUtils.isEmpty(taskId) || StringUtils.isEmpty(processInstanceId)) {
             throw new RuntimeException("任务ID/流程实例ID 不可为空！");
         }
-        // 目标节点
+        /*// 目标节点
         ActivityImpl pointActivity = findActivitiImpl(taskId, nodeKey);
         Map<String, Object> value = makeUserVarMap(pointActivity, userId);
         // 当前节点
@@ -104,9 +102,9 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
         // 执行转向任务
         taskService.complete(taskId, value);
         // 删除目标节点新流入
-        pointActivity.getIncomingTransitions().remove(newTransition);
+        pointActivity.getIncomingTransitions().remove(newTransition);*/
         // 还原以前流向
-        restoreTransition(currActivity, oriPvmTransitionList);
+        //restoreTransition(currActivity, oriPvmTransitionList);
         return findTaskByProcessInstanceId(processInstanceId);
     }
 
@@ -129,6 +127,9 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
 
     @Override
     public Task findTaskById(String taskId) {
+        if (StringUtils.isEmpty(taskId)) {
+            return null;
+        }
         return taskService.createTaskQuery().taskId(taskId).singleResult();
     }
 
@@ -192,11 +193,11 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
         if (StringUtils.isEmpty(processDefinitionId)) {
             return null;
         }
-        final ReadOnlyProcessDefinition deployedProcessDefinition = ((RepositoryServiceImpl) repositoryService)
+       /* final ReadOnlyProcessDefinition deployedProcessDefinition = ((RepositoryServiceImpl) repositoryService)
                 .getDeployedProcessDefinition(processDefinitionId);
         if (deployedProcessDefinition != null) {
             return deployedProcessDefinition.getKey();
-        }
+        }*/
         return null;
     }
 
@@ -217,7 +218,7 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
 
     // ======================================= 工作流服务 内部方法 =============================================
 
-    private ActivityImpl findActivitiImpl(String taskId, String nodeKey) {
+    /*private ActivityImpl findActivitiImpl(String taskId, String nodeKey) {
         // 取得流程定义 11
         ProcessDefinitionEntity processDefinition = findProcessDefinitionEntityByTaskId(taskId);
 
@@ -227,7 +228,7 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
         }
         // 根据节点ID，获取对应的活动节点
         return processDefinition.findActivity(nodeKey);
-    }
+    }*/
 
     private ProcessDefinitionEntity findProcessDefinitionEntityByTaskId(String taskId) {
         // 取得流程定义
@@ -236,7 +237,7 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
                         .getProcessDefinitionId());
     }
 
-    private Map<String, Object> makeUserVarMap(ActivityImpl pointActivity, String userId) {
+   /* private Map<String, Object> makeUserVarMap(ActivityImpl pointActivity, String userId) {
         if (pointActivity != null && pointActivity.getActivityBehavior() instanceof UserTaskActivityBehavior) {
             // 设置节点处置人信息
             UserTaskActivityBehavior behavior = (UserTaskActivityBehavior) pointActivity.getActivityBehavior();
@@ -253,24 +254,24 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
             return value;
         }
         return new HashMap<>();
-    }
+    }*/
 
-    private List<PvmTransition> clearTransition(ActivityImpl activityImpl) {
+    /*private List<PvmTransition> clearTransition(ActivityImpl activityImpl) {
         // 存储当前节点所有流向临时变量
         // 获取当前节点所有流向，存储到临时变量，然后清空
         List<PvmTransition> pvmTransitionList = activityImpl.getOutgoingTransitions();
         List<PvmTransition> oriPvmTransitionList = new ArrayList<>(pvmTransitionList);
         pvmTransitionList.clear();
         return oriPvmTransitionList;
-    }
+    }*/
 
-    private void restoreTransition(ActivityImpl activityImpl, List<PvmTransition> oriPvmTransitionList) {
+    /*private void restoreTransition(ActivityImpl activityImpl, List<PvmTransition> oriPvmTransitionList) {
         // 清空现有流向
         List<PvmTransition> pvmTransitionList = activityImpl.getOutgoingTransitions();
         pvmTransitionList.clear();
         // 还原以前流向
         pvmTransitionList.addAll(oriPvmTransitionList);
-    }
+    }*/
 
     private String getProcessDefinitionIdByProcessInstanceId(String processInstanceId) {
         if (StringUtils.isEmpty(processInstanceId)) {

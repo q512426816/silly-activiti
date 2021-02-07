@@ -12,9 +12,9 @@
     <name>silly-bom ${project.version}</name>
     <description>silly bom</description>
     <url>http://silly.iqiny.com</url>
-    
+
     <properties>
-        <activiti.version>5.15.1</activiti.version>
+        <activiti.version>7.1.0.M6</activiti.version>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
