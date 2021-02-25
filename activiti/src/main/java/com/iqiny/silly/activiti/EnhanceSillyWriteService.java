@@ -16,7 +16,7 @@ import java.util.Map;
 
 @SuppressWarnings("unchecked")
 public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable>
-        extends AbstractSillyWriteService<M, N, V> implements InitializingBean {
+        extends AbstractSillyWriteService<M, N, V, Task> implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -141,7 +141,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
     protected String nextProcess(List<Task> taskList) {
         List<String> userIds = new ArrayList<>();
         for (Task task1 : taskList) {
-            final List<String> taskUserIds = sillyEngineService.getTaskUserIds(task1.getId());
+            final List<String> taskUserIds = sillyEngineService.getTaskUserIds(task1);
             if (taskUserIds == null || taskUserIds.isEmpty()) {
                 throw new RuntimeException("下一步任务处置人不可为空！");
             }

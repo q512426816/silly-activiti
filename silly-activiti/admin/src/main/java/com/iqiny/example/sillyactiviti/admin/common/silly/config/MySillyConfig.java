@@ -3,6 +3,7 @@ package com.iqiny.example.sillyactiviti.admin.common.silly.config;
 import com.iqiny.silly.activiti.ActivitiSillyConfig;
 import com.iqiny.silly.activiti.SillyActivitiEngineServiceImpl;
 import com.iqiny.silly.core.config.SillyConfig;
+import org.activiti.spring.ProcessEngineFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,10 +14,13 @@ import org.springframework.context.annotation.Configuration;
 public class MySillyConfig {
 
     @Bean(initMethod = "init")
-    public SillyConfig createSillyConfig(MyCurrentUserUtil currentUserUtil, SillyActivitiEngineServiceImpl sillyActivitiEngineService) {
+    public SillyConfig createSillyConfig(MyCurrentUserUtil currentUserUtil, ProcessEngineFactoryBean processEngineFactoryBean) {
         final SillyConfig sillyConfig = new ActivitiSillyConfig();
         sillyConfig.setCurrentUserUtil(currentUserUtil);
-        sillyConfig.setSillyEngineService(sillyActivitiEngineService);
+        SillyActivitiEngineServiceImpl sillyEngineService = new SillyActivitiEngineServiceImpl();
+        sillyEngineService.setProcessEngineFactoryBean(processEngineFactoryBean);
+        sillyEngineService.init();
+        sillyConfig.setSillyEngineService(sillyEngineService);
         return sillyConfig;
     }
 

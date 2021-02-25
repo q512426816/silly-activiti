@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.iqiny.example.sillyactiviti.admin.common.base.BaseEntity;
+import com.iqiny.example.sillyactiviti.admin.common.utils.SecurityUtils;
 import com.iqiny.example.sillyactiviti.common.validator.group.UpdateGroup;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import lombok.Data;
@@ -22,7 +23,7 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public abstract class MySillyMaster<T extends Model<T>> extends Model<T> implements SillyMaster, BaseEntity {
-    
+
     protected String processId;
     protected String status;
     protected String startUserId;
@@ -74,12 +75,17 @@ public abstract class MySillyMaster<T extends Model<T>> extends Model<T> impleme
 
     @Override
     public void preInsert() {
-
+        this.createDate = new Date();
+        this.createUserId = SecurityUtils.getUserId();
+        this.updateDate = new Date();
+        this.updateUserId = SecurityUtils.getUserId();
+        this.delFlag = 0;
     }
 
     @Override
     public void preUpdate() {
-
+        this.updateDate = new Date();
+        this.updateUserId = SecurityUtils.getUserId();
     }
 
 }

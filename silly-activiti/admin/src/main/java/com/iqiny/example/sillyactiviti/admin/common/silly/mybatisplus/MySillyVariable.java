@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.iqiny.example.sillyactiviti.admin.common.base.BaseEntity;
+import com.iqiny.example.sillyactiviti.admin.common.utils.SecurityUtils;
 import com.iqiny.example.sillyactiviti.common.validator.group.UpdateGroup;
 import com.iqiny.silly.core.base.core.SillyVariable;
 import lombok.Data;
@@ -81,12 +82,17 @@ public abstract class MySillyVariable<T extends Model<T>> extends Model<T> imple
 
     @Override
     public void preInsert() {
-
+        this.createDate = new Date();
+        this.createUserId = SecurityUtils.getUserId();
+        this.updateDate = new Date();
+        this.updateUserId = SecurityUtils.getUserId();
+        this.delFlag = 0;
     }
 
     @Override
     public void preUpdate() {
-
+        this.updateDate = new Date();
+        this.updateUserId = SecurityUtils.getUserId();
     }
 
 }

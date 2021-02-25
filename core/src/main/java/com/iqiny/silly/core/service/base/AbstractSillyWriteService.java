@@ -12,6 +12,7 @@ import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.service.SillyEngineService;
 import com.iqiny.silly.core.service.SillyWriteService;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,13 +24,13 @@ import java.util.Map;
  * @param <N> 节点
  * @param <V> 变量
  */
-public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> implements SillyWriteService<M, N, V> {
-    
+public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable, T> implements SillyWriteService<M, N, V> {
+
     protected SillyConfig sillyConfig;
 
     protected SillyFactory<M, N, V> sillyFactory;
 
-    protected SillyEngineService sillyEngineService;
+    protected SillyEngineService<T> sillyEngineService;
 
     protected CurrentUserUtil currentUserUtil;
 
@@ -119,6 +120,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         if (StringUtils.isNotEmpty(taskId)) {
             node.setTaskId(taskId);
         }
+        node.setMasterId(master.getId());
         submitNode(node, complete);
     }
 
@@ -207,7 +209,11 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
             // 流程启动  返回任务ID
             String processInstanceId = sillyEngineService.start(master, varMap);
             master.setProcessId(processInstanceId);
-            final List<Object> tasks = sillyEngineService.findTaskByProcessInstanceId(processInstanceId);
+            saveFlag = updateById(master);
+            if (!saveFlag) {
+                throw new RuntimeException("主信息更新发生异常！");
+            }
+            final List<T> tasks = sillyEngineService.findTaskByProcessInstanceId(processInstanceId);
             if (tasks.size() != 1) {
                 throw new RuntimeException("任务启动第一位节点任务不可为多个！");
             }
@@ -267,6 +273,8 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
 
     private void doInsertNode(N node) {
         node.setStatus(Constant.ActivitiNode.STATUS_CURRENT);
+        node.setNodeDate(new Date());
+        node.setNodeUserId(currentUserUtil.currentUserId());
         boolean flag = insert(node);
         if (!flag) {
             throw new RuntimeException("保存NCR流程主表信息发生异常！");
@@ -279,7 +287,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         if (variableList == null) {
             return;
         }
-        
+
         for (V variable : variableList) {
             if (variable != null) {
                 if (variable.getVariableName() == null) {

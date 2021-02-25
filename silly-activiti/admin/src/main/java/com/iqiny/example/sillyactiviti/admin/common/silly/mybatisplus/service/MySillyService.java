@@ -21,11 +21,13 @@ public abstract class MySillyService<M extends MySillyMaster<M>, N extends MySil
 
     @Override
     public boolean insert(M master) {
+        master.preInsert();
         return master.insert();
     }
 
     @Override
     public boolean updateById(M master) {
+        master.preUpdate();
         return master.updateById();
     }
 
@@ -44,11 +46,13 @@ public abstract class MySillyService<M extends MySillyMaster<M>, N extends MySil
 
     @Override
     public boolean insert(N node) {
+        node.preInsert();
         return node.insert();
     }
 
     @Override
     public boolean update(N node, N where) {
+        node.preUpdate();
         QueryWrapper<N> qw = new QueryWrapper<>();
         qw.setEntity(where);
         return node.update(qw);
@@ -56,11 +60,13 @@ public abstract class MySillyService<M extends MySillyMaster<M>, N extends MySil
 
     @Override
     public boolean insert(V variable) {
+        variable.preInsert();
         return variable.insert();
     }
 
     @Override
     public boolean update(V variable, V where) {
+        variable.preUpdate();
         QueryWrapper<V> qw = new QueryWrapper<>();
         qw.setEntity(where);
         return variable.update(qw);

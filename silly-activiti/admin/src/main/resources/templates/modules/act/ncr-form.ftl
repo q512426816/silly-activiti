@@ -4,7 +4,7 @@
 		<el-row>
 			<el-col :xs="24" :sm="12" :lg="8">
 				<el-form-item label="流程KEY" prop="processKey">
-					<el-input v-model="form.master.processKey"
+					<el-input v-model="form.processKey"
 					          :disabled="false"
 					          :style="{width:  '100%'}"
 					          :clearable="true"
@@ -14,7 +14,7 @@
 			</el-col>
 			<el-col :xs="24" :sm="12" :lg="8">
 				<el-form-item label="流程版本" prop="processVersion">
-					<el-input v-model="form.master.processVersion"
+					<el-input v-model="form.processVersion"
 					          :disabled="false"
 					          :style="{width:  '100%'}"
 					          :clearable="true"
@@ -22,9 +22,19 @@
 					</el-input>
 				</el-form-item>
 			</el-col>
+			<el-col :xs="24" :sm="24" :lg="24">
+				<el-form-item label="审批人ID" prop="approveUserId">
+					<el-input v-model="form.approveUserId"
+					          :disabled="false"
+					          :style="{width:  '100%'}"
+					          :clearable="true"
+					          placeholder="审批人ID">
+					</el-input>
+				</el-form-item>
+			</el-col>
 			<el-col :xs="24" :sm="12" :lg="8">
-				<el-form-item label="招生人员" prop="personId">
-					<xh-select v-model="form.personId" res="person"></xh-select>
+				<el-form-item label="招生人员" prop="createUserId">
+					<xh-select v-model="form.createUserId" res="person"></xh-select>
 				</el-form-item>
 			</el-col>
 			<el-col :xs="24" :sm="12" :lg="8">
@@ -139,16 +149,18 @@
 				dialogVisible: false,
 				dialogWidth: '50%',
 				fullscreen: false,
+				masterMap: {id: "id", processKey: "processKey", processVersion: "processVersion"},
+				nodeMap: {grade: "grade"},
+				variableTypeMap: {createUserId: "list"},
+				activitiHandlerMap: {createUserId: 'string', approveUserId: 'string'},
 				form: {
-					master: {
-						processKey: "PBTS_DELIVERY_VEHICLE_V1",
-						processVersion: "V1"
-					},
-					node: {},
-					personId: "",
+					processKey: "PBTS_DELIVERY_VEHICLE_V1",
+					processVersion: "V1",
+					createUserId: "",
 					agentCode: "",
 					joinDate: "",
-					grade: ""
+					grade: "",
+					approveUserId: null
 				},
 				managerRoleidOptions: [],
 				rules: {
@@ -161,7 +173,7 @@
 						message: '推广编号长度为3-8个字符!',
 						trigger: 'change'
 					}],
-					personId: [{
+					createUserId: [{
 						"required": true,
 						"message": "招生员必须填写"
 					}],
@@ -176,6 +188,43 @@
 				}
 			};
 		},
+		computed: {
+			saveData: function () {
+				var data = this.form;
+				var myData = {
+					master: {
+						processKey: data.processKey,
+						processVersion: data.processVersion
+					},
+					node: {
+						variableList: []
+					}
+				};
+				var masterMap = this.masterMap;
+				var nodeMap = this.nodeMap;
+				var variableTypeMap = this.variableTypeMap;
+				var activitiHandlerMap = this.activitiHandlerMap;
+				for (var key in data) {
+					if (key && data.hasOwnProperty(key)) {
+						var value = data[key];
+						if (masterMap[key]) {
+							myData.master[masterMap[key]] = value;
+						}
+						if (nodeMap[key]) {
+							myData.node[nodeMap[key]] = value;
+						}
+						myData.node.variableList.push({
+							variableType: variableTypeMap[key] || 'string',
+							variableName: key,
+							variableText: value,
+							activitiHandler: activitiHandlerMap[key]
+						})
+					}
+				}
+
+				return myData;
+			}
+		},
 		watch: {
 			dialogVisible: function (v) {
 				if (!v) {
@@ -184,7 +233,6 @@
 				}
 			}
 		},
-		computed: {},
 		mounted() {
 			var that = this;
 			window.onresize = function () {
@@ -211,7 +259,7 @@
 					if (valid) {
 						that.saveDisabled = true;
 						var url = xh.base + "/silly/ncr/write/save";
-						var data = JSON.parse(JSON.stringify(that.form));
+						var data = JSON.parse(JSON.stringify(that.saveData));
 						xh.http.post(url, data, {headers: {"Content-Type": "application/json"}}).then(function (data) {
 							if (data.code === 0) {
 								that.$notify({

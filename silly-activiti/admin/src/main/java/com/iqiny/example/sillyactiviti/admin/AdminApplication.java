@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
 @EnableTransactionManagement
-@ComponentScan(value = "com.iqiny")
+@ComponentScan(value = "com.iqiny.example")
 public class AdminApplication {
 
     public static void main(String[] args) {

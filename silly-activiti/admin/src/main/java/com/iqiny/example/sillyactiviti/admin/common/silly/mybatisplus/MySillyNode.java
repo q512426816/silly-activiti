@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.iqiny.example.sillyactiviti.admin.common.base.BaseEntity;
+import com.iqiny.example.sillyactiviti.admin.common.utils.SecurityUtils;
 import com.iqiny.example.sillyactiviti.common.validator.group.UpdateGroup;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
@@ -14,6 +15,7 @@ import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,7 +47,7 @@ public abstract class MySillyNode<T extends Model<T>, V extends SillyVariable> e
     @TableField(exist = false)
     protected List<V> variableList;
     @TableField(exist = false)
-    protected Map<String, Object> variableMap;
+    protected Map<String, Object> variableMap = new LinkedHashMap<>();
 
 
     /**
@@ -92,12 +94,17 @@ public abstract class MySillyNode<T extends Model<T>, V extends SillyVariable> e
 
     @Override
     public void preInsert() {
-
+        this.createDate = new Date();
+        this.createUserId = SecurityUtils.getUserId();
+        this.updateDate = new Date();
+        this.updateUserId = SecurityUtils.getUserId();
+        this.delFlag = 0;
     }
 
     @Override
     public void preUpdate() {
-
+        this.updateDate = new Date();
+        this.updateUserId = SecurityUtils.getUserId();
     }
 
 }

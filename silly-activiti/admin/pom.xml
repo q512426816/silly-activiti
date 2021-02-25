@@ -54,17 +54,7 @@
         <dependency>
             <groupId>com.iqiny.silly</groupId>
             <artifactId>silly-all</artifactId>
-            <version>1.0.1-RELEASE</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.activiti</groupId>
-                    <artifactId>activiti-engine</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.activiti</groupId>
-                    <artifactId>activiti-spring</artifactId>
-                </exclusion>
-            </exclusions>
+            <version>1.0.2-RELEASE</version>
         </dependency>
 
         <!-- activiti -->

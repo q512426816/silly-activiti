@@ -16,13 +16,12 @@ import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.IdentityLink;
 import org.activiti.engine.task.Task;
+import org.activiti.engine.task.TaskQuery;
 import org.activiti.spring.ProcessEngineFactoryBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Method;
 import java.util.*;
 
-@Component
 public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> {
 
     protected ProcessEngineFactoryBean processEngineFactoryBean;
@@ -32,9 +31,11 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
     protected TaskService taskService;
     protected RepositoryService repositoryService;
 
-    @Autowired
     public void setProcessEngineFactoryBean(ProcessEngineFactoryBean processEngineFactoryBean) {
         this.processEngineFactoryBean = processEngineFactoryBean;
+    }
+
+    protected void doInit() {
         if (processEngineFactoryBean == null) {
             return;
         }
@@ -52,7 +53,7 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
 
     @Override
     public void init() {
-
+        doInit();
     }
 
     @Override
@@ -63,8 +64,9 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
         if (StringUtils.isEmpty(master.getId())) {
             throw new RuntimeException("流程启动时 业务主键 不可为空！");
         }
-        variableMap = new HashMap<>();
-        variableMap.put("createUserId", "1");
+        if (variableMap == null) {
+            variableMap = new HashMap<>();
+        }
         final ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(master.processKey(), master.getId(), variableMap);
         return processInstance.getId();
     }
@@ -114,7 +116,18 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
         if (StringUtils.isEmpty(processInstanceId)) {
             throw new RuntimeException("查询任务列表，流程实例ID不可为空！");
         }
-        return taskService.createTaskQuery().processInstanceId(processInstanceId).list();
+        final TaskQuery taskQuery = taskService.createTaskQuery();
+        TaskQuery taskQuery1 = null;
+        try {
+            final Method method = taskQuery.getClass().getMethod("processInstanceId", String.class);
+            taskQuery1 = (TaskQuery) method.invoke(taskQuery, processInstanceId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (taskQuery1 != null) {
+            return taskQuery1.list();
+        }
+        return new ArrayList<>();
     }
 
     @Override
