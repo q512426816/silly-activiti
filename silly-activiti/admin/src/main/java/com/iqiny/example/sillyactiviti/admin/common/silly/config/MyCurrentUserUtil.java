@@ -11,5 +11,10 @@ public class MyCurrentUserUtil implements CurrentUserUtil {
     public String currentUserId() {
         return SecurityUtils.getUserId();
     }
-    
+
+    @Override
+    public String userIdToName(String userId) {
+        return null;
+    }
+
 }

@@ -77,4 +77,12 @@ public interface SillyVariable {
     String getActivitiHandler();
 
     void setActivitiHandler(String variableText);
+
+    /**
+     * 归属对象 （master / node / variable）
+     */
+    String getBelong();
+
+    void setBelong(String belong);
+
 }

@@ -14,4 +14,9 @@ public class ShiroCurrentUserUtil implements CurrentUserUtil {
         }*/
         return null;
     }
+
+    @Override
+    public String userIdToName(String userId) {
+        return null;
+    }
 }

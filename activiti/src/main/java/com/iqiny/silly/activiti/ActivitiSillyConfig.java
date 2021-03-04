@@ -1,13 +1,16 @@
 package com.iqiny.silly.activiti;
 
+import com.iqiny.silly.common.Constant;
 import com.iqiny.silly.core.config.AbstractSillyConfig;
+import com.iqiny.silly.activiti.convertor.SillyListConvertor;
+import com.iqiny.silly.activiti.convertor.SillyListListConvertor;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 
 import java.util.Map;
 
 public class ActivitiSillyConfig extends AbstractSillyConfig {
 
-    
+
     @Override
     protected void preInit() {
         System.out.println("ActivitiSillyConfig 初始化开始");
@@ -20,6 +23,7 @@ public class ActivitiSillyConfig extends AbstractSillyConfig {
 
     @Override
     protected void hookInitSillyConvertorMap(Map<String, SillyVariableConvertor> convertorMap) {
-        
+        convertorMap.put(Constant.ActivitiNode.CONVERTOR_LIST, new SillyListConvertor());
+        convertorMap.put(Constant.ActivitiNode.CONVERTOR_LIST_LIST, new SillyListListConvertor());
     }
 }

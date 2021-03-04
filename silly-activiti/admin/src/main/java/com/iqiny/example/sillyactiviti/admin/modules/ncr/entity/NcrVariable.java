@@ -6,4 +6,13 @@ import com.iqiny.example.sillyactiviti.admin.common.silly.mybatisplus.MySillyVar
 @TableName("silly_ncr_variable")
 public class NcrVariable extends MySillyVariable<NcrVariable> {
 
+    @Override
+    public String getBelong() {
+        return null;
+    }
+
+    @Override
+    public void setBelong(String belong) {
+
+    }
 }

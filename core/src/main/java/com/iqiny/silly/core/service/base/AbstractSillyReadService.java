@@ -41,9 +41,14 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
     @Override
     public void init() {
         setSillyFactory(createSillyFactory());
+        if (sillyConfig == null) {
+            sillyConfig = initSillyConfig();
+        }
         setSillyEngineService(sillyConfig.getSillyEngineService());
         setSillyHandlerMap(sillyConfig.getSillyConvertorMap());
     }
+
+    public abstract SillyConfig initSillyConfig();
 
     public void setSillyConfig(SillyConfig sillyConfig) {
         this.sillyConfig = sillyConfig;
@@ -61,7 +66,7 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
         this.sillyHandlerMap = sillyHandlerMap;
     }
 
-    private SillyVariableConvertor<?> getSillyHandler(String handleKey) {
+    protected SillyVariableConvertor<?> getSillyHandler(String handleKey) {
         if (sillyHandlerMap == null) {
             throw new RuntimeException("Silly处理类初始化为null！");
         }

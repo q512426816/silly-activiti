@@ -13,6 +13,11 @@ public class NcrMaster extends MySillyMaster<NcrMaster> {
     private String processVersion;
 
     @Override
+    public void setTaskName(String status) {
+        
+    }
+
+    @Override
     public String processKey() {
         return processKey;
     }
@@ -35,6 +40,11 @@ public class NcrMaster extends MySillyMaster<NcrMaster> {
     @Override
     public String endStatus() {
         return "90";
+    }
+
+    @Override
+    public void setHandleUserName(String userName) {
+
     }
 
     public String getProcessKey() {

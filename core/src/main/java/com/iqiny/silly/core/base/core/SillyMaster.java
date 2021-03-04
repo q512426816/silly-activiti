@@ -32,6 +32,13 @@ public interface SillyMaster {
     void setStatus(String status);
 
     /**
+     * 设置任务名称（多个去重 , 拼接），显示方便
+     *
+     * @param status
+     */
+    void setTaskName(String status);
+
+    /**
      * 开启时间
      */
     Date getStartDate();
@@ -84,4 +91,10 @@ public interface SillyMaster {
      */
     String endStatus();
 
+    /**
+     * 设置下一步处置人名称（多个去重 , 拼接），方便显示
+     *
+     * @param userName
+     */
+    void setHandleUserName(String userName);
 }

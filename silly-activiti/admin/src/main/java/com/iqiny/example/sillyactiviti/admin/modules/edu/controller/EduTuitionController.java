@@ -44,7 +44,6 @@ public class EduTuitionController {
     @PreAuthorize("hasAnyAuthority('edu:tuition:info')")
     public R info(@PathVariable("id") Long id){
         EduTuitionEntity entity = eduTuitionService.getById(id);
-
         return R.ok().put("entity", entity);
     }
 

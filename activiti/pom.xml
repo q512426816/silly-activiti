@@ -24,13 +24,11 @@
         <dependency>
             <groupId>org.activiti</groupId>
             <artifactId>activiti-engine</artifactId>
-            <scope>provided</scope>
         </dependency>
         <!-- activiti-spring -->
         <dependency>
             <groupId>org.activiti</groupId>
             <artifactId>activiti-spring</artifactId>
-            <scope>provided</scope>
         </dependency>
 
 

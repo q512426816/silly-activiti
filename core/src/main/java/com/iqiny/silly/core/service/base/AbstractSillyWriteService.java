@@ -1,6 +1,7 @@
 package com.iqiny.silly.core.service.base;
 
 import com.iqiny.silly.common.Constant;
+import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.CurrentUserUtil;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyFactory;
@@ -277,7 +278,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         node.setNodeUserId(currentUserUtil.currentUserId());
         boolean flag = insert(node);
         if (!flag) {
-            throw new RuntimeException("保存NCR流程主表信息发生异常！");
+            throw new RuntimeException("保存流程主表信息发生异常！");
         }
     }
 
@@ -293,16 +294,26 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
                 if (variable.getVariableName() == null) {
                     throw new RuntimeException("流程参数名称不可为空！" + variable.getVariableText());
                 }
-                variable.setId(null);
-                variable.setTaskId(node.getTaskId());
-                variable.setMasterId(node.getMasterId());
-                variable.setNodeKey(node.getNodeKey());
-                variable.setNodeId(node.getId());
-                variable.setStatus(Constant.ActivitiNode.STATUS_CURRENT);
-                boolean flag = insert(variable);
-                if (!flag) {
-                    throw new RuntimeException("保存流程子表信息发生异常！");
+
+                final SillyVariableConvertor<?> handler = getSillyConvertor(variable.getVariableType());
+                if (handler == null) {
+                    throw new SillyException("未配置相关数据处理器" + variable.getVariableType());
                 }
+
+                List<V> saveVariableList = handler.saveVariable(variable);
+                for (V v : saveVariableList) {
+                    v.setId(null);
+                    v.setTaskId(node.getTaskId());
+                    v.setMasterId(node.getMasterId());
+                    v.setNodeKey(node.getNodeKey());
+                    v.setNodeId(node.getId());
+                    v.setStatus(Constant.ActivitiNode.STATUS_CURRENT);
+                    boolean flag = insert(v);
+                    if (!flag) {
+                        throw new RuntimeException("保存流程子表信息发生异常！");
+                    }
+                }
+
             }
         }
     }

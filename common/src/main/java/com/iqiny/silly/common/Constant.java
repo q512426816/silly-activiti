@@ -34,6 +34,23 @@ public class Constant {
 
     }
 
+    public class ActivitiVariable {
+
+        /**
+         * 流程变量 归属主表
+         */
+        public static final String BELONG_MASTER = "master";
+        /**
+         * 流程变量 归属节点表
+         */
+        public static final String BELONG_NODE = "node";
+        /**
+         * 流程变量 归属变量表
+         */
+        public static final String BELONG_VARIABLE = "variable";
+
+    }
+
     public class ActivitiParallel {
         /**
          * 是并行

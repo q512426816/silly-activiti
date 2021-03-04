@@ -14,4 +14,9 @@ public class SpringSecurityCurrentUserUtil implements CurrentUserUtil {
         }*/
         return null;
     }
+
+    @Override
+    public String userIdToName(String userId) {
+        return null;
+    }
 }

@@ -12,6 +12,11 @@ public class JwtCurrentUserUtil implements CurrentUserUtil {
         return threadLocal.get();
     }
 
+    @Override
+    public String userIdToName(String userId) {
+        return null;
+    }
+
     /**
      * 设置当前线程的用户ID 方法执行前设置
      *

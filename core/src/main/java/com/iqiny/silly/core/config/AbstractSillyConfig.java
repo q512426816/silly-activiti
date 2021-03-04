@@ -3,8 +3,6 @@ package com.iqiny.silly.core.config;
 import com.iqiny.silly.common.Constant;
 import com.iqiny.silly.common.util.CurrentUserUtil;
 import com.iqiny.silly.common.util.SillyAssert;
-import com.iqiny.silly.core.convertor.SillyListConvertor;
-import com.iqiny.silly.core.convertor.SillyListListConvertor;
 import com.iqiny.silly.core.convertor.SillyStringConvertor;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.service.SillyEngineService;
@@ -38,9 +36,9 @@ public abstract class AbstractSillyConfig implements SillyConfig {
 
         setSillyConvertorMap(initSillyConvertorMap());
 
-        initComplete();
-
         checkConfig();
+
+        initComplete();
     }
 
     /**
@@ -62,9 +60,7 @@ public abstract class AbstractSillyConfig implements SillyConfig {
 
     protected Map<String, SillyVariableConvertor> initSillyConvertorMap() {
         Map<String, SillyVariableConvertor> convertorMap = new LinkedHashMap<>();
-        convertorMap.put(Constant.ActivitiNode.CONVERTOR_LIST, new SillyListConvertor());
         convertorMap.put(Constant.ActivitiNode.CONVERTOR_STRING, new SillyStringConvertor());
-        convertorMap.put(Constant.ActivitiNode.CONVERTOR_LIST_LIST, new SillyListListConvertor());
         hookInitSillyConvertorMap(convertorMap);
         return convertorMap;
     }

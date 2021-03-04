@@ -6,5 +6,7 @@ package com.iqiny.silly.common.util;
 public interface CurrentUserUtil {
 
     String currentUserId();
+    
+    String userIdToName(String userId);
 
 }

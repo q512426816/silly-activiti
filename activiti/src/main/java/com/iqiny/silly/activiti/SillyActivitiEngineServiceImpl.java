@@ -143,7 +143,8 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
         if (StringUtils.isEmpty(taskId)) {
             return null;
         }
-        return taskService.createTaskQuery().taskId(taskId).singleResult();
+        final TaskQuery taskQuery = taskService.createTaskQuery();
+        return taskQuery.taskId(taskId).singleResult();
     }
 
     @Override
@@ -226,6 +227,11 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
             // 状态设置为已完成
             return Constant.ActivitiNode.KEY_END;
         }
+    }
+
+    @Override
+    public Set<String> getDoingMasterId(String category, String userId) {
+        throw new RuntimeException("请自行实现getDoingMasterId");
     }
 
 

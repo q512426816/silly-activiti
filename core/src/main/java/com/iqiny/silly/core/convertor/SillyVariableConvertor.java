@@ -1,5 +1,8 @@
 package com.iqiny.silly.core.convertor;
 
+import com.iqiny.silly.core.base.core.SillyVariable;
+
+import java.util.List;
 import java.util.Map;
 
 public interface SillyVariableConvertor<T> {
@@ -14,4 +17,6 @@ public interface SillyVariableConvertor<T> {
      */
     T convert(Map<String, Object> map, String key, String value);
 
+    <V extends SillyVariable> List<V> saveVariable(V variable);
+    
 }

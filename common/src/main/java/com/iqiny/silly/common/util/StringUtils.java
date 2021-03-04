@@ -1,6 +1,6 @@
 package com.iqiny.silly.common.util;
 
-import java.util.List;
+import java.util.Collection;
 
 public class StringUtils {
 
@@ -15,7 +15,7 @@ public class StringUtils {
         return !StringUtils.isEmpty(str);
     }
 
-    public static String join(List<String> list, String split) {
+    public static String join(Collection<String> list, String split) {
         if (list == null) {
             return null;
         }

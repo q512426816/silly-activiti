@@ -1,7 +1,10 @@
-package com.iqiny.silly.core.convertor;
+package com.iqiny.silly.activiti.convertor;
 
 
 import com.iqiny.silly.common.util.StringUtils;
+import com.iqiny.silly.core.base.core.SillyVariable;
+import com.iqiny.silly.core.convertor.SillyVariableConvertor;
+import org.springframework.beans.BeanUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,4 +33,22 @@ public class SillyListConvertor implements SillyVariableConvertor<List<String>> 
         varMap.put(key, varList);
         return varList;
     }
+
+    @Override
+    public <V extends SillyVariable> List<V> saveVariable(V variable) {
+        final String variableText = variable.getVariableText();
+        List<V> list = new ArrayList<>();
+        try {
+            final String[] split = variableText.split(",");
+            for (String val : split) {
+                final V copy = (V) variable.getClass().newInstance();
+                BeanUtils.copyProperties(variable, copy);
+                copy.setVariableText(val);
+                list.add(copy);
+            }
+        } catch (Exception e) {
+        }
+        return list;
+    }
+
 }

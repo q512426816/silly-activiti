@@ -9,10 +9,7 @@ import com.iqiny.silly.core.service.base.AbstractSillyWriteService;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.InitializingBean;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @SuppressWarnings("unchecked")
 public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable>
@@ -25,7 +22,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
 
     @Override
     protected void completeTask(String taskId, String orgHandleInfo, Map<String, Object> varMap) {
-        Task task = (Task) sillyEngineService.findTaskById(taskId);
+        Task task = sillyEngineService.findTaskById(taskId);
         SillyAssert.notNull(task, "任务获取失败！");
         String nextUserIds = complete(varMap, task);
         // 保存流程履历信息
@@ -98,6 +95,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
             preCloseProcess(task);
         } else {
             nextUserIds = nextProcess(taskList);
+            afterCompleteProcess(taskList, nextUserIds);
         }
         return nextUserIds;
     }
@@ -136,6 +134,38 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
             throw new RuntimeException("更新主表状态发生异常！");
         }
         return masterId;
+    }
+
+    protected String afterCompleteProcess(List<Task> taskList, String userIds) {
+        Set<String> taskNames = new LinkedHashSet<>();
+        for (Task task : taskList) {
+            taskNames.add(task.getName());
+        }
+        String masterId = sillyEngineService.getBusinessKey(taskList.get(0).getProcessInstanceId());
+        if (masterId == null) {
+            throw new RuntimeException("通过任务流程实例ID获取主表数据ID异常！");
+        }
+        M master = sillyFactory.newMaster();
+        master.setTaskName(StringUtils.join(taskNames, ","));
+        master.setHandleUserName(userIdsToName(userIds));
+        master.setId(masterId);
+        if (!updateById(master)) {
+            throw new RuntimeException("更新主表数据发生异常！");
+        }
+        return masterId;
+    }
+
+    protected String userIdsToName(String userIds) {
+        if (StringUtils.isEmpty(userIds)) {
+            return null;
+        }
+        
+        final String[] split = userIds.split(",");
+        Set<String> userNames = new LinkedHashSet<>();
+        for (String userId : split) {
+            userNames.add(currentUserUtil.userIdToName(userId));
+        }
+        return StringUtils.join(userNames, ",");
     }
 
     protected String nextProcess(List<Task> taskList) {
