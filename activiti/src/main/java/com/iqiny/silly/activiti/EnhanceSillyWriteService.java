@@ -1,10 +1,13 @@
 package com.iqiny.silly.activiti;
 
+import com.iqiny.silly.common.SillyConstant;
+import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
+import com.iqiny.silly.core.resume.SillyResume;
 import com.iqiny.silly.core.service.base.AbstractSillyWriteService;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.InitializingBean;
@@ -18,6 +21,13 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
     @Override
     public void afterPropertiesSet() throws Exception {
         super.init();
+    }
+
+    @Override
+    protected void onStartProcess(M master, Task task) {
+        master.setTaskName(task.getName());
+        final List<String> taskUserIds = sillyEngineService.getTaskUserIds(task);
+        master.setHandleUserName(userIdsToName(StringUtils.join(taskUserIds)));
     }
 
     @Override
@@ -37,13 +47,13 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
      * @param orgHandleInfo
      */
     protected void saveProcessResume(Task task, String nextUserIds, String orgHandleInfo) {
-        //final Long dueTime = sillyActivitiService.getTaskDueTime(task);
-        //final String masterId = sillyActivitiService.getBusinessKey(task.getProcessInstanceId());
+        final Long dueTime = sillyEngineService.getTaskDueTime(task);
+        final String masterId = sillyEngineService.getBusinessKey(task.getProcessInstanceId());
         // 履历内容
-       /* String handleInfo = getSillyResumeService().makeResumeHandleInfo(nextUserIds, task.getName(), orgHandleInfo);
+        String handleInfo = sillyResumeService.makeResumeHandleInfo(nextUserIds, task.getName(), orgHandleInfo);
 
-        SillyResume process = getSillyFactory().newResume();
-        process.setProcessType(MbpProcessResume.PROCESS_TYPE_NEXT);
+        SillyResume process = sillyFactory.newResume();
+        process.setProcessType(SillyConstant.SillyResumeType.PROCESS_TYPE_NEXT);
         process.setBusinessId(processResumeBusinessId(masterId));
         process.setBusinessType(processResumeBusinessType());
         process.setHandleInfo(handleInfo);
@@ -51,10 +61,8 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         process.setProcessNodeName(task.getName());
         process.setNextUserId(nextUserIds);
         process.setConsumeTime(dueTime);
-        process.setHandleDate(new Date());
-        process.setHandleUserId(ThreadUtil.currentUserId());
         // 插入流程履历
-        getSillyResumeService().insert(process);*/
+        sillyResumeService.insert(process);
     }
 
 
@@ -123,7 +131,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
     protected String preCloseProcess(Task task) {
         String masterId = sillyEngineService.getBusinessKey(task.getProcessInstanceId());
         if (masterId == null) {
-            throw new RuntimeException("通过任务流程实例ID获取主表数据ID异常！");
+            throw new SillyException("通过任务流程实例ID获取主表数据ID异常！");
         }
         M master = sillyFactory.newMaster();
         master.setStatus(master.endStatus());
@@ -131,7 +139,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         master.setCloseUserId(currentUserUtil.currentUserId());
         master.setId(masterId);
         if (!updateById(master)) {
-            throw new RuntimeException("更新主表状态发生异常！");
+            throw new SillyException("更新主表状态发生异常！");
         }
         return masterId;
     }
@@ -143,14 +151,14 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         }
         String masterId = sillyEngineService.getBusinessKey(taskList.get(0).getProcessInstanceId());
         if (masterId == null) {
-            throw new RuntimeException("通过任务流程实例ID获取主表数据ID异常！");
+            throw new SillyException("通过任务流程实例ID获取主表数据ID异常！");
         }
         M master = sillyFactory.newMaster();
         master.setTaskName(StringUtils.join(taskNames, ","));
         master.setHandleUserName(userIdsToName(userIds));
         master.setId(masterId);
         if (!updateById(master)) {
-            throw new RuntimeException("更新主表数据发生异常！");
+            throw new SillyException("更新主表数据发生异常！");
         }
         return masterId;
     }
@@ -159,7 +167,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         if (StringUtils.isEmpty(userIds)) {
             return null;
         }
-        
+
         final String[] split = userIds.split(",");
         Set<String> userNames = new LinkedHashSet<>();
         for (String userId : split) {
@@ -173,13 +181,13 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         for (Task task1 : taskList) {
             final List<String> taskUserIds = sillyEngineService.getTaskUserIds(task1);
             if (taskUserIds == null || taskUserIds.isEmpty()) {
-                throw new RuntimeException("下一步任务处置人不可为空！");
+                throw new SillyException("下一步任务处置人不可为空！");
             }
             userIds.addAll(taskUserIds);
         }
         String nextUserIds = StringUtils.join(userIds, ",");
         if (StringUtils.isEmpty(nextUserIds)) {
-            throw new RuntimeException("下一步处置人不可为空！");
+            throw new SillyException("下一步处置人不可为空！");
         }
         return nextUserIds;
     }

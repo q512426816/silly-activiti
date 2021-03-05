@@ -1,10 +1,11 @@
 package com.iqiny.silly.core.config;
 
-import com.iqiny.silly.common.Constant;
+import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.util.CurrentUserUtil;
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.core.convertor.SillyStringConvertor;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
+import com.iqiny.silly.core.resume.SillyResumeService;
 import com.iqiny.silly.core.service.SillyEngineService;
 
 import java.util.LinkedHashMap;
@@ -29,6 +30,11 @@ public abstract class AbstractSillyConfig implements SillyConfig {
      * 流程变量 类型转换器
      */
     protected Map<String, SillyVariableConvertor> sillyConvertorMap;
+
+    /**
+     * 流程履历记录服务
+     */
+    protected SillyResumeService sillyResumeService;
 
     @Override
     public void init() {
@@ -60,7 +66,7 @@ public abstract class AbstractSillyConfig implements SillyConfig {
 
     protected Map<String, SillyVariableConvertor> initSillyConvertorMap() {
         Map<String, SillyVariableConvertor> convertorMap = new LinkedHashMap<>();
-        convertorMap.put(Constant.ActivitiNode.CONVERTOR_STRING, new SillyStringConvertor());
+        convertorMap.put(SillyConstant.ActivitiNode.CONVERTOR_STRING, new SillyStringConvertor());
         hookInitSillyConvertorMap(convertorMap);
         return convertorMap;
     }
@@ -100,5 +106,15 @@ public abstract class AbstractSillyConfig implements SillyConfig {
     @Override
     public void setSillyConvertorMap(Map<String, SillyVariableConvertor> sillyConvertorMap) {
         this.sillyConvertorMap = sillyConvertorMap;
+    }
+
+    @Override
+    public SillyResumeService getSillyResumeService() {
+        return sillyResumeService;
+    }
+
+    @Override
+    public void setSillyResumeService(SillyResumeService sillyResumeService) {
+        this.sillyResumeService = sillyResumeService;
     }
 }

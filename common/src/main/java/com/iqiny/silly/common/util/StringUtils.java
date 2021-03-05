@@ -15,6 +15,10 @@ public class StringUtils {
         return !StringUtils.isEmpty(str);
     }
 
+    public static String join(Collection<String> list) {
+        return join(list, ",");
+    }
+
     public static String join(Collection<String> list, String split) {
         if (list == null) {
             return null;

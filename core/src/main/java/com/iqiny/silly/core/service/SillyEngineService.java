@@ -1,11 +1,11 @@
 package com.iqiny.silly.core.service;
 
 import com.iqiny.silly.core.base.Initializable;
+import com.iqiny.silly.core.base.SillyMasterTask;
 import com.iqiny.silly.core.base.core.SillyMaster;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * 傻瓜流程引擎服务 （流程控制服务，一般都结合第三方框架实现，比如 Activiti）
@@ -117,5 +117,5 @@ public interface SillyEngineService<T> extends Initializable {
      * @param userId
      * @return
      */
-    Set<String> getDoingMasterId(String category, String userId);
+    List<? extends SillyMasterTask> getDoingMasterTask(String category, String userId);
 }

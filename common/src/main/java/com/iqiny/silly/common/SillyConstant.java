@@ -1,7 +1,7 @@
 package com.iqiny.silly.common;
 
-public class Constant {
-    private Constant() {
+public class SillyConstant {
+    private SillyConstant() {
     }
 
     public class ActivitiNode {
@@ -81,4 +81,18 @@ public class Constant {
         public static final String KEY_GROUP = "group";
     }
 
+    public class SillyResumeType {
+        /**
+         * 履历类型 提交
+         */
+        public static final String PROCESS_TYPE_NEXT = "next";
+        /**
+         * 履历类型 驳回
+         */
+        public static final String PROCESS_TYPE_BACK = "back";
+        /**
+         * 履历类型 流转
+         */
+        public static final String PROCESS_TYPE_FLOW = "flow";
+    }
 }

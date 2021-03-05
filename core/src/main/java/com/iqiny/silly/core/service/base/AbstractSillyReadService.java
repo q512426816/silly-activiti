@@ -1,6 +1,7 @@
 package com.iqiny.silly.core.service.base;
 
-import com.iqiny.silly.common.Constant;
+import com.iqiny.silly.common.SillyConstant;
+import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.base.SillyTaskData;
@@ -68,10 +69,10 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
 
     protected SillyVariableConvertor<?> getSillyHandler(String handleKey) {
         if (sillyHandlerMap == null) {
-            throw new RuntimeException("Silly处理类初始化为null！");
+            throw new SillyException("Silly处理类初始化为null！");
         }
         final SillyVariableConvertor<?> handler = sillyHandlerMap.get(handleKey);
-        return handler == null ? sillyHandlerMap.get(Constant.ActivitiNode.CONVERTOR_STRING) : handler;
+        return handler == null ? sillyHandlerMap.get(SillyConstant.ActivitiNode.CONVERTOR_STRING) : handler;
     }
 
     protected abstract SillyFactory<M, N, V> createSillyFactory();
@@ -130,7 +131,7 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
                 }
             }
         }
-        bigMap.put(Constant.ActivitiDataMap.KEY_ALL_MAP, mergeAllMap(bigMap, new LinkedHashMap<>(128)));
+        bigMap.put(SillyConstant.ActivitiDataMap.KEY_ALL_MAP, mergeAllMap(bigMap, new LinkedHashMap<>(128)));
         return bigMap;
     }
 
@@ -173,7 +174,7 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
      */
     protected Map<String, Object> createSillyNodeProcess(N np, Map<String, Object> map) {
         Map<String, Object> nodeMap = new LinkedHashMap<>();
-        boolean isParallel = !Constant.ActivitiParallel.NOT_PARALLEL.equals(np.getParallelFlag());
+        boolean isParallel = !SillyConstant.ActivitiParallel.NOT_PARALLEL.equals(np.getParallelFlag());
         if (isParallel) {
             List<Map<String, Object>> list = null;
             if (map.get(np.getNodeKey()) instanceof List) {
@@ -190,9 +191,9 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         if (np.getNodeDate() != null) {
-            nodeMap.put(Constant.ActivitiDataMap.KEY_NODE_HANDLE_DATE, sdf.format(np.getNodeDate()));
+            nodeMap.put(SillyConstant.ActivitiDataMap.KEY_NODE_HANDLE_DATE, sdf.format(np.getNodeDate()));
         }
-        nodeMap.put(Constant.ActivitiDataMap.KEY_NODE_TASK_ID, np.getTaskId());
+        nodeMap.put(SillyConstant.ActivitiDataMap.KEY_NODE_TASK_ID, np.getTaskId());
         return nodeMap;
     }
 
@@ -213,8 +214,8 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
             final String label = variable.getVariableType();
             final String key = variable.getVariableName();
             final String value = variable.getVariableText();
-            if (StringUtils.isEmpty(label) || Constant.ActivitiNode.CONVERTOR_STRING.equals(label)) {
-                final SillyVariableConvertor<?> handle = getSillyHandler(Constant.ActivitiNode.CONVERTOR_STRING);
+            if (StringUtils.isEmpty(label) || SillyConstant.ActivitiNode.CONVERTOR_STRING.equals(label)) {
+                final SillyVariableConvertor<?> handle = getSillyHandler(SillyConstant.ActivitiNode.CONVERTOR_STRING);
                 handle.convert(nodeMap, key, value);
             } else {
                 Map<String, Object> myMap = variableMap.computeIfAbsent(label, k -> new HashMap<>());
@@ -237,7 +238,7 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
             for (String key : variableMap.keySet()) {
                 list.add(variableMap.get(key));
             }
-            nodeMap.put(Constant.ActivitiDataMap.KEY_GROUP, list);
+            nodeMap.put(SillyConstant.ActivitiDataMap.KEY_GROUP, list);
         }
     }
 
@@ -278,7 +279,30 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
             }
             return map;
         } catch (Exception ex) {
-            throw new RuntimeException();
+            throw new SillyException(ex.getMessage());
         }
     }
+
+    /**
+     * 获取当前任务下的变量数据
+     *
+     * @param taskId
+     * @return
+     */
+    public Map<String, Object> findTaskVariable(String taskId) {
+        final V variable = sillyFactory.newVariable();
+        variable.setTaskId(taskId);
+        variable.setStatus(SillyConstant.ActivitiNode.STATUS_CURRENT);
+        final List<V> variables =  findVariableList(variable);
+        Map<String, Object> map = new LinkedHashMap<>();
+        for (V auditVariable : variables) {
+            final SillyVariableConvertor<?> sillyHandler = getSillyHandler(auditVariable.getVariableType());
+            sillyHandler.convert(map, auditVariable.getVariableName(), auditVariable.getVariableText());
+        }
+
+        return map;
+    }
+
+    protected abstract List<V> findVariableList(V where);
+
 }

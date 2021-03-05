@@ -3,6 +3,7 @@ package com.iqiny.silly.core.base;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
+import com.iqiny.silly.core.resume.SillyResume;
 
 /**
  * 傻瓜工厂 创建 相同一族的傻瓜
@@ -43,4 +44,12 @@ public interface SillyFactory<M extends SillyMaster, N extends SillyNode<V>, V e
      */
     SillyTaskData<N, V> newSillyTaskData();
 
+    /**
+     * 创建 流程履历对象
+     *
+     * @param <T>
+     * @return
+     */
+    <T extends SillyResume> T newResume();
+    
 }

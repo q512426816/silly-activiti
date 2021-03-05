@@ -3,6 +3,7 @@ package com.iqiny.silly.core.config;
 import com.iqiny.silly.common.util.CurrentUserUtil;
 import com.iqiny.silly.core.base.Initializable;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
+import com.iqiny.silly.core.resume.SillyResumeService;
 import com.iqiny.silly.core.service.SillyEngineService;
 
 import java.util.Map;
@@ -23,4 +24,8 @@ public interface SillyConfig extends Initializable {
     Map<String, SillyVariableConvertor> getSillyConvertorMap();
 
     void setSillyConvertorMap(Map<String, SillyVariableConvertor> sillyConvertorMap);
+
+    SillyResumeService getSillyResumeService();
+    
+    void setSillyResumeService(SillyResumeService sillyResumeService);
 }

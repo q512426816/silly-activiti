@@ -5,6 +5,7 @@ import com.iqiny.example.sillyactiviti.admin.modules.ncr.entity.NcrNode;
 import com.iqiny.example.sillyactiviti.admin.modules.ncr.entity.NcrVariable;
 import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.base.SillyTaskData;
+import com.iqiny.silly.core.resume.SillyResume;
 
 public class NcrSillyFactory implements SillyFactory<NcrMaster, NcrNode, NcrVariable> {
 
@@ -34,6 +35,11 @@ public class NcrSillyFactory implements SillyFactory<NcrMaster, NcrNode, NcrVari
 
     @Override
     public SillyTaskData<NcrNode, NcrVariable> newSillyTaskData() {
+        return null;
+    }
+
+    @Override
+    public <T extends SillyResume> T newResume() {
         return null;
     }
 }

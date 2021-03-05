@@ -1,6 +1,6 @@
 package com.iqiny.silly.core.service.base;
 
-import com.iqiny.silly.common.Constant;
+import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.CurrentUserUtil;
 import com.iqiny.silly.common.util.StringUtils;
@@ -10,6 +10,7 @@ import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.config.SillyConfig;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
+import com.iqiny.silly.core.resume.SillyResumeService;
 import com.iqiny.silly.core.service.SillyEngineService;
 import com.iqiny.silly.core.service.SillyWriteService;
 
@@ -35,6 +36,8 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
 
     protected CurrentUserUtil currentUserUtil;
 
+    protected SillyResumeService sillyResumeService;
+
     protected Map<String, SillyVariableConvertor> sillyConvertorMap;
 
     @Override
@@ -46,6 +49,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         setSillyEngineService(sillyConfig.getSillyEngineService());
         setCurrentUserUtil(sillyConfig.getCurrentUserUtil());
         setSillyConvertorMap(sillyConfig.getSillyConvertorMap());
+        setSillyResumeService(sillyConfig.getSillyResumeService());
     }
 
     public abstract SillyConfig initSillyConfig();
@@ -70,13 +74,17 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         this.sillyConvertorMap = sillyConvertorMap;
     }
 
+    public void setSillyResumeService(SillyResumeService sillyResumeService) {
+        this.sillyResumeService = sillyResumeService;
+    }
+
     protected abstract void forceEndProcess(String processInstanceId, String userId);
 
     protected abstract SillyFactory<M, N, V> createSillyFactory();
 
     private SillyVariableConvertor<?> getSillyConvertor(String handleKey) {
         if (sillyConvertorMap == null) {
-            throw new RuntimeException("Silly数据处理器未设置！");
+            throw new SillyException("Silly数据处理器未设置！");
         }
 
         return sillyConvertorMap.get(handleKey);
@@ -205,28 +213,34 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
             // 插入主表
             boolean saveFlag = insert(master);
             if (!saveFlag) {
-                throw new RuntimeException("主信息保存发生异常！");
+                throw new SillyException("主信息保存发生异常！");
             }
             // 流程启动  返回任务ID
             String processInstanceId = sillyEngineService.start(master, varMap);
             master.setProcessId(processInstanceId);
-            saveFlag = updateById(master);
-            if (!saveFlag) {
-                throw new RuntimeException("主信息更新发生异常！");
-            }
             final List<T> tasks = sillyEngineService.findTaskByProcessInstanceId(processInstanceId);
             if (tasks.size() != 1) {
-                throw new RuntimeException("任务启动第一位节点任务不可为多个！");
+                throw new SillyException("任务启动第一位节点任务不可为多个！");
             }
+            final T t = tasks.get(0);
+            onStartProcess(master, t);
+            
+            saveFlag = updateById(master);
+            if (!saveFlag) {
+                throw new SillyException("主信息更新发生异常！");
+            }
+            
             return sillyEngineService.getTaskId(tasks.get(0));
         } else {
             boolean saveFlag = updateById(master);
             if (!saveFlag) {
-                throw new RuntimeException("主信息更新发生异常！");
+                throw new SillyException("主信息更新发生异常！");
             }
             return null;
         }
     }
+
+    protected abstract void onStartProcess(M master, T t);
 
     /**
      * 保存流程节点数据
@@ -235,7 +249,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
      * @return 工作流需要的数据 Map
      */
     protected Map<String, Object> saveNodeInfo(N node) {
-        boolean isParallel = Constant.ActivitiParallel.IS_PARALLEL.equals(node.getParallelFlag());
+        boolean isParallel = SillyConstant.ActivitiParallel.IS_PARALLEL.equals(node.getParallelFlag());
         // （若有）更新之前的流程信息 为历史状态
         updateToHistory(node, isParallel);
         doInsertNode(node);
@@ -251,16 +265,16 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         if (isParallel) {
             whereNode.setTaskId(node.getTaskId());
         } else {
-            node.setParallelFlag(Constant.ActivitiParallel.NOT_PARALLEL);
+            node.setParallelFlag(SillyConstant.ActivitiParallel.NOT_PARALLEL);
         }
         final N sillyNode = sillyFactory.newNode();
-        sillyNode.setStatus(Constant.ActivitiNode.STATUS_HISTORY);
+        sillyNode.setStatus(SillyConstant.ActivitiNode.STATUS_HISTORY);
         update(sillyNode, whereNode);
 
         // （若有）更新之前的流程变量信息 为历史状态
         final V whereVariable = sillyFactory.newVariable();
         whereVariable.setMasterId(node.getMasterId());
-        whereVariable.setNodeKey(node.getMasterId());
+        whereVariable.setNodeKey(node.getNodeKey());
         if (isParallel) {
             whereVariable.setTaskId(node.getTaskId());
         }
@@ -268,17 +282,17 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         sillyVariable.setMasterId(node.getMasterId());
         sillyVariable.setNodeKey(node.getNodeKey());
         sillyVariable.setTaskId(node.getTaskId());
-        sillyVariable.setStatus(Constant.ActivitiNode.STATUS_HISTORY);
+        sillyVariable.setStatus(SillyConstant.ActivitiNode.STATUS_HISTORY);
         update(sillyVariable, whereVariable);
     }
 
     private void doInsertNode(N node) {
-        node.setStatus(Constant.ActivitiNode.STATUS_CURRENT);
+        node.setStatus(SillyConstant.ActivitiNode.STATUS_CURRENT);
         node.setNodeDate(new Date());
         node.setNodeUserId(currentUserUtil.currentUserId());
         boolean flag = insert(node);
         if (!flag) {
-            throw new RuntimeException("保存流程主表信息发生异常！");
+            throw new SillyException("保存流程主表信息发生异常！");
         }
     }
 
@@ -292,7 +306,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         for (V variable : variableList) {
             if (variable != null) {
                 if (variable.getVariableName() == null) {
-                    throw new RuntimeException("流程参数名称不可为空！" + variable.getVariableText());
+                    throw new SillyException("流程参数名称不可为空！" + variable.getVariableText());
                 }
 
                 final SillyVariableConvertor<?> handler = getSillyConvertor(variable.getVariableType());
@@ -307,10 +321,10 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
                     v.setMasterId(node.getMasterId());
                     v.setNodeKey(node.getNodeKey());
                     v.setNodeId(node.getId());
-                    v.setStatus(Constant.ActivitiNode.STATUS_CURRENT);
+                    v.setStatus(SillyConstant.ActivitiNode.STATUS_CURRENT);
                     boolean flag = insert(v);
                     if (!flag) {
-                        throw new RuntimeException("保存流程子表信息发生异常！");
+                        throw new SillyException("保存流程子表信息发生异常！");
                     }
                 }
 
@@ -353,7 +367,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
     protected void delete(String masterId, String processInstanceId) {
         boolean delFlag = deleteByMasterId(masterId);
         if (!delFlag) {
-            throw new RuntimeException("主信息删除发生异常！");
+            throw new SillyException("主信息删除发生异常！");
         }
         // 结束流程
         forceEndProcess(processInstanceId, currentUserUtil.currentUserId());

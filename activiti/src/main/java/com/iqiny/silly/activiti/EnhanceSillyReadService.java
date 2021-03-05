@@ -21,5 +21,4 @@ public abstract class EnhanceSillyReadService<M extends SillyMaster, N extends S
         super.init();
     }
 
-   
 }

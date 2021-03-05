@@ -1,7 +1,9 @@
 package com.iqiny.silly.activiti;
 
-import com.iqiny.silly.common.Constant;
+import com.iqiny.silly.common.SillyConstant;
+import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.StringUtils;
+import com.iqiny.silly.core.base.SillyMasterTask;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.service.SillyEngineService;
 import org.activiti.engine.HistoryService;
@@ -59,10 +61,10 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
     @Override
     public String start(SillyMaster master, Map<String, Object> variableMap) {
         if (StringUtils.isEmpty(master.processKey())) {
-            throw new RuntimeException("流程启动时流程KEY 不可为空！");
+            throw new SillyException("流程启动时流程KEY 不可为空！");
         }
         if (StringUtils.isEmpty(master.getId())) {
-            throw new RuntimeException("流程启动时 业务主键 不可为空！");
+            throw new SillyException("流程启动时 业务主键 不可为空！");
         }
         if (variableMap == null) {
             variableMap = new HashMap<>();
@@ -75,7 +77,7 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
     public void complete(Task task, String userId, Map<String, Object> variableMap) {
         String taskId = task.getId();
         if (StringUtils.isEmpty(task.getId())) {
-            throw new RuntimeException("当前执行的任务ID获取失败");
+            throw new SillyException("当前执行的任务ID获取失败");
         }
         // 认领任务
         taskService.claim(taskId, userId);
@@ -88,7 +90,7 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
         String processInstanceId = task.getProcessInstanceId();
         String taskId = task.getId();
         if (StringUtils.isEmpty(taskId) || StringUtils.isEmpty(processInstanceId)) {
-            throw new RuntimeException("任务ID/流程实例ID 不可为空！");
+            throw new SillyException("任务ID/流程实例ID 不可为空！");
         }
         /*// 目标节点
         ActivityImpl pointActivity = findActivitiImpl(taskId, nodeKey);
@@ -114,7 +116,7 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
     @Override
     public List<Task> findTaskByProcessInstanceId(String processInstanceId) {
         if (StringUtils.isEmpty(processInstanceId)) {
-            throw new RuntimeException("查询任务列表，流程实例ID不可为空！");
+            throw new SillyException("查询任务列表，流程实例ID不可为空！");
         }
         final TaskQuery taskQuery = taskService.createTaskQuery();
         TaskQuery taskQuery1 = null;
@@ -191,7 +193,7 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
 
     public void endProcessByProcessInstanceId(String actProcessId, Task task, String userId) {
         if (task != null) {
-            changeTask(task, Constant.ActivitiNode.KEY_END, userId);
+            changeTask(task, SillyConstant.ActivitiNode.KEY_END, userId);
         }
         if (actProcessId != null) {
             List<Task> tasks = findTaskByProcessInstanceId(actProcessId);
@@ -225,13 +227,18 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
             return task.getTaskDefinitionKey();
         } else {
             // 状态设置为已完成
-            return Constant.ActivitiNode.KEY_END;
+            return SillyConstant.ActivitiNode.KEY_END;
         }
     }
 
+    /**
+     * @param category 流程类型
+     * @param userId   用户ID
+     * @return 业务MasterId
+     */
     @Override
-    public Set<String> getDoingMasterId(String category, String userId) {
-        throw new RuntimeException("请自行实现getDoingMasterId");
+    public List<? extends SillyMasterTask> getDoingMasterTask(String category, String userId) {
+        throw new SillyException("请自行实现getDoingMasterId");
     }
 
 
