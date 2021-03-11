@@ -94,5 +94,4 @@ public abstract class MySillyVariable<T extends Model<T>> extends Model<T> imple
         this.updateDate = new Date();
         this.updateUserId = SecurityUtils.getUserId();
     }
-
 }

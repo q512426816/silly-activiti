@@ -96,4 +96,11 @@ public interface SillyNode<V extends SillyVariable> {
 
     void setVariableMap(Map<String, Object> variableMap);
 
+    /**
+     * 处置类型 （启动/下一步/驳回/流转/完成）
+     *
+     * @return
+     */
+    String getHandleType();
+
 }

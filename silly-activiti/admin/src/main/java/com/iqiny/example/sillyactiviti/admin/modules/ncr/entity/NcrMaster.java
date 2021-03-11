@@ -26,7 +26,7 @@ public class NcrMaster extends MySillyMaster<NcrMaster> {
     public String processVersion() {
         return processVersion;
     }
-
+    
     @Override
     public String startStatus() {
         return "10";

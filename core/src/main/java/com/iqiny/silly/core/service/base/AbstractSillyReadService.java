@@ -289,11 +289,46 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
      * @param taskId
      * @return
      */
-    public Map<String, Object> findTaskVariable(String taskId) {
+    public Map<String, Object> findVariableByTaskId(String taskId) {
         final V variable = sillyFactory.newVariable();
         variable.setTaskId(taskId);
         variable.setStatus(SillyConstant.ActivitiNode.STATUS_CURRENT);
-        final List<V> variables =  findVariableList(variable);
+        return findVariableByVariable(variable);
+    }
+
+    /**
+     * 获取数据 Map
+     *
+     * @param masterId
+     * @return
+     */
+    public Map<String, Object> findVariableByMasterId(String masterId) {
+        return findVariableByMasterIdNodeKey(masterId, null);
+    }
+
+    /**
+     * 获取数据 Map
+     *
+     * @param masterId
+     * @param nodeKey
+     * @return
+     */
+    public Map<String, Object> findVariableByMasterIdNodeKey(String masterId, String nodeKey) {
+        final V variable = sillyFactory.newVariable();
+        variable.setMasterId(masterId);
+        variable.setNodeKey(nodeKey);
+        variable.setStatus(SillyConstant.ActivitiNode.STATUS_CURRENT);
+        return findVariableByVariable(variable);
+    }
+
+    /**
+     * 获取数据 Map
+     *
+     * @param variable
+     * @return
+     */
+    public Map<String, Object> findVariableByVariable(V variable) {
+        final List<V> variables = findVariableList(variable);
         Map<String, Object> map = new LinkedHashMap<>();
         for (V auditVariable : variables) {
             final SillyVariableConvertor<?> sillyHandler = getSillyHandler(auditVariable.getVariableType());

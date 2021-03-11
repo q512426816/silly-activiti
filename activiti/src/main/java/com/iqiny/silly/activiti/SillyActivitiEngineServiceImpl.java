@@ -21,7 +21,6 @@ import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
 import org.activiti.spring.ProcessEngineFactoryBean;
 
-import java.lang.reflect.Method;
 import java.util.*;
 
 public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> {
@@ -118,18 +117,7 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
         if (StringUtils.isEmpty(processInstanceId)) {
             throw new SillyException("查询任务列表，流程实例ID不可为空！");
         }
-        final TaskQuery taskQuery = taskService.createTaskQuery();
-        TaskQuery taskQuery1 = null;
-        try {
-            final Method method = taskQuery.getClass().getMethod("processInstanceId", String.class);
-            taskQuery1 = (TaskQuery) method.invoke(taskQuery, processInstanceId);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if (taskQuery1 != null) {
-            return taskQuery1.list();
-        }
-        return new ArrayList<>();
+        return taskService.createTaskQuery().processInstanceId(processInstanceId).list();
     }
 
     @Override
@@ -191,6 +179,11 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
         }
     }
 
+    @Override
+    public void deleteProcessInstance(String processInstanceId, String deleteReason) {
+        runtimeService.deleteProcessInstance(processInstanceId, deleteReason);
+    }
+
     public void endProcessByProcessInstanceId(String actProcessId, Task task, String userId) {
         if (task != null) {
             changeTask(task, SillyConstant.ActivitiNode.KEY_END, userId);
@@ -239,6 +232,15 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
     @Override
     public List<? extends SillyMasterTask> getDoingMasterTask(String category, String userId) {
         throw new SillyException("请自行实现getDoingMasterId");
+    }
+
+    @Override
+    public List<Task> findTaskByMasterId(String masterId) {
+        final ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceBusinessKey(masterId).singleResult();
+        if (processInstance == null) {
+            return new ArrayList<>();
+        }
+        return findTaskByProcessInstanceId(processInstance.getProcessInstanceId());
     }
 
 
@@ -312,5 +314,16 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
             processDefinitionId = processInstance.getProcessDefinitionId();
         }
         return processDefinitionId;
+    }
+
+    @Override
+    public void changeUser(String taskId, String userId) {
+        taskService.unclaim(taskId);
+        taskService.claim(taskId, userId);
+    }
+
+    @Override
+    public void addUser(String taskId, String userId) {
+        taskService.addCandidateUser(taskId, userId);
     }
 }

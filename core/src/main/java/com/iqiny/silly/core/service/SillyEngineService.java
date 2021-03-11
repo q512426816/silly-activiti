@@ -96,6 +96,13 @@ public interface SillyEngineService<T> extends Initializable {
     void endProcessByProcessInstanceId(String processInstanceId, String userId);
 
     /**
+     * 通过流程实例ID 删除流程
+     *
+     * @param processInstanceId 流程实例ID
+     */
+    void deleteProcessInstance(String processInstanceId, String deleteReason);
+
+    /**
      * 通过流程实例ID 获取流程Key
      *
      * @param processInstanceId 流程实例ID
@@ -113,9 +120,34 @@ public interface SillyEngineService<T> extends Initializable {
 
     /**
      * 获取进行中的主表ID
+     *
      * @param category
      * @param userId
      * @return
      */
     List<? extends SillyMasterTask> getDoingMasterTask(String category, String userId);
+
+    /**
+     * 根据业务表ID 获取任务列表
+     *
+     * @param id
+     * @return
+     */
+    List<T> findTaskByMasterId(String id);
+
+    /**
+     * 调整任务执行人
+     *
+     * @param taskId
+     * @param userId
+     */
+    void changeUser(String taskId, String userId);
+
+    /**
+     * 添加任务参与者
+     *
+     * @param taskId
+     * @param userId
+     */
+    void addUser(String taskId, String userId);
 }

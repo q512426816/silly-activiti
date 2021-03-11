@@ -1,6 +1,5 @@
 package com.iqiny.silly.core.config;
 
-import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.util.CurrentUserUtil;
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.core.convertor.SillyStringConvertor;
@@ -40,7 +39,7 @@ public abstract class AbstractSillyConfig implements SillyConfig {
     public void init() {
         preInit();
 
-        setSillyConvertorMap(initSillyConvertorMap());
+        initSillyConvertorMap();
 
         checkConfig();
 
@@ -64,19 +63,22 @@ public abstract class AbstractSillyConfig implements SillyConfig {
     }
 
 
-    protected Map<String, SillyVariableConvertor> initSillyConvertorMap() {
-        Map<String, SillyVariableConvertor> convertorMap = new LinkedHashMap<>();
-        convertorMap.put(SillyConstant.ActivitiNode.CONVERTOR_STRING, new SillyStringConvertor());
-        hookInitSillyConvertorMap(convertorMap);
-        return convertorMap;
+    protected void initSillyConvertorMap() {
+        addSillyVariableConvertor(new SillyStringConvertor());
+        hookInitSillyConvertorMap();
+    }
+
+    protected void addSillyVariableConvertor(SillyVariableConvertor convertor) {
+        if (sillyConvertorMap == null) {
+            sillyConvertorMap = new LinkedHashMap<>();
+        }
+        sillyConvertorMap.put(convertor.name(), convertor);
     }
 
     /**
      * 初始完成 傻瓜转换器 回调方法
-     *
-     * @param convertorMap
      */
-    protected abstract void hookInitSillyConvertorMap(Map<String, SillyVariableConvertor> convertorMap);
+    protected abstract void hookInitSillyConvertorMap();
 
     @Override
     public CurrentUserUtil getCurrentUserUtil() {

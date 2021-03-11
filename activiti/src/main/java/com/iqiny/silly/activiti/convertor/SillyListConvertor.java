@@ -18,6 +18,11 @@ import java.util.Map;
 public class SillyListConvertor implements SillyVariableConvertor<List<String>> {
 
     @Override
+    public String name() {
+        return "list";
+    }
+
+    @Override
     public List<String> convert(Map<String, Object> varMap, String key, String value) {
         List<String> varList = null;
         Object obj = varMap.get(key);
