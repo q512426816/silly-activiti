@@ -125,7 +125,17 @@ public interface SillyEngineService<T> extends Initializable {
      * @param userId
      * @return
      */
-    List<? extends SillyMasterTask> getDoingMasterTask(String category, String userId);
+    <S extends SillyMasterTask> List<S> getDoingMasterTask(String category, String userId);
+
+    /**
+     * 获取历史的主表ID
+     *
+     * @param category
+     * @param userId
+     * @param <S>
+     * @return
+     */
+    <S extends SillyMasterTask> List<S> getHistoryMasterTask(String category, String userId);
 
     /**
      * 根据业务表ID 获取任务列表

@@ -33,9 +33,9 @@ public interface SillyMaster {
 
     /**
      * 设置任务名称（多个去重 , 拼接），显示方便
-     *
-     * @param status
      */
+    String getTaskName();
+
     void setTaskName(String status);
 
     /**
@@ -93,8 +93,8 @@ public interface SillyMaster {
 
     /**
      * 设置下一步处置人名称（多个去重 , 拼接），方便显示
-     *
-     * @param userName
      */
+    String getHandleUserName();
+
     void setHandleUserName(String userName);
 }

@@ -34,59 +34,79 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
     }
 
     @Override
-    protected void onStartProcess(M master, Task task) {
-        master.setStatus(master.startStatus());
+    protected void afterStartProcess(M master, Task task) {
+        if (StringUtils.isEmpty(master.getStatus())) {
+            master.setStatus(master.startStatus());
+        }
+        if (StringUtils.isEmpty(master.getTaskName())) {
+            master.setTaskName(task.getName());
+        }
+
         master.setStartDate(new Date());
         master.setStartUserId(currentUserUtil.currentUserId());
-        master.setTaskName(task.getName());
         final List<String> taskUserIds = sillyEngineService.getTaskUserIds(task);
-        master.setHandleUserName(userIdsToName(StringUtils.join(taskUserIds)));
-
-        // 保存流程履历信息
-        saveProcessResume(task, StringUtils.join(taskUserIds), "流程启动");
+        final String joinNextUserIds = StringUtils.join(taskUserIds);
+        master.setHandleUserName(userIdsToName(joinNextUserIds));
     }
 
     @Override
-    protected List<Task> completeTask(String taskId, Map<String, Object> varMap) {
-        Task task = sillyEngineService.findTaskById(taskId);
+    protected List<Task> completeTask(M master, N node, Map<String, Object> varMap) {
+        SillyAssert.notEmpty(node.getTaskId(), "完成任务操作，任务ID不可为空！");
+        Task task = sillyEngineService.findTaskById(node.getTaskId());
         SillyAssert.notNull(task, "任务获取失败！");
         complete(varMap, task);
-        return afterCompleteTask(task.getProcessInstanceId());
+        return afterCompleteTask(master, node, task);
     }
 
-    protected List<Task> afterCompleteTask(String actProcessId) {
+    /**
+     * 任务完成之后的回调
+     *
+     * @param master
+     * @param node
+     * @return
+     */
+    protected List<Task> afterCompleteTask(M master, N node, Task oldTask) {
+        final String actProcessId = oldTask.getProcessInstanceId();
         // 判断是否结束任务了
         List<Task> taskList = sillyEngineService.findTaskByProcessInstanceId(actProcessId);
         if (taskList.isEmpty()) {
-            // 任务完成
-            final String masterId = sillyEngineService.getBusinessKey(actProcessId);
-            preCloseProcess(masterId);
+            afterCloseProcess(master, node);
         } else {
             // 下一步任务记录
-            afterCompleteProcess(taskList);
+            afterCompleteProcess(master, node, taskList);
         }
         return taskList;
     }
 
     @Override
-    protected void saveProcessResume(N node, List<Task> nextTaskList) {
+    protected void saveProcessResume(N node, Task oldTask, String nextTaskId) {
+        final Task task = sillyEngineService.findTaskById(nextTaskId);
+        saveProcessResume(node, oldTask, Collections.singletonList(task));
+    }
+
+    @Override
+    protected void saveProcessResume(N node, Task oldTask, List<Task> nextTaskList) {
         String handleType = node.getHandleType();
         if (StringUtils.isEmpty(handleType)) {
             // 默认下一步
             handleType = SillyConstant.SillyResumeType.PROCESS_TYPE_NEXT;
         }
-        final Task task = sillyEngineService.findTaskById(node.getTaskId());
-        SillyAssert.notNull(task);
-
-        final Long dueTime = sillyEngineService.getTaskDueTime(task);
-        final String masterId = node.getMasterId();
+        String taskName = node.getNodeInfo();
+        String taskKey = node.getNodeKey();
+        Long dueTime = null;
+        if (oldTask != null) {
+            dueTime = sillyEngineService.getTaskDueTime(oldTask);
+            taskName = oldTask.getName();
+            taskKey = oldTask.getTaskDefinitionKey();
+        }
 
         final Set<String> nextUserIds = nextProcess(nextTaskList);
         final String joinNextUserIds = StringUtils.join(nextUserIds);
         // 履历内容
-        String handleInfo = sillyResumeService.makeResumeHandleInfo(joinNextUserIds, task.getName(), node.getNodeInfo());
+        String handleInfo = sillyResumeService.makeResumeHandleInfo(handleType, joinNextUserIds, taskName, node.getNodeInfo());
 
-        doSaveProcessResume(masterId, handleInfo, handleType, task.getTaskDefinitionKey(), task.getName(), joinNextUserIds, dueTime);
+        final String masterId = node.getMasterId();
+        doSaveProcessResume(masterId, handleInfo, handleType, taskKey, taskName, joinNextUserIds, dueTime);
     }
 
     protected void doSaveProcessResume(String masterId, String handleInfo, String handleType, String processNodeKey, String processNodeName, String nextUserIds, Long dueTime) {
@@ -97,33 +117,6 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         process.setHandleInfo(handleInfo);
         process.setProcessNodeKey(processNodeKey);
         process.setProcessNodeName(processNodeName);
-        process.setNextUserId(nextUserIds);
-        process.setConsumeTime(dueTime);
-        // 插入流程履历
-        sillyResumeService.insert(process);
-    }
-
-
-    /**
-     * 保存流程履历数据
-     *
-     * @param task
-     * @param nextUserIds
-     * @param orgHandleInfo
-     */
-    protected void saveProcessResume(Task task, String nextUserIds, String orgHandleInfo) {
-        final Long dueTime = sillyEngineService.getTaskDueTime(task);
-        final String masterId = sillyEngineService.getBusinessKey(task.getProcessInstanceId());
-        // 履历内容
-        String handleInfo = sillyResumeService.makeResumeHandleInfo(nextUserIds, task.getName(), orgHandleInfo);
-
-        SillyResume process = sillyFactory.newResume();
-        process.setProcessType(SillyConstant.SillyResumeType.PROCESS_TYPE_NEXT);
-        process.setBusinessId(processResumeBusinessId(masterId));
-        process.setBusinessType(processResumeBusinessType());
-        process.setHandleInfo(handleInfo);
-        process.setProcessNodeKey(task.getTaskDefinitionKey());
-        process.setProcessNodeName(task.getName());
         process.setNextUserId(nextUserIds);
         process.setConsumeTime(dueTime);
         // 插入流程履历
@@ -159,12 +152,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
      */
     protected void complete(Map<String, Object> variableMap, Task task) {
         // 完成此步骤流程
-        complete(variableMap, task, currentUserUtil.currentUserId());
-    }
-
-    protected void complete(Map<String, Object> variableMap, Task task, String userId) {
-        // 完成此步骤流程
-        sillyEngineService.complete(task, userId, variableMap);
+        sillyEngineService.complete(task, currentUserUtil.currentUserId(), variableMap);
     }
 
     /**
@@ -187,46 +175,75 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         return sillyEngineService.getTaskDueTime(task);
     }
 
-    protected String preCloseProcess(Task task) {
-        String masterId = sillyEngineService.getBusinessKey(task.getProcessInstanceId());
-        return preCloseProcess(masterId);
-    }
-
-    protected String preCloseProcess(String masterId) {
+    /**
+     * 流程结束之后的回调
+     *
+     * @param master
+     * @param node
+     */
+    protected void afterCloseProcess(M master, N node) {
+        final String masterId = master.getId();
         if (masterId == null) {
             throw new SillyException("通过任务流程实例ID获取主表数据ID异常！");
         }
-        M master = sillyFactory.newMaster();
-        master.setStatus(master.endStatus());
-        master.setCloseDate(new Date());
-        master.setCloseUserId(currentUserUtil.currentUserId());
-        master.setTaskName("流程结束");
-        master.setHandleUserName("");
-        master.setId(masterId);
-        if (!updateById(master)) {
+        boolean updateFlag = false;
+        if (StringUtils.isEmpty(master.getStatus())) {
+            master.setStatus(master.endStatus());
+            master.setCloseDate(new Date());
+            master.setCloseUserId(currentUserUtil.currentUserId());
+            master.setHandleUserName("");
+            updateFlag = true;
+        }
+        if (StringUtils.isEmpty(master.getTaskName())) {
+            master.setTaskName("流程结束");
+            updateFlag = true;
+        }
+        node.setHandleType(SillyConstant.SillyResumeType.PROCESS_TYPE_CLOSE);
+
+        if (updateFlag && !updateById(master)) {
             throw new SillyException("更新主表状态发生异常！");
         }
-        return masterId;
     }
 
-    protected String afterCompleteProcess(List<Task> taskList) {
-        Set<String> taskNames = new LinkedHashSet<>();
-        for (Task task : taskList) {
-            taskNames.add(task.getName());
-        }
-        String masterId = sillyEngineService.getBusinessKey(taskList.get(0).getProcessInstanceId());
+    /**
+     * 流程完成之后的回调
+     *
+     * @param master
+     * @param node
+     * @param taskList
+     */
+    protected void afterCompleteProcess(M master, N node, List<Task> taskList) {
+        String masterId = master.getId();
         if (masterId == null) {
             throw new SillyException("通过任务流程实例ID获取主表数据ID异常！");
         }
-        M master = sillyFactory.newMaster();
-        master.setTaskName(StringUtils.join(taskNames, ","));
-        master.setHandleUserName(userIdsToName(nextProcess(taskList)));
-        master.setStatus(master.doingStatus());
-        master.setId(masterId);
-        if (!updateById(master)) {
+
+        boolean updateFlag = false;
+        if (StringUtils.isEmpty(master.getTaskName())) {
+            Set<String> taskNames = new LinkedHashSet<>();
+            for (Task task : taskList) {
+                taskNames.add(task.getName());
+            }
+            master.setTaskName(StringUtils.join(taskNames, ","));
+            updateFlag = true;
+        }
+        if (StringUtils.isEmpty(master.getHandleUserName())) {
+            master.setHandleUserName(userIdsToName(nextProcess(taskList)));
+            updateFlag = true;
+        }
+        if (StringUtils.isEmpty(master.getStatus())) {
+            master.setStatus(master.doingStatus());
+            updateFlag = true;
+        }
+        if (StringUtils.isEmpty(node.getHandleType())) {
+            node.setHandleType(SillyConstant.SillyResumeType.PROCESS_TYPE_NEXT);
+            updateFlag = true;
+        }
+
+        if (updateFlag && !updateById(master)) {
             throw new SillyException("更新主表数据发生异常！");
         }
-        return masterId;
+
     }
 
     protected String userIdsToName(String userIds) {

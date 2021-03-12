@@ -92,28 +92,53 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
     }
 
     /**
-     * 提交主数据 流程开始流转
+     * 提交数据 流程流转
      *
      * @param master
      * @param node
      */
     protected void submit(M master, N node) {
+        final String taskId = node.getTaskId();
+        final T task = sillyEngineService.findTaskById(taskId);
         Map<String, Object> varMap = makeActVariableMap(node);
         // 保存数据
         save(master, node, varMap);
         // 完成任务
-        List<T> taskList = completeTask(node.getTaskId(), varMap);
+        List<T> taskList = completeTask(master, node, varMap);
+
+        afterSubmit(master, node, task, taskList);
+    }
+
+    /**
+     * 提交方法之后的回调
+     *
+     * @param master
+     * @param node
+     * @param oldTask
+     * @param taskList
+     */
+    protected void afterSubmit(M master, N node, T oldTask, List<T> taskList) {
         // 保存流程履历信息
-        saveProcessResume(node, taskList);
+        saveProcessResume(node, oldTask, taskList);
     }
 
     /**
      * 保存流程履历信息
      *
-     * @param node
-     * @param taskList
+     * @param node         当前处置节点
+     * @param oldTask      当前任务
+     * @param nextTaskList 下一步任务
      */
-    protected abstract void saveProcessResume(N node, List<T> taskList);
+    protected abstract void saveProcessResume(N node, T oldTask, List<T> nextTaskList);
+
+    /**
+     * 保存流程履历
+     *
+     * @param node       当前处置节点
+     * @param oldTask    当前任务
+     * @param nextTaskId 下一步任务ID
+     */
+    protected abstract void saveProcessResume(N node, T oldTask, String nextTaskId);
 
 
     /**
@@ -161,10 +186,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
             saveMaster(master);
             node.setMasterId(master.getId());
             if (startProcess) {
-                final String taskId = startProcess(master, varMap);
-                if (StringUtils.isNotEmpty(taskId)) {
-                    node.setTaskId(taskId);
-                }
+                startProcess(master, node, varMap);
             }
         }
 
@@ -177,70 +199,72 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
      * @param master
      */
     protected void onlyStartProcess(M master, N node) {
+        if (StringUtils.isEmpty(node.getMasterId())) {
+            node.setMasterId(master.getId());
+        }
+        if (StringUtils.isEmpty(node.getHandleType())) {
+            node.setHandleType(SillyConstant.SillyResumeType.PROCESS_TYPE_START);
+        }
+        if (StringUtils.isEmpty(node.getNodeKey())) {
+            node.setNodeKey(SillyConstant.ActivitiNode.KEY_START);
+        }
+        if (StringUtils.isEmpty(node.getNodeInfo())) {
+            node.setNodeInfo("流程启动");
+        }
+
         // 获取流程变量
         final Map<String, Object> varMap = makeActVariableMap(node);
         // 启动流程
-        startProcess(master, varMap);
+        startProcess(master, node, varMap);
+
+        afterOnlyStartProcess(master, node);
     }
+
+
+    protected void afterOnlyStartProcess(M master, N node) {
+        // 保存流程履历信息
+        saveProcessResume(node, null, node.getTaskId());
+    }
+
 
     /**
      * 重启流程 ，撤销到 启动节点
      *
      * @param master
      */
-    protected String reStartProcess(M master, List<V> variableList) {
-        // 获取流程变量
-        final Map<String, Object> varMap = makeActVariableMap(variableList);
-        // 启动新流程
-        return reStartProcess(master, varMap);
-    }
-
-    /**
-     * 重启流程 ，撤销到 启动节点
-     *
-     * @param master
-     */
-    protected String reStartProcess(M master, N node) {
-        return reStartProcess(master, node.getVariableList());
-    }
-
-    /**
-     * 重启流程 ，撤销到 启动节点
-     *
-     * @param master
-     */
-    protected String reStartProcess(M master, Map<String, Object> varMap) {
+    protected void reStartProcess(M master, N node) {
         // 结束之前存在的流程实例
         sillyEngineService.deleteProcessInstance(master.getProcessId(), "流程撤销");
         master.setProcessId("");
+        // 获取流程变量
+        final Map<String, Object> varMap = makeActVariableMap(node.getVariableList());
         // 启动新流程
-        return doStartProcess(master, varMap);
+        doStartProcess(master, node, varMap);
+
+        afterReStartProcess(master, node);
+    }
+
+    /**
+     * 流程重启之后的回调
+     *
+     * @param master
+     * @param node
+     */
+    protected void afterReStartProcess(M master, N node) {
+        // 保存履历
+        node.setHandleType(SillyConstant.SillyResumeType.PROCESS_TYPE_START);
+        saveProcessResume(node, null, node.getTaskId());
     }
 
 
     /**
      * 完成任务
      *
-     * @param taskId 任务ID
+     * @param master 主对象
+     * @param node   节点对象
      * @param varMap 流程参数
      */
-    protected abstract List<T> completeTask(String taskId, Map<String, Object> varMap);
-
-
-    /**
-     * 保存主表数据 (新增同时启动流程)
-     *
-     * @param master
-     * @param varMap
-     * @return 任务启动返回 当前任务ID (任务启动只能有一个任务) 否则返回 null
-     */
-    @SuppressWarnings("unchecked")
-    protected String saveMasterAndStart(M master, Map<String, Object> varMap) {
-        // 保存主表数据
-        saveMaster(master);
-        // 启动流程
-        return startProcess(master, varMap);
-    }
+    protected abstract List<T> completeTask(M master, N node, Map<String, Object> varMap);
 
     /**
      * 启动流程返回任务ID
@@ -249,19 +273,20 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
      * @param varMap
      * @return
      */
-    protected String startProcess(M master, Map<String, Object> varMap) {
+    protected void startProcess(M master, N node, Map<String, Object> varMap) {
         // 验证主表是否存在流程实例，若存在则不重复启动流程实例
         if (StringUtils.isNotEmpty(master.getProcessId())) {
-            return null;
+            return;
         }
+
         final List<T> taskList = sillyEngineService.findTaskByMasterId(master.getId());
         if (taskList != null && !taskList.isEmpty()) {
-            return null;
+            return;
         }
-        return doStartProcess(master, varMap);
+        doStartProcess(master, node, varMap);
     }
 
-    protected String doStartProcess(M master, Map<String, Object> varMap) {
+    protected void doStartProcess(M master, N node, Map<String, Object> varMap) {
         // 流程启动  返回任务ID
         String processInstanceId = sillyEngineService.start(master, varMap);
         final List<T> tasks = sillyEngineService.findTaskByProcessInstanceId(processInstanceId);
@@ -269,17 +294,16 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
             throw new SillyException("任务启动第一位节点任务不可为多个！");
         }
         final T t = tasks.get(0);
+        node.setTaskId(sillyEngineService.getTaskId(t));
 
         master.setProcessId(processInstanceId);
 
-        onStartProcess(master, t);
+        afterStartProcess(master, t);
 
         boolean saveFlag = updateById(master);
         if (!saveFlag) {
             throw new SillyException("主信息更新发生异常！");
         }
-
-        return sillyEngineService.getTaskId(tasks.get(0));
     }
 
     protected void saveMaster(M master) {
@@ -297,7 +321,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         }
     }
 
-    protected abstract void onStartProcess(M master, T t);
+    protected abstract void afterStartProcess(M master, T t);
 
     /**
      * 保存流程节点数据

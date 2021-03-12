@@ -16,4 +16,10 @@ public class SillyAssert {
         }
     }
 
+    public static void notEmpty(String o, String msg) {
+        if (StringUtils.isEmpty(o)) {
+            throw SillyException.newInstance(msg);
+        }
+    }
+
 }

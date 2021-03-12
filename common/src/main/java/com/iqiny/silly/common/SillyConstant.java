@@ -6,6 +6,7 @@ public class SillyConstant {
 
     public class ActivitiNode {
 
+        public static final String KEY_START = "start";
         public static final String KEY_END = "end";
 
         // ===================================== STATUS ==============================================
@@ -83,6 +84,10 @@ public class SillyConstant {
 
     public class SillyResumeType {
         /**
+         * 履历类型 启动
+         */
+        public static final String PROCESS_TYPE_START = "start";
+        /**
          * 履历类型 提交
          */
         public static final String PROCESS_TYPE_NEXT = "next";
@@ -94,5 +99,9 @@ public class SillyConstant {
          * 履历类型 流转
          */
         public static final String PROCESS_TYPE_FLOW = "flow";
+        /**
+         * 履历类型 关闭
+         */
+        public static final String PROCESS_TYPE_CLOSE = "close";
     }
 }

@@ -5,12 +5,21 @@ import java.util.List;
 /**
  * 流程履历服务接口
  */
-public interface SillyResumeService {
+public interface SillyResumeService<R extends SillyResume> {
 
-    String makeResumeHandleInfo(String nextUserIds, String taskName, String content);
+    /**
+     * 生成处置履历内容
+     *
+     * @param handleType
+     * @param nextUserIds
+     * @param taskName
+     * @param content
+     * @return
+     */
+    String makeResumeHandleInfo(String handleType, String nextUserIds, String taskName, String content);
 
-    void insert(SillyResume process);
+    void insert(R process);
 
-    List<? extends SillyResume> selectList(String masterId, String businessType);
+    List<R> selectList(String masterId, String businessType);
 
 }

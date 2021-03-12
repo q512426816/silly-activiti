@@ -224,14 +224,19 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
         }
     }
 
+    @Override
+    public <S extends SillyMasterTask> List<S> getHistoryMasterTask(String category, String userId) {
+        throw new SillyException("请自行实现getHistoryMasterTask");
+    }
+
     /**
      * @param category 流程类型
      * @param userId   用户ID
      * @return 业务MasterId
      */
     @Override
-    public List<? extends SillyMasterTask> getDoingMasterTask(String category, String userId) {
-        throw new SillyException("请自行实现getDoingMasterId");
+    public <S extends SillyMasterTask> List<S> getDoingMasterTask(String category, String userId) {
+        throw new SillyException("请自行实现getDoingMasterTask");
     }
 
     @Override
