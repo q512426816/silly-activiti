@@ -11,6 +11,7 @@ import com.iqiny.silly.core.config.SillyConfig;
 import com.iqiny.silly.core.resume.SillyResume;
 import com.iqiny.silly.core.service.base.AbstractSillyWriteService;
 import org.activiti.engine.task.Task;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -35,18 +36,24 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
 
     @Override
     protected void afterStartProcess(M master, Task task) {
+        final M copyMaster = sillyFactory.newMaster();
+        BeanUtils.copyProperties(master, copyMaster);
         if (StringUtils.isEmpty(master.getStatus())) {
-            master.setStatus(master.startStatus());
+            copyMaster.setStatus(master.startStatus());
         }
         if (StringUtils.isEmpty(master.getTaskName())) {
-            master.setTaskName(task.getName());
+            copyMaster.setTaskName(task.getName());
         }
 
-        master.setStartDate(new Date());
-        master.setStartUserId(currentUserUtil.currentUserId());
+        copyMaster.setStartDate(new Date());
+        copyMaster.setStartUserId(currentUserUtil.currentUserId());
         final List<String> taskUserIds = sillyEngineService.getTaskUserIds(task);
         final String joinNextUserIds = StringUtils.join(taskUserIds);
-        master.setHandleUserName(userIdsToName(joinNextUserIds));
+        copyMaster.setHandleUserName(userIdsToName(joinNextUserIds));
+        boolean saveFlag = updateById(copyMaster);
+        if (!saveFlag) {
+            throw new SillyException("主信息更新发生异常！");
+        }
     }
 
     @Override

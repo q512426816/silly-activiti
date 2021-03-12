@@ -98,15 +98,19 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
      * @param node
      */
     protected void submit(M master, N node) {
-        final String taskId = node.getTaskId();
-        final T task = sillyEngineService.findTaskById(taskId);
         Map<String, Object> varMap = makeActVariableMap(node);
         // 保存数据
         save(master, node, varMap);
-        // 完成任务
+
+        final String nowTaskId = node.getTaskId();
+        SillyAssert.notEmpty(nowTaskId, "提交时，当前任务ID不存在");
+        // 当前任务
+        final T nowTask = sillyEngineService.findTaskById(nowTaskId);
+        SillyAssert.notNull(nowTask, "提交时，当前任务不存在");
+        // 完成任务，返回下一步任务列表
         List<T> taskList = completeTask(master, node, varMap);
 
-        afterSubmit(master, node, task, taskList);
+        afterSubmit(master, node, nowTask, taskList);
     }
 
     /**
@@ -300,10 +304,6 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
 
         afterStartProcess(master, t);
 
-        boolean saveFlag = updateById(master);
-        if (!saveFlag) {
-            throw new SillyException("主信息更新发生异常！");
-        }
     }
 
     protected void saveMaster(M master) {
