@@ -35,8 +35,9 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
     public void setProcessEngineFactoryBean(ProcessEngineFactoryBean processEngineFactoryBean) {
         this.processEngineFactoryBean = processEngineFactoryBean;
     }
-
-    protected void doInit() {
+    
+    @Override
+    public void init() {
         if (processEngineFactoryBean == null) {
             return;
         }
@@ -50,11 +51,6 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
         this.historyService = processEngineConfiguration.getHistoryService();
         this.taskService = processEngineConfiguration.getTaskService();
         this.repositoryService = processEngineConfiguration.getRepositoryService();
-    }
-
-    @Override
-    public void init() {
-        doInit();
     }
 
     @Override
@@ -331,4 +327,5 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
     public void addUser(String taskId, String userId) {
         taskService.addCandidateUser(taskId, userId);
     }
+
 }

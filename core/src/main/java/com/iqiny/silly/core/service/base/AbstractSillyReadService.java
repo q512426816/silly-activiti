@@ -3,14 +3,11 @@ package com.iqiny.silly.core.service.base;
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.StringUtils;
-import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.base.SillyTaskData;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
-import com.iqiny.silly.core.config.SillyConfig;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
-import com.iqiny.silly.core.service.SillyEngineService;
 import com.iqiny.silly.core.service.SillyReadService;
 
 import java.beans.BeanInfo;
@@ -29,53 +26,8 @@ import java.util.*;
  * @param <V> 变量
  */
 @SuppressWarnings("unchecked")
-public abstract class AbstractSillyReadService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> implements SillyReadService<M, N, V> {
+public abstract class AbstractSillyReadService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable, T> extends AbstractSillyService<M, N, V, T> implements SillyReadService<M, N, V> {
 
-    protected SillyConfig sillyConfig;
-
-    protected SillyFactory<M, N, V> sillyFactory;
-
-    protected SillyEngineService sillyEngineService;
-
-    private Map<String, SillyVariableConvertor> sillyHandlerMap;
-
-    @Override
-    public void init() {
-        setSillyFactory(createSillyFactory());
-        if (sillyConfig == null) {
-            sillyConfig = initSillyConfig();
-        }
-        setSillyEngineService(sillyConfig.getSillyEngineService());
-        setSillyHandlerMap(sillyConfig.getSillyConvertorMap());
-    }
-
-    public abstract SillyConfig initSillyConfig();
-
-    public void setSillyConfig(SillyConfig sillyConfig) {
-        this.sillyConfig = sillyConfig;
-    }
-
-    public void setSillyFactory(SillyFactory<M, N, V> sillyFactory) {
-        this.sillyFactory = sillyFactory;
-    }
-
-    public void setSillyEngineService(SillyEngineService sillyEngineService) {
-        this.sillyEngineService = sillyEngineService;
-    }
-
-    public void setSillyHandlerMap(Map<String, SillyVariableConvertor> sillyHandlerMap) {
-        this.sillyHandlerMap = sillyHandlerMap;
-    }
-
-    protected SillyVariableConvertor<?> getSillyHandler(String handleKey) {
-        if (sillyHandlerMap == null) {
-            throw new SillyException("Silly处理类初始化为null！");
-        }
-        final SillyVariableConvertor<?> handler = sillyHandlerMap.get(handleKey);
-        return handler == null ? sillyHandlerMap.get(SillyConstant.ActivitiNode.CONVERTOR_STRING) : handler;
-    }
-
-    protected abstract SillyFactory<M, N, V> createSillyFactory();
 
     /**
      * 查询主表数据
@@ -215,11 +167,11 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
             final String key = variable.getVariableName();
             final String value = variable.getVariableText();
             if (StringUtils.isEmpty(label) || SillyConstant.ActivitiNode.CONVERTOR_STRING.equals(label)) {
-                final SillyVariableConvertor<?> handle = getSillyHandler(SillyConstant.ActivitiNode.CONVERTOR_STRING);
+                final SillyVariableConvertor<?> handle = getSillyConvertor(SillyConstant.ActivitiNode.CONVERTOR_STRING);
                 handle.convert(nodeMap, key, value);
             } else {
                 Map<String, Object> myMap = variableMap.computeIfAbsent(label, k -> new HashMap<>());
-                final SillyVariableConvertor<?> handle = getSillyHandler(label);
+                final SillyVariableConvertor<?> handle = getSillyConvertor(label);
                 handle.convert(myMap, key, value);
             }
         }
@@ -331,7 +283,7 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
         final List<V> variables = findVariableList(variable);
         Map<String, Object> map = new LinkedHashMap<>();
         for (V auditVariable : variables) {
-            final SillyVariableConvertor<?> sillyHandler = getSillyHandler(auditVariable.getVariableType());
+            final SillyVariableConvertor<?> sillyHandler = getSillyConvertor(auditVariable.getVariableType());
             sillyHandler.convert(map, auditVariable.getVariableName(), auditVariable.getVariableText());
         }
 

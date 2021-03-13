@@ -1,9 +1,10 @@
 package com.iqiny.silly.core.service;
 
-import com.iqiny.silly.core.base.Initializable;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
+
+import java.util.List;
 
 /**
  * 数据写入的基本服务操作接口
@@ -11,7 +12,7 @@ import com.iqiny.silly.core.base.core.SillyVariable;
  * @author QINY
  * @since 1.0
  */
-public interface SillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> extends Initializable {
+public interface SillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> extends SillyService {
 
     /**
      * 新增主表数据
@@ -61,6 +62,8 @@ public interface SillyWriteService<M extends SillyMaster, N extends SillyNode<V>
      * @return 是否成功
      */
     boolean insert(V variable);
+
+    boolean batchInsert(List<V> variable);
 
     /**
      * 更新变量表数据

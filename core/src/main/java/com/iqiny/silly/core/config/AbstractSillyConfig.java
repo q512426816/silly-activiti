@@ -2,6 +2,7 @@ package com.iqiny.silly.core.config;
 
 import com.iqiny.silly.common.util.CurrentUserUtil;
 import com.iqiny.silly.common.util.SillyAssert;
+import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.convertor.SillyStringConvertor;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.resume.SillyResumeService;
@@ -26,25 +27,34 @@ public abstract class AbstractSillyConfig implements SillyConfig {
     protected SillyEngineService sillyEngineService;
 
     /**
-     * 流程变量 类型转换器
-     */
-    protected Map<String, SillyVariableConvertor> sillyConvertorMap;
-
-    /**
      * 流程履历记录服务
      */
     protected SillyResumeService sillyResumeService;
 
-    @Override
+    /**
+     * 流程变量 类型转换器
+     */
+    protected Map<String, SillyVariableConvertor> sillyConvertorMap;
+
+
+    /**
+     * 傻瓜工厂工厂
+     */
+    private Map<String, SillyFactory> sillyFactoryMap;
+
+
     public void init() {
         preInit();
-
+        // 1 初始化 傻瓜工厂
+        initSillyFactory();
+        // 2.初始化傻瓜转换器
         initSillyConvertorMap();
 
         checkConfig();
 
         initComplete();
     }
+
 
     /**
      * 初始化之前 的回调方法
@@ -62,6 +72,24 @@ public abstract class AbstractSillyConfig implements SillyConfig {
         SillyAssert.notNull(this.sillyConvertorMap);
     }
 
+    private void initSillyFactory() {
+        if (sillyFactoryMap == null) {
+            sillyFactoryMap = new LinkedHashMap<>();
+        }
+        hookInitSillyFactoryMap();
+    }
+
+    protected void addSillyFactory(SillyFactory sillyFactory) {
+        if (sillyFactoryMap == null) {
+            sillyFactoryMap = new LinkedHashMap<>();
+        }
+        sillyFactoryMap.put(sillyFactory.category(), sillyFactory);
+    }
+
+    /**
+     * 初始 傻瓜工厂 回调方法
+     */
+    protected abstract void hookInitSillyFactoryMap();
 
     protected void initSillyConvertorMap() {
         addSillyVariableConvertor(new SillyStringConvertor());
@@ -86,20 +114,10 @@ public abstract class AbstractSillyConfig implements SillyConfig {
     }
 
     @Override
-    public void setCurrentUserUtil(CurrentUserUtil currentUserUtil) {
-        this.currentUserUtil = currentUserUtil;
-    }
-
-    @Override
     public SillyEngineService getSillyEngineService() {
         return sillyEngineService;
     }
-
-    @Override
-    public void setSillyEngineService(SillyEngineService sillyEngineService) {
-        this.sillyEngineService = sillyEngineService;
-    }
-
+    
     @Override
     public Map<String, SillyVariableConvertor> getSillyConvertorMap() {
         return sillyConvertorMap;
@@ -114,9 +132,10 @@ public abstract class AbstractSillyConfig implements SillyConfig {
     public SillyResumeService getSillyResumeService() {
         return sillyResumeService;
     }
+    
 
     @Override
-    public void setSillyResumeService(SillyResumeService sillyResumeService) {
-        this.sillyResumeService = sillyResumeService;
+    public SillyFactory getSillyFactory(String category) {
+        return sillyFactoryMap.get(category);
     }
 }

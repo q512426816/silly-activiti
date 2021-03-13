@@ -25,7 +25,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
     private SillyConfig sillyConfig;
 
     @Override
-    public SillyConfig initSillyConfig() {
+    public SillyConfig getSillyConfig() {
         return sillyConfig;
     }
 
@@ -118,9 +118,11 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
 
     protected void doSaveProcessResume(String masterId, String handleInfo, String handleType, String processNodeKey, String processNodeName, String nextUserIds, Long dueTime) {
         SillyResume process = sillyFactory.newResume();
+        final String businessId = processResumeBusinessId(masterId);
+        SillyAssert.notEmpty(businessId, "履历保存业务主键不可为空");
         process.setProcessType(handleType);
-        process.setBusinessId(processResumeBusinessId(masterId));
-        process.setBusinessType(processResumeBusinessType());
+        process.setBusinessId(businessId);
+        process.setBusinessType(usedCategory());
         process.setHandleInfo(handleInfo);
         process.setProcessNodeKey(processNodeKey);
         process.setProcessNodeName(processNodeName);
@@ -141,13 +143,6 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         // 默认使用本身作为流程履历业务ID
         return masterId;
     }
-
-    /**
-     * 获取流程履历的业务类型
-     *
-     * @return
-     */
-    protected abstract String processResumeBusinessType();
 
 
     /**

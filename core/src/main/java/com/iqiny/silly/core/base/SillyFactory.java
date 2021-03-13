@@ -17,6 +17,11 @@ import com.iqiny.silly.core.resume.SillyResume;
 public interface SillyFactory<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> {
 
     /**
+     * 分类，需要保证唯一
+     */
+    String category();
+
+    /**
      * 创建 主对象
      *
      * @return 主对象
@@ -51,5 +56,5 @@ public interface SillyFactory<M extends SillyMaster, N extends SillyNode<V>, V e
      * @return
      */
     <T extends SillyResume> T newResume();
-    
+
 }

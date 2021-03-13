@@ -2,23 +2,15 @@ package com.iqiny.silly.core.service.base;
 
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.exception.SillyException;
-import com.iqiny.silly.common.util.CurrentUserUtil;
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.StringUtils;
-import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
-import com.iqiny.silly.core.config.SillyConfig;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
-import com.iqiny.silly.core.resume.SillyResumeService;
-import com.iqiny.silly.core.service.SillyEngineService;
 import com.iqiny.silly.core.service.SillyWriteService;
 
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 默认抽象方法
@@ -27,69 +19,8 @@ import java.util.Map;
  * @param <N> 节点
  * @param <V> 变量
  */
-public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable, T> implements SillyWriteService<M, N, V> {
-
-    protected SillyConfig sillyConfig;
-
-    protected SillyFactory<M, N, V> sillyFactory;
-
-    protected SillyEngineService<T> sillyEngineService;
-
-    protected CurrentUserUtil currentUserUtil;
-
-    protected SillyResumeService sillyResumeService;
-
-    protected Map<String, SillyVariableConvertor> sillyConvertorMap;
-
-    @Override
-    public void init() {
-        setSillyFactory(createSillyFactory());
-        if (sillyConfig == null) {
-            sillyConfig = initSillyConfig();
-        }
-        setSillyEngineService(sillyConfig.getSillyEngineService());
-        setCurrentUserUtil(sillyConfig.getCurrentUserUtil());
-        setSillyConvertorMap(sillyConfig.getSillyConvertorMap());
-        setSillyResumeService(sillyConfig.getSillyResumeService());
-    }
-
-    public abstract SillyConfig initSillyConfig();
-
-    public void setSillyConfig(SillyConfig sillyConfig) {
-        this.sillyConfig = sillyConfig;
-    }
-
-    public void setSillyFactory(SillyFactory<M, N, V> sillyFactory) {
-        this.sillyFactory = sillyFactory;
-    }
-
-    public void setSillyEngineService(SillyEngineService sillyEngineService) {
-        this.sillyEngineService = sillyEngineService;
-    }
-
-    public void setCurrentUserUtil(CurrentUserUtil currentUserUtil) {
-        this.currentUserUtil = currentUserUtil;
-    }
-
-    public void setSillyConvertorMap(Map<String, SillyVariableConvertor> sillyConvertorMap) {
-        this.sillyConvertorMap = sillyConvertorMap;
-    }
-
-    public void setSillyResumeService(SillyResumeService sillyResumeService) {
-        this.sillyResumeService = sillyResumeService;
-    }
-
-    protected abstract void forceEndProcess(String processInstanceId);
-
-    protected abstract SillyFactory<M, N, V> createSillyFactory();
-
-    private SillyVariableConvertor<?> getSillyConvertor(String handleKey) {
-        if (sillyConvertorMap == null) {
-            throw new SillyException("Silly数据处理器未设置！");
-        }
-
-        return sillyConvertorMap.get(handleKey);
-    }
+public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable, T>
+        extends AbstractSillyService<M, N, V, T> implements SillyWriteService<M, N, V> {
 
     /**
      * 提交数据 流程流转
@@ -237,6 +168,9 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
      * @param master
      */
     protected void reStartProcess(M master, N node) {
+        if (StringUtils.isEmpty(node.getMasterId())) {
+            node.setMasterId(master.getId());
+        }
         // 结束之前存在的流程实例
         sillyEngineService.deleteProcessInstance(master.getProcessId(), "流程撤销");
         master.setProcessId("");
@@ -386,31 +320,36 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
             return;
         }
 
+        List<V> saveList = new ArrayList<>();
         for (V variable : variableList) {
-            if (variable != null) {
-                if (variable.getVariableName() == null) {
-                    throw new SillyException("流程参数名称不可为空！" + variable.getVariableText());
-                }
+            if (variable == null) {
+                continue;
+            }
 
-                final SillyVariableConvertor<?> handler = getSillyConvertor(variable.getVariableType());
-                if (handler == null) {
-                    throw new SillyException("未配置相关数据处理器" + variable.getVariableType());
-                }
+            if (variable.getVariableName() == null) {
+                throw new SillyException("流程参数名称不可为空！" + variable.getVariableText());
+            }
 
-                List<V> saveVariableList = handler.saveVariable(variable);
-                for (V v : saveVariableList) {
-                    v.setId(null);
-                    v.setTaskId(node.getTaskId());
-                    v.setMasterId(node.getMasterId());
-                    v.setNodeKey(node.getNodeKey());
-                    v.setNodeId(node.getId());
-                    v.setStatus(SillyConstant.ActivitiNode.STATUS_CURRENT);
-                    boolean flag = insert(v);
-                    if (!flag) {
-                        throw new SillyException("保存流程子表信息发生异常！");
-                    }
-                }
+            final SillyVariableConvertor<?> handler = getSillyConvertor(variable.getVariableType());
+            if (handler == null) {
+                throw new SillyException("未配置相关数据处理器" + variable.getVariableType());
+            }
 
+            List<V> saveVariableList = handler.saveVariable(variable);
+            for (V v : saveVariableList) {
+                v.setId(null);
+                v.setTaskId(node.getTaskId());
+                v.setMasterId(node.getMasterId());
+                v.setNodeKey(node.getNodeKey());
+                v.setNodeId(node.getId());
+                v.setStatus(SillyConstant.ActivitiNode.STATUS_CURRENT);
+                saveList.add(v);
+            }
+        }
+        if (!saveList.isEmpty()) {
+            boolean flag = batchInsert(saveList);
+            if (!flag) {
+                throw new SillyException("保存流程子表信息发生异常！");
             }
         }
     }
@@ -474,4 +413,10 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         }
     }
 
+    /**
+     * 强制结束流程
+     *
+     * @param processInstanceId
+     */
+    protected abstract void forceEndProcess(String processInstanceId);
 }
