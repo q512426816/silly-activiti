@@ -1,21 +1,23 @@
 package com.iqiny.example.sillyactiviti.admin.modules.ncr.silly;
 
+import com.iqiny.example.sillyactiviti.admin.common.silly.entity.MySillyResume;
 import com.iqiny.example.sillyactiviti.admin.modules.ncr.entity.NcrMaster;
 import com.iqiny.example.sillyactiviti.admin.modules.ncr.entity.NcrNode;
 import com.iqiny.example.sillyactiviti.admin.modules.ncr.entity.NcrVariable;
 import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.base.SillyTaskData;
 import com.iqiny.silly.core.resume.SillyResume;
+import org.springframework.stereotype.Component;
 
+@Component
 public class NcrSillyFactory implements SillyFactory<NcrMaster, NcrNode, NcrVariable> {
-
-    private static final NcrSillyFactory SILLY_FACTORY = new NcrSillyFactory();
 
     private NcrSillyFactory() {
     }
 
-    public static NcrSillyFactory get() {
-        return SILLY_FACTORY;
+    @Override
+    public String category() {
+        return NcrMaster.CATEGORY;
     }
 
     @Override
@@ -35,11 +37,11 @@ public class NcrSillyFactory implements SillyFactory<NcrMaster, NcrNode, NcrVari
 
     @Override
     public SillyTaskData<NcrNode, NcrVariable> newSillyTaskData() {
-        return null;
+        return new NcrSillySaveData();
     }
 
     @Override
-    public <T extends SillyResume> T newResume() {
-        return null;
+    public SillyResume newResume() {
+        return new MySillyResume();
     }
 }

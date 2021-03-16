@@ -1,4 +1,4 @@
-package com.iqiny.example.sillyactiviti.admin.common.silly.config;
+package com.iqiny.example.sillyactiviti.admin.common.silly.service;
 
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.image.impl.DefaultProcessDiagramGenerator;

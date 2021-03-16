@@ -1,4 +1,4 @@
-package com.iqiny.example.sillyactiviti.admin.common.silly.mybatisplus;
+package com.iqiny.example.sillyactiviti.admin.common.silly.mybatisplus.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -8,47 +8,21 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.iqiny.example.sillyactiviti.admin.common.base.BaseEntity;
 import com.iqiny.example.sillyactiviti.admin.common.utils.SecurityUtils;
 import com.iqiny.example.sillyactiviti.common.validator.group.UpdateGroup;
-import com.iqiny.silly.core.base.core.SillyNode;
-import com.iqiny.silly.core.base.core.SillyVariable;
+import com.iqiny.silly.mybatisplus.BaseMySillyMaster;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
- * SillyNode 集成MybatisPlus
+ * SillyMaster 集成MybatisPlus
  *
  * @param <T>
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public abstract class MySillyNode<T extends Model<T>, V extends SillyVariable> extends Model<T> implements SillyNode<V>, BaseEntity {
-
-    protected String masterId;
-
-    protected int seq;
-
-    protected String nodeKey;
-    protected String taskId;
-
-    protected String parallelFlag;
-
-    protected Date nodeDate;
-    protected String nodeUserId;
-
-    protected String status;
-
-    protected String nodeInfo;
-
-    @TableField(exist = false)
-    protected List<V> variableList;
-    @TableField(exist = false)
-    protected Map<String, Object> variableMap = new LinkedHashMap<>();
-
+public abstract class MySillyMaster<T extends Model<T>> extends BaseMySillyMaster<T> implements BaseEntity {
 
     /**
      * 主键

@@ -15,6 +15,7 @@
 
     <properties>
         <activiti.version>7.1.0.M6</activiti.version>
+        <mybatis-plus.version>3.1.2</mybatis-plus.version>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -36,6 +37,12 @@
                 <groupId>org.activiti</groupId>
                 <artifactId>activiti-spring</artifactId>
                 <version>${activiti.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus</artifactId>
+                <version>${mybatis-plus.version}</version>
             </dependency>
 
         </dependencies>

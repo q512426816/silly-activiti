@@ -1,6 +1,6 @@
 package com.iqiny.silly.core.service;
 
-import com.iqiny.silly.core.base.Initializable;
+import com.iqiny.silly.core.base.SillyInitializable;
 import com.iqiny.silly.core.config.SillyConfig;
 
 /**
@@ -9,12 +9,7 @@ import com.iqiny.silly.core.config.SillyConfig;
  * @author QINY
  * @since 1.0
  */
-public interface SillyService extends Initializable {
-
-    /**
-     * 使用的类型
-     */
-    String usedCategory();
+public interface SillyService extends SillyInitializable {
 
     /**
      * 初始化傻瓜配置

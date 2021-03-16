@@ -2,10 +2,15 @@ package com.iqiny.example.sillyactiviti.admin.modules.ncr.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.iqiny.example.sillyactiviti.admin.common.silly.mybatisplus.MySillyMaster;
+import com.iqiny.example.sillyactiviti.admin.common.silly.mybatisplus.entity.MySillyMaster;
 
 @TableName("silly_ncr_master")
 public class NcrMaster extends MySillyMaster<NcrMaster> {
+
+    /**
+     * 流程分类
+     */
+    public static final String CATEGORY = "NCR";
 
     @TableField(exist = false)
     private String processKey;
@@ -19,7 +24,7 @@ public class NcrMaster extends MySillyMaster<NcrMaster> {
 
     @Override
     public void setTaskName(String status) {
-        
+
     }
 
     @Override
@@ -31,7 +36,7 @@ public class NcrMaster extends MySillyMaster<NcrMaster> {
     public String processVersion() {
         return processVersion;
     }
-    
+
     @Override
     public String startStatus() {
         return "10";

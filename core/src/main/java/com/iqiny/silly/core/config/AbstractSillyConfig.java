@@ -35,26 +35,40 @@ public abstract class AbstractSillyConfig implements SillyConfig {
      * 流程变量 类型转换器
      */
     protected Map<String, SillyVariableConvertor> sillyConvertorMap;
-
-
+    
     /**
      * 傻瓜工厂工厂
      */
-    private Map<String, SillyFactory> sillyFactoryMap;
+    protected Map<String, SillyFactory> sillyFactoryMap;
 
 
+    @Override
     public void init() {
         preInit();
-        // 1 初始化 傻瓜工厂
+        // 1 初始化 基本属性
+        initFiled();
+        // 2 初始化 傻瓜工厂
         initSillyFactory();
-        // 2.初始化傻瓜转换器
+        // 3 初始化傻瓜转换器
         initSillyConvertorMap();
 
         checkConfig();
 
+        // 设置配置静态工具
+        SillyConfigUtil.addSillyConfig(this);
+
         initComplete();
     }
 
+    @Override
+    public String usedCategory() {
+        return DEFAULT_CATEGORY;
+    }
+
+    /**
+     * 初始化配置属性
+     */
+    protected abstract void initFiled();
 
     /**
      * 初始化之前 的回调方法
@@ -117,13 +131,12 @@ public abstract class AbstractSillyConfig implements SillyConfig {
     public SillyEngineService getSillyEngineService() {
         return sillyEngineService;
     }
-    
+
     @Override
     public Map<String, SillyVariableConvertor> getSillyConvertorMap() {
         return sillyConvertorMap;
     }
 
-    @Override
     public void setSillyConvertorMap(Map<String, SillyVariableConvertor> sillyConvertorMap) {
         this.sillyConvertorMap = sillyConvertorMap;
     }
@@ -132,7 +145,7 @@ public abstract class AbstractSillyConfig implements SillyConfig {
     public SillyResumeService getSillyResumeService() {
         return sillyResumeService;
     }
-    
+
 
     @Override
     public SillyFactory getSillyFactory(String category) {

@@ -54,6 +54,11 @@ public class SillyActivitiEngineServiceImpl implements SillyEngineService<Task> 
     }
 
     @Override
+    public String usedCategory() {
+        return DEFAULT_CATEGORY;
+    }
+
+    @Override
     public String start(SillyMaster master, Map<String, Object> variableMap) {
         if (StringUtils.isEmpty(master.processKey())) {
             throw new SillyException("流程启动时流程KEY 不可为空！");

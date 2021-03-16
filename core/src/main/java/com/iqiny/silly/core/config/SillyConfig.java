@@ -1,6 +1,7 @@
 package com.iqiny.silly.core.config;
 
 import com.iqiny.silly.common.util.CurrentUserUtil;
+import com.iqiny.silly.core.base.SillyInitializable;
 import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.resume.SillyResumeService;
@@ -11,23 +12,15 @@ import java.util.Map;
 /**
  * 配置类
  */
-public interface SillyConfig {
+public interface SillyConfig extends SillyInitializable {
 
     CurrentUserUtil getCurrentUserUtil();
 
-    void setCurrentUserUtil(CurrentUserUtil currentUserUtil);
-
     SillyEngineService getSillyEngineService();
-
-    void setSillyEngineService(SillyEngineService sillyEngineService);
 
     Map<String, SillyVariableConvertor> getSillyConvertorMap();
 
-    void setSillyConvertorMap(Map<String, SillyVariableConvertor> sillyConvertorMap);
-
     SillyResumeService getSillyResumeService();
-
-    void setSillyResumeService(SillyResumeService sillyResumeService);
 
     SillyFactory getSillyFactory(String category);
 

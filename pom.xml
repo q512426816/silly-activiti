@@ -13,6 +13,7 @@
         <module>core</module>
         <module>activiti</module>
         <module>all</module>
+        <module>mybatisplus</module>
     </modules>
     <packaging>pom</packaging>
     <name>silly-parent ${project.version}</name>

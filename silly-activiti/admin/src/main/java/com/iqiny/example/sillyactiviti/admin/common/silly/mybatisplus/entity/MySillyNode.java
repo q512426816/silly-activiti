@@ -1,35 +1,31 @@
-package com.iqiny.example.sillyactiviti.admin.common.silly.mybatisplus;
+package com.iqiny.example.sillyactiviti.admin.common.silly.mybatisplus.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.iqiny.example.sillyactiviti.admin.common.base.BaseEntity;
 import com.iqiny.example.sillyactiviti.admin.common.utils.SecurityUtils;
 import com.iqiny.example.sillyactiviti.common.validator.group.UpdateGroup;
-import com.iqiny.silly.core.base.core.SillyMaster;
+import com.iqiny.silly.core.base.core.SillyVariable;
+import com.iqiny.silly.mybatisplus.BaseMySillyNode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- * SillyMaster 集成MybatisPlus
+ * SillyNode 集成MybatisPlus
  *
  * @param <T>
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public abstract class MySillyMaster<T extends Model<T>> extends Model<T> implements SillyMaster, BaseEntity {
-
-    protected String processId;
-    protected String status;
-    protected String startUserId;
-    protected Date startDate;
-    protected String closeUserId;
-    protected Date closeDate;
+public abstract class MySillyNode<T extends Model<T>, V extends SillyVariable> extends BaseMySillyNode<T, V> implements BaseEntity {
 
     /**
      * 主键
@@ -42,36 +38,11 @@ public abstract class MySillyMaster<T extends Model<T>> extends Model<T> impleme
      */
     @TableLogic
     protected Integer delFlag;
-    /**
-     * 创建时间
-     */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    protected Date createDate;
-    /**
-     * 创建人
-     */
-    protected String createUserId;
-    /**
-     * 更新时间
-     */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    protected Date updateDate;
-    /**
-     * 更新人
-     */
-    protected String updateUserId;
 
-    /**
-     * 更新人
-     */
     @TableField(exist = false)
-    protected String updateUserName;
-    /**
-     * 创建人
-     */
+    protected List<V> variableList;
     @TableField(exist = false)
-    protected String createUserName;
-
+    protected Map<String, Object> variableMap = new LinkedHashMap<>();
 
     @Override
     public void preInsert() {

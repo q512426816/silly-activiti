@@ -14,7 +14,7 @@ public class MyCurrentUserUtil implements CurrentUserUtil {
 
     @Override
     public String userIdToName(String userId) {
-        return null;
+        return userId;
     }
 
 }

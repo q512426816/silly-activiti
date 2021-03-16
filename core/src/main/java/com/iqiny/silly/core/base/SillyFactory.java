@@ -52,9 +52,8 @@ public interface SillyFactory<M extends SillyMaster, N extends SillyNode<V>, V e
     /**
      * 创建 流程履历对象
      *
-     * @param <T>
-     * @return
+     * @return 流程履历对象
      */
-    <T extends SillyResume> T newResume();
+    SillyResume newResume();
 
 }

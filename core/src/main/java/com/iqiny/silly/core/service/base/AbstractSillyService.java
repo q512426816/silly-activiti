@@ -8,6 +8,7 @@ import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.config.SillyConfig;
+import com.iqiny.silly.core.config.SillyConfigUtil;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.resume.SillyResumeService;
 import com.iqiny.silly.core.service.SillyEngineService;
@@ -45,6 +46,11 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         setSillyResumeService(sillyConfig.getSillyResumeService());
     }
 
+    @Override
+    public SillyConfig getSillyConfig() {
+        return SillyConfigUtil.getSillyConfig(usedCategory());
+    }
+
     public void setSillyFactory(SillyFactory<M, N, V> sillyFactory) {
         this.sillyFactory = sillyFactory;
     }
@@ -73,5 +79,5 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         return sillyConvertorMap.get(handleKey);
     }
 
-    
+
 }

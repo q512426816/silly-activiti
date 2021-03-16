@@ -7,32 +7,16 @@ import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
-import com.iqiny.silly.core.config.SillyConfig;
 import com.iqiny.silly.core.resume.SillyResume;
 import com.iqiny.silly.core.service.base.AbstractSillyWriteService;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 
 @SuppressWarnings("unchecked")
 public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable>
-        extends AbstractSillyWriteService<M, N, V, Task> implements InitializingBean {
-
-    @Autowired
-    private SillyConfig sillyConfig;
-
-    @Override
-    public SillyConfig getSillyConfig() {
-        return sillyConfig;
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        super.init();
-    }
+        extends AbstractSillyWriteService<M, N, V, Task> {
 
     @Override
     protected void afterStartProcess(M master, Task task) {
