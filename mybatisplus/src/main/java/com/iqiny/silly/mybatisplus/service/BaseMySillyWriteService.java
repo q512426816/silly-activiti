@@ -1,13 +1,10 @@
 package com.iqiny.silly.mybatisplus.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.iqiny.silly.activiti.EnhanceSillyWriteService;
 import com.iqiny.silly.mybatisplus.BaseMySillyMaster;
 import com.iqiny.silly.mybatisplus.BaseMySillyNode;
 import com.iqiny.silly.mybatisplus.BaseMySillyVariable;
-import com.iqiny.silly.activiti.EnhanceSillyWriteService;
-import com.iqiny.silly.common.SillyConstant;
-import com.iqiny.silly.common.util.StringUtils;
-import org.activiti.engine.task.Task;
 
 import java.util.List;
 
@@ -78,27 +75,6 @@ public abstract class BaseMySillyWriteService<M extends BaseMySillyMaster<M>, N 
         QueryWrapper<V> qw = new QueryWrapper<>();
         qw.setEntity(where);
         return variable.update(qw);
-    }
-
-    /**
-     * 人员流转
-     */
-    public void changeUser(String taskId, String userId, String reason) {
-        final Task task = sillyEngineService.findTaskById(taskId);
-        final String masterId = sillyEngineService.getBusinessKey(task.getProcessInstanceId());
-        // 变更人员
-        sillyEngineService.changeUser(taskId, userId);
-        // 获取任务处置人员
-        final List<String> userIds = sillyEngineService.getTaskUserIds(task);
-        final String joinUserIds = StringUtils.join(userIds, ",");
-        // 记录履历
-        String handleInfo = this.sillyResumeService.makeResumeHandleInfo(SillyConstant.SillyResumeType.PROCESS_TYPE_FLOW, joinUserIds, task.getName(), reason);
-        super.doSaveProcessResume(masterId, handleInfo, SillyConstant.SillyResumeType.PROCESS_TYPE_FLOW, task.getTaskDefinitionKey(), task.getName(), joinUserIds, null);
-        // 更新主表信息
-        final M master = sillyFactory.newMaster();
-        master.setId(masterId);
-        master.setHandleUserName(userIdsToName(joinUserIds));
-        updateById(master);
     }
 
 }

@@ -9,10 +9,14 @@ import com.iqiny.silly.core.config.AbstractSillyConfig;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.resume.SillyResumeService;
 import com.iqiny.silly.core.service.SillyEngineService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.Set;
 
 public class ActivitiSillyConfig extends AbstractSillyConfig {
+
+    private final static Log log = LogFactory.getLog(SpringSillyContent.class);
 
     protected SpringSillyContent springSillyContent;
     protected String category = DEFAULT_CATEGORY;
@@ -36,7 +40,7 @@ public class ActivitiSillyConfig extends AbstractSillyConfig {
 
     @Override
     protected void preInit() {
-        System.out.println(usedCategory() + "  ActivitiSillyConfig Aware 初始化开始");
+        log.info("Category:" + usedCategory() + "  " + this.getClass().getName() + " 初始化开始");
     }
 
     @Override
@@ -66,7 +70,8 @@ public class ActivitiSillyConfig extends AbstractSillyConfig {
 
     @Override
     protected void initComplete() {
-        System.out.println(usedCategory() + "  ActivitiSillyConfig Aware 初始化完成! 傻瓜转换器：" + sillyConvertorMap.size() + "个，傻瓜工厂：" + sillyFactoryMap.size() + "个");
+        log.info("Category:" + usedCategory() + "  " + this.getClass().getName() + " 初始化完成");
+        log.info("Category:" + usedCategory() + "  傻瓜转换器：" + sillyConvertorMap.size() + "个，傻瓜工厂：" + sillyFactoryMap.size() + "个");
     }
 
 }

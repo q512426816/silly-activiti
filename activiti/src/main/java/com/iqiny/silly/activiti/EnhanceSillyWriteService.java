@@ -269,4 +269,25 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         return userIds;
     }
 
+    /**
+     * 人员流转
+     */
+    protected void changeUser(String taskId, String userId, String reason) {
+        final Task task = sillyEngineService.findTaskById(taskId);
+        final String masterId = sillyEngineService.getBusinessKey(task.getProcessInstanceId());
+        // 变更人员
+        sillyEngineService.changeUser(taskId, userId);
+        // 获取任务处置人员
+        final List<String> userIds = sillyEngineService.getTaskUserIds(task);
+        final String joinUserIds = StringUtils.join(userIds, ",");
+        // 记录履历
+        String handleInfo = this.sillyResumeService.makeResumeHandleInfo(SillyConstant.SillyResumeType.PROCESS_TYPE_FLOW, joinUserIds, task.getName(), reason);
+        doSaveProcessResume(masterId, handleInfo, SillyConstant.SillyResumeType.PROCESS_TYPE_FLOW, task.getTaskDefinitionKey(), task.getName(), joinUserIds, null);
+        // 更新主表信息
+        final M master = sillyFactory.newMaster();
+        master.setId(masterId);
+        master.setHandleUserName(userIdsToName(joinUserIds));
+        updateById(master);
+    }
+
 }
