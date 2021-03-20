@@ -1,3 +1,11 @@
+/*
+ *  Copyright  iqiny.com
+ *
+ *  https://gitee.com/iqiny/silly
+ *
+ *  project name：silly-core 1.0.3-RELEASE
+ *  project description：top silly project pom.xml file
+ */
 package com.iqiny.silly.core.base;
 
 import com.iqiny.silly.core.base.core.SillyNode;
@@ -11,7 +19,7 @@ import java.util.List;
  * @author QINY
  * @since 1.0
  */
-public interface SillyTaskData<N extends SillyNode<V>, V extends SillyVariable> {
+public interface SillyTaskData<N extends SillyNode<V>, V extends SillyVariable> extends SillyEntity {
 
     N getNode();
 

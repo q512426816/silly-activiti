@@ -1,8 +1,16 @@
+/*
+ *  Copyright  iqiny.com
+ *
+ *  https://gitee.com/iqiny/silly
+ *
+ *  project name：silly-common 1.0.3-RELEASE
+ *  project description：top silly project pom.xml file
+ */
 package com.iqiny.silly.common.util;
 
 import java.util.Collection;
 
-public class StringUtils {
+public class StringUtils extends org.apache.commons.lang3.StringUtils {
 
     public static boolean isEmpty(String str) {
         if (str == null) {

@@ -5,7 +5,7 @@
 
     <groupId>com.iqiny.silly</groupId>
     <artifactId>silly-all</artifactId>
-    <version>1.0.2-RELEASE</version>
+    <version>1.0.3-RELEASE</version>
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -89,7 +89,7 @@
             <artifactId>silly-mybatisplus</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
+
     </dependencies>
 
     <build>
@@ -171,6 +171,20 @@
                                     <include>com.iqiny.silly:silly-mybatisplus</include>
                                 </includes>
                             </artifactSet>
+                            <transformers>
+                                <!-- META-INF/services -->
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <!-- spring相关 -->
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/spring.handlers</resource>
+                                </transformer>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/spring.schemas</resource>
+                                </transformer>
+                            </transformers>
                         </configuration>
                     </execution>
                 </executions>

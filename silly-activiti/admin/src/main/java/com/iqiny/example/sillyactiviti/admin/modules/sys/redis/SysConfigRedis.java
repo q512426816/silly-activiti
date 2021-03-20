@@ -1,3 +1,11 @@
+/*
+ *  Copyright  iqiny.com
+ *
+ *  https://gitee.com/iqiny/silly
+ *
+ *  project name：silly-parent 1.0.3-RELEASE
+ *  project description：top silly project pom.xml file
+ */
 package com.iqiny.example.sillyactiviti.admin.modules.sys.redis;
 
 
@@ -8,7 +16,7 @@ import org.springframework.stereotype.Component;
 /**
  * 系统配置Redis
  *
- * @author Mark sunlightcs@gmail.com
+ *
  */
 @Component
 public class SysConfigRedis {

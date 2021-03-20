@@ -1,3 +1,11 @@
+/*
+ *  Copyright  iqiny.com
+ *
+ *  https://gitee.com/iqiny/silly
+ *
+ *  project name：silly-parent 1.0.3-RELEASE
+ *  project description：top silly project pom.xml file
+ */
 package com.iqiny.example.sillyactiviti.admin.modules.sys.controller;
 
 
@@ -9,7 +17,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Controller公共组件
  *
- * @author Mark sunlightcs@gmail.com
+ *
  */
 public abstract class AbstractController {
 	protected Logger logger = LoggerFactory.getLogger(getClass());

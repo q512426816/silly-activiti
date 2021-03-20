@@ -1,4 +1,14 @@
+/*
+ *  Copyright  iqiny.com
+ *
+ *  https://gitee.com/iqiny/silly
+ *
+ *  project name：silly-core 1.0.3-RELEASE
+ *  project description：top silly project pom.xml file
+ */
 package com.iqiny.silly.core.base.core;
+
+import com.iqiny.silly.core.base.SillyEntity;
 
 /**
  * 傻瓜工作流 流程变量接口 （每个数据key：value对应一个Variable）
@@ -6,7 +16,7 @@ package com.iqiny.silly.core.base.core;
  * @author QINY
  * @since 1.0
  */
-public interface SillyVariable {
+public interface SillyVariable extends SillyEntity {
 
     /**
      * 主键

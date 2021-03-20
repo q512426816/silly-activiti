@@ -1,3 +1,11 @@
+/*
+ *  Copyright  iqiny.com
+ *
+ *  https://gitee.com/iqiny/silly
+ *
+ *  project name：silly-parent 1.0.3-RELEASE
+ *  project description：top silly project pom.xml file
+ */
 package com.iqiny.example.sillyactiviti.admin.modules.sys.controller;
 
 import com.iqiny.example.sillyactiviti.admin.common.annotation.SysLog;
@@ -19,7 +27,7 @@ import java.util.List;
 /**
  * 系统菜单
  *
- * @author Mark sunlightcs@gmail.com
+ *
  */
 @RestController
 @RequestMapping("/sys/menu")

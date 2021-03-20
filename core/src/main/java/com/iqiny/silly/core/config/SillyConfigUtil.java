@@ -1,9 +1,18 @@
+/*
+ *  Copyright  iqiny.com
+ *
+ *  https://gitee.com/iqiny/silly
+ *
+ *  project name：silly-core 1.0.3-RELEASE
+ *  project description：top silly project pom.xml file
+ */
 package com.iqiny.silly.core.config;
 
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.core.base.SillyInitializable;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -22,14 +31,24 @@ public class SillyConfigUtil {
 
     public static void addSillyConfig(String category, SillyConfig sillyConfig) {
         SillyAssert.notNull(category);
+
         if (SillyInitializable.DEFAULT_CATEGORY.equals(category)) {
             defaultSillyConfig = sillyConfig;
         }
-        SILLY_CONFIG_MAP.put(category, sillyConfig);
+        final SillyConfig put = SILLY_CONFIG_MAP.put(category, sillyConfig);
+        SillyAssert.isNull(put, "冲突的SillyConfig category:" + category);
+    }
+
+    public static void addSillyConfig(Set<String> categories, SillyConfig sillyConfig) {
+        SillyAssert.notNull(categories);
+
+        for (String category : categories) {
+            addSillyConfig(category, sillyConfig);
+        }
     }
 
     public static void addSillyConfig(SillyConfig sillyConfig) {
-        addSillyConfig(sillyConfig.usedCategory(), sillyConfig);
+        addSillyConfig(sillyConfig.supportCategories(), sillyConfig);
     }
 
     public static SillyConfig getSillyConfig(String category) {

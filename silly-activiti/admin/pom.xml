@@ -53,8 +53,8 @@
 
         <dependency>
             <groupId>com.iqiny.silly</groupId>
-            <artifactId>silly-all</artifactId>
-            <version>1.0.2-RELEASE</version>
+            <artifactId>silly-spring-boot-starter</artifactId>
+            <version>1.0.3-RELEASE</version>
         </dependency>
 
         <!-- activiti -->

@@ -1,3 +1,11 @@
+/*
+ *  Copyright  iqiny.com
+ *
+ *  https://gitee.com/iqiny/silly
+ *
+ *  project name：silly-parent 1.0.3-RELEASE
+ *  project description：top silly project pom.xml file
+ */
 package com.iqiny.example.sillyactiviti.admin.common.exception;
 
 
@@ -13,7 +21,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 /**
  * 异常处理器
  *
- * @author Mark sunlightcs@gmail.com
+ *
  */
 @RestControllerAdvice
 public class MyRestExceptionHandler {

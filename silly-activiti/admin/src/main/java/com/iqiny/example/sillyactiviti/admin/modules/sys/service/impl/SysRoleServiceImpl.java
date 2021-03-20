@@ -1,3 +1,11 @@
+/*
+ *  Copyright  iqiny.com
+ *
+ *  https://gitee.com/iqiny/silly
+ *
+ *  project name：silly-parent 1.0.3-RELEASE
+ *  project description：top silly project pom.xml file
+ */
 package com.iqiny.example.sillyactiviti.admin.modules.sys.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -23,7 +31,7 @@ import java.util.Map;
 /**
  * 角色
  *
- * @author Mark sunlightcs@gmail.com
+ *
  */
 @Service
 public class SysRoleServiceImpl extends ServiceImpl<SysRoleDao, SysRoleEntity> implements SysRoleService {

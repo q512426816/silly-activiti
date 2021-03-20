@@ -13,6 +13,7 @@
         <module>core</module>
         <module>activiti</module>
         <module>all</module>
+        <module>starter</module>
         <module>mybatisplus</module>
     </modules>
     <packaging>pom</packaging>
@@ -22,7 +23,7 @@
 
     <properties>
         <!-- version -->
-        <revision>1.0.2-RELEASE</revision>
+        <revision>1.0.3-RELEASE</revision>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -95,6 +96,36 @@
             <id>release</id>
             <build>
                 <plugins>
+                    <!-- license 声明 -->
+                    <plugin>
+                        <groupId>com.mycila</groupId>
+                        <artifactId>license-maven-plugin</artifactId>
+                        <version>${license-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>remove</goal>
+                                    <goal>format</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <quiet>true</quiet>
+                            <header>${user.dir}/style/copyright</header>
+                            <includes>
+                                <include>**/src/main/java/**</include>
+                                <include>**/src/test/java/**</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/generated/**</exclude>
+                            </excludes>
+                            <strictCheck>true</strictCheck>
+                            <mapping>
+                                <java>SLASHSTAR_STYLE</java>
+                            </mapping>
+                        </configuration>
+                    </plugin>
                     <!-- 发布Jar到Maven仓库 Begin -->
                     <!--生成Source jar文件-->
                     <plugin>

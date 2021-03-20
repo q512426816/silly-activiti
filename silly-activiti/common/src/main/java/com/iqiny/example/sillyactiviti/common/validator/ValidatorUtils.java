@@ -1,3 +1,11 @@
+/*
+ *  Copyright  iqiny.com
+ *
+ *  https://gitee.com/iqiny/silly
+ *
+ *  project name：silly-parent 1.0.3-RELEASE
+ *  project description：top silly project pom.xml file
+ */
 package com.iqiny.example.sillyactiviti.common.validator;
 
 
@@ -15,7 +23,7 @@ import java.util.Set;
  *
  * 参考文档：http://docs.jboss.org/hibernate/validator/5.4/reference/en-US/html_single/
  *
- * @author Mark sunlightcs@gmail.com
+ *
  */
 public class ValidatorUtils {
     private static Validator validator;

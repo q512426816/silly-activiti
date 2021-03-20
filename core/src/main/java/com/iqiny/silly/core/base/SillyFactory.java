@@ -1,3 +1,11 @@
+/*
+ *  Copyright  iqiny.com
+ *
+ *  https://gitee.com/iqiny/silly
+ *
+ *  project name：silly-core 1.0.3-RELEASE
+ *  project description：top silly project pom.xml file
+ */
 package com.iqiny.silly.core.base;
 
 import com.iqiny.silly.core.base.core.SillyMaster;
@@ -14,12 +22,7 @@ import com.iqiny.silly.core.resume.SillyResume;
  * @author QINY
  * @since 1.0
  */
-public interface SillyFactory<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> {
-
-    /**
-     * 分类，需要保证唯一
-     */
-    String category();
+public interface SillyFactory<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable, R extends SillyResume, D extends SillyTaskData<N, V>> extends SillyEntity {
 
     /**
      * 创建 主对象
@@ -47,13 +50,13 @@ public interface SillyFactory<M extends SillyMaster, N extends SillyNode<V>, V e
      *
      * @return 任务数据对象
      */
-    SillyTaskData<N, V> newSillyTaskData();
+    D newSillyTaskData();
 
     /**
      * 创建 流程履历对象
      *
      * @return 流程履历对象
      */
-    SillyResume newResume();
+    R newResume();
 
 }

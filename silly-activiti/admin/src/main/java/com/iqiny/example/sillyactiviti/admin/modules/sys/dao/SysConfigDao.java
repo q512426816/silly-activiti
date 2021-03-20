@@ -1,3 +1,11 @@
+/*
+ *  Copyright  iqiny.com
+ *
+ *  https://gitee.com/iqiny/silly
+ *
+ *  project name：silly-parent 1.0.3-RELEASE
+ *  project description：top silly project pom.xml file
+ */
 package com.iqiny.example.sillyactiviti.admin.modules.sys.dao;
 
 
@@ -9,7 +17,7 @@ import org.apache.ibatis.annotations.Param;
 /**
  * 系统配置信息
  *
- * @author Mark sunlightcs@gmail.com
+ *
  */
 @Mapper
 public interface SysConfigDao extends BaseMapper<SysConfigEntity> {

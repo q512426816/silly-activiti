@@ -1,4 +1,14 @@
+/*
+ *  Copyright  iqiny.com
+ *
+ *  https://gitee.com/iqiny/silly
+ *
+ *  project name：silly-core 1.0.3-RELEASE
+ *  project description：top silly project pom.xml file
+ */
 package com.iqiny.silly.core.base.core;
+
+import com.iqiny.silly.core.base.SillyEntity;
 
 import java.util.Date;
 
@@ -8,7 +18,7 @@ import java.util.Date;
  * @author QINY
  * @since 1.0
  */
-public interface SillyMaster {
+public interface SillyMaster extends SillyEntity {
 
     /**
      * 主键

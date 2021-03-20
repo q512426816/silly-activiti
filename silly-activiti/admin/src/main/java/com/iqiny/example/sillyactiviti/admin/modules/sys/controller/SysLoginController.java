@@ -1,3 +1,11 @@
+/*
+ *  Copyright  iqiny.com
+ *
+ *  https://gitee.com/iqiny/silly
+ *
+ *  project name：silly-parent 1.0.3-RELEASE
+ *  project description：top silly project pom.xml file
+ */
 package com.iqiny.example.sillyactiviti.admin.modules.sys.controller;
 
 
@@ -14,7 +22,7 @@ import java.io.IOException;
 /**
  * 登录相关
  *
- * @author Mark sunlightcs@gmail.com
+ *
  */
 @Controller
 public class SysLoginController {

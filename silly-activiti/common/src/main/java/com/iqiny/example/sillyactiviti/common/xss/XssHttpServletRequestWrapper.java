@@ -1,3 +1,11 @@
+/*
+ *  Copyright  iqiny.com
+ *
+ *  https://gitee.com/iqiny/silly
+ *
+ *  project name：silly-parent 1.0.3-RELEASE
+ *  project description：top silly project pom.xml file
+ */
 package com.iqiny.example.sillyactiviti.common.xss;
 
 import com.iqiny.example.sillyactiviti.common.utils.StringUtils;
@@ -10,7 +18,7 @@ import java.util.Map;
 /**
  * XSS过滤处理
  *
- * @author Mark sunlightcs@gmail.com
+
  */
 public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     /**

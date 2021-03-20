@@ -1,3 +1,11 @@
+/*
+ *  Copyright  iqiny.com
+ *
+ *  https://gitee.com/iqiny/silly
+ *
+ *  project name：silly-parent 1.0.3-RELEASE
+ *  project description：top silly project pom.xml file
+ */
 package com.iqiny.example.sillyactiviti.admin.modules.sys.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -8,7 +16,7 @@ import java.util.List;
 /**
  * 角色与菜单对应关系
  *
- * @author Mark sunlightcs@gmail.com
+ *
  */
 public interface SysRoleMenuService extends IService<SysRoleMenuEntity> {
 	

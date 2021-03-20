@@ -1,20 +1,32 @@
+/*
+ *  Copyright  iqiny.com
+ *
+ *  https://gitee.com/iqiny/silly
+ *
+ *  project name：silly-core 1.0.3-RELEASE
+ *  project description：top silly project pom.xml file
+ */
 package com.iqiny.silly.core.config;
 
-import com.iqiny.silly.common.util.CurrentUserUtil;
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.core.base.SillyFactory;
+import com.iqiny.silly.core.base.SillyInitializable;
 import com.iqiny.silly.core.convertor.SillyStringConvertor;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.resume.SillyResumeService;
 import com.iqiny.silly.core.service.SillyEngineService;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 配置类
  */
 public abstract class AbstractSillyConfig implements SillyConfig {
+
+    /**
+     * 支持的业务种类
+     */
+    protected final Set<String> supportCategories = new LinkedHashSet<>();
 
     /**
      * 当前人获取工具
@@ -34,12 +46,12 @@ public abstract class AbstractSillyConfig implements SillyConfig {
     /**
      * 流程变量 类型转换器
      */
-    protected Map<String, SillyVariableConvertor> sillyConvertorMap;
-    
+    protected final Map<String, SillyVariableConvertor> sillyConvertorMap = new HashMap<>();
+
     /**
      * 傻瓜工厂工厂
      */
-    protected Map<String, SillyFactory> sillyFactoryMap;
+    protected final Map<String, SillyFactory> sillyFactoryMap = new HashMap<>();
 
 
     @Override
@@ -61,8 +73,21 @@ public abstract class AbstractSillyConfig implements SillyConfig {
     }
 
     @Override
-    public String usedCategory() {
-        return DEFAULT_CATEGORY;
+    public Set<String> supportCategories() {
+        return supportCategories;
+    }
+
+    /**
+     * 此配置器是否支持此种类, 若支持默认类型，则全部支持
+     *
+     * @param category
+     * @return
+     */
+    @Override
+    public boolean isSupport(String category) {
+        SillyAssert.notNull(category);
+
+        return supportCategories.contains(SillyInitializable.DEFAULT_CATEGORY) || supportCategories.contains(category);
     }
 
     /**
@@ -81,24 +106,30 @@ public abstract class AbstractSillyConfig implements SillyConfig {
     protected abstract void initComplete();
 
     protected void checkConfig() {
+        SillyAssert.notEmpty(this.supportCategories);
         SillyAssert.notNull(this.currentUserUtil);
         SillyAssert.notNull(this.sillyEngineService);
         SillyAssert.notNull(this.sillyConvertorMap);
     }
 
     private void initSillyFactory() {
-        if (sillyFactoryMap == null) {
-            sillyFactoryMap = new LinkedHashMap<>();
-        }
+        initBaseSillyFactoryMap();
         hookInitSillyFactoryMap();
     }
 
+
     protected void addSillyFactory(SillyFactory sillyFactory) {
-        if (sillyFactoryMap == null) {
-            sillyFactoryMap = new LinkedHashMap<>();
+        boolean support = isSupport(sillyFactory.category());
+        // 仅适配支持的类型
+        if (support) {
+            sillyFactoryMap.put(sillyFactory.category(), sillyFactory);
         }
-        sillyFactoryMap.put(sillyFactory.category(), sillyFactory);
     }
+
+    /**
+     * 初始化基本傻瓜工厂，可能会被相同种类的工厂覆盖
+     */
+    protected abstract void initBaseSillyFactoryMap();
 
     /**
      * 初始 傻瓜工厂 回调方法
@@ -111,9 +142,6 @@ public abstract class AbstractSillyConfig implements SillyConfig {
     }
 
     protected void addSillyVariableConvertor(SillyVariableConvertor convertor) {
-        if (sillyConvertorMap == null) {
-            sillyConvertorMap = new LinkedHashMap<>();
-        }
         sillyConvertorMap.put(convertor.name(), convertor);
     }
 
@@ -135,10 +163,6 @@ public abstract class AbstractSillyConfig implements SillyConfig {
     @Override
     public Map<String, SillyVariableConvertor> getSillyConvertorMap() {
         return sillyConvertorMap;
-    }
-
-    public void setSillyConvertorMap(Map<String, SillyVariableConvertor> sillyConvertorMap) {
-        this.sillyConvertorMap = sillyConvertorMap;
     }
 
     @Override

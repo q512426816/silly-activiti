@@ -1,6 +1,14 @@
+/*
+ *  Copyright  iqiny.com
+ *
+ *  https://gitee.com/iqiny/silly
+ *
+ *  project name：silly-activiti 1.0.3-RELEASE
+ *  project description：top silly project pom.xml file
+ */
 package com.iqiny.silly.activiti.spring;
 
-import com.iqiny.silly.activiti.ActivitiSillyConfig;
+import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.core.base.SillyInitializable;
 import com.iqiny.silly.core.config.SillyConfig;
 import org.apache.commons.logging.Log;
@@ -15,48 +23,84 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * 傻瓜 Spring 相关操作
+ */
 public class SpringSillyContent implements ApplicationContextAware, InitializingBean {
 
     private final static Log log = LogFactory.getLog(SpringSillyContent.class);
 
-    protected ApplicationContext applicationContext;
+    protected static ApplicationContext applicationContext;
 
-    public <T> Set<T> getBeanSet(Class<T> clazz) {
+    /**
+     * 获取Bean 同时会在容器中寻找相应Bean 注册到Spring环境中
+     *
+     * @param clazz
+     * @param <T>
+     * @return
+     */
+    public static <T> Set<T> getBeanSet(Class<T> clazz) {
         Set<T> set = new LinkedHashSet<>();
         final Set<Map.Entry<String, T>> entries = applicationContext.getBeansOfType(clazz).entrySet();
         for (Map.Entry<String, T> entry : entries) {
             set.add(entry.getValue());
         }
+
         return set;
     }
 
-    public <T> T getBean(Class<T> clazz) {
+    public static Set<SillyInitializable> getBeanSet(Class<SillyInitializable> clazz, String category) {
+        Set<SillyInitializable> set = getBeanSet(clazz);
+        Set<SillyInitializable> returnSet = new LinkedHashSet<>();
+        for (SillyInitializable sillyInit : set) {
+            if (sillyInit.usedCategory().equals(category)) {
+                returnSet.add(sillyInit);
+            }
+        }
+        return returnSet;
+    }
+
+    public static <T> T getBean(Class<T> clazz) {
         return applicationContext.getBean(clazz);
     }
+
+    public static SillyInitializable getBean(Class<SillyInitializable> clazz, String category) {
+        final Set<SillyInitializable> beanSet = getBeanSet(clazz, category);
+        SillyAssert.isTrue((beanSet.size() != 1), clazz.getName() + " 对应的种类 " + category + " 期望找到 1 个匹配项，找到了 " + beanSet.size() + "个");
+        return beanSet.iterator().next();
+    }
+
 
     @Override
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
         System.out.println("===============================================");
         System.out.println("");
-        System.out.println("欢迎使用 Silly【1.0.2-RELEASE】流程数据服务框架");
+        System.out.println("欢迎使用 Silly【1.0.3-RELEASE】流程数据服务框架");
         System.out.println("");
         System.out.println("===============================================");
 
-        this.applicationContext = applicationContext;
-        // 开始初始化配置
-        final Set<ActivitiSillyConfig> beanSet = getBeanSet(ActivitiSillyConfig.class);
-        for (ActivitiSillyConfig sillyConfig : beanSet) {
-            // SillyConfig初始化！
-            sillyConfig.setSpringSillyContent(this);
-            sillyConfig.init();
-            if (log.isDebugEnabled()) {
-                log.debug("SillyConfig:" + sillyConfig.getClass().getName() + " 初始化完成");
-            }
-        }
+        SpringSillyContent.applicationContext = applicationContext;
+
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        initSillyConfig();
+        initSillyInitializable();
+    }
+
+    protected void initSillyConfig() {
+        // 开始初始化配置
+        final Set<SillyConfig> beanSet = getBeanSet(SillyConfig.class);
+        for (SillyConfig sillyConfig : beanSet) {
+            // SillyConfig初始化！
+            sillyConfig.init();
+            log.info("SillyConfig:" + sillyConfig.getClass().getName() + " 初始化完成");
+        }
+    }
+
+    protected void initSillyInitializable() {
+        // 开始初始化配置
         final Set<SillyInitializable> beanSet = getBeanSet(SillyInitializable.class);
         for (SillyInitializable sillyInitializable : beanSet) {
             // 不对sillyConfig重新初始化！
@@ -68,4 +112,5 @@ public class SpringSillyContent implements ApplicationContextAware, Initializing
             }
         }
     }
+
 }

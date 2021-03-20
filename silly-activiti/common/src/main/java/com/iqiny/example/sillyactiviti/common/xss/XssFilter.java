@@ -1,3 +1,11 @@
+/*
+ *  Copyright  iqiny.com
+ *
+ *  https://gitee.com/iqiny/silly
+ *
+ *  project name：silly-parent 1.0.3-RELEASE
+ *  project description：top silly project pom.xml file
+ */
 package com.iqiny.example.sillyactiviti.common.xss;
 
 import javax.servlet.*;
@@ -7,7 +15,7 @@ import java.io.IOException;
 /**
  * XSS过滤
  *
- * @author Mark sunlightcs@gmail.com
+
  */
 public class XssFilter implements Filter {
 

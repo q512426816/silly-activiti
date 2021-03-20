@@ -1,9 +1,18 @@
+/*
+ *  Copyright  iqiny.com
+ *
+ *  https://gitee.com/iqiny/silly
+ *
+ *  project name：silly-activiti 1.0.3-RELEASE
+ *  project description：top silly project pom.xml file
+ */
 package com.iqiny.silly.activiti.convertor;
 
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,6 +23,7 @@ import java.util.Map;
  * 数据Value: List<List<String>>
  * map: {key: "key", value: [["1"],["2"],["3"]]}
  */
+@Component
 public class SillyListListConvertor implements SillyVariableConvertor<List<List<String>>> {
 
     @Override
@@ -45,7 +55,7 @@ public class SillyListListConvertor implements SillyVariableConvertor<List<List<
         try {
             final String[] split = variableText.split(",");
             for (String val : split) {
-                final V copy = (V) variable.getClass().newInstance();
+                final V copy = (V) variable.getClass().getConstructor().newInstance();
                 BeanUtils.copyProperties(variable, copy);
                 copy.setVariableText(val);
                 list.add(copy);

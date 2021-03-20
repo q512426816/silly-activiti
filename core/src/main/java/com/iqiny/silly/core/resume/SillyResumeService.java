@@ -1,11 +1,21 @@
+/*
+ *  Copyright  iqiny.com
+ *
+ *  https://gitee.com/iqiny/silly
+ *
+ *  project name：silly-core 1.0.3-RELEASE
+ *  project description：top silly project pom.xml file
+ */
 package com.iqiny.silly.core.resume;
+
+import com.iqiny.silly.core.base.SillyInitializable;
 
 import java.util.List;
 
 /**
  * 流程履历服务接口
  */
-public interface SillyResumeService<R extends SillyResume> {
+public interface SillyResumeService<R extends SillyResume> extends SillyInitializable {
 
     /**
      * 生成处置履历内容

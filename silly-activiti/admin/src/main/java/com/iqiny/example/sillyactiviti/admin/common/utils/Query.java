@@ -1,3 +1,11 @@
+/*
+ *  Copyright  iqiny.com
+ *
+ *  https://gitee.com/iqiny/silly
+ *
+ *  project name：silly-parent 1.0.3-RELEASE
+ *  project description：top silly project pom.xml file
+ */
 package com.iqiny.example.sillyactiviti.admin.common.utils;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -15,7 +23,7 @@ import java.util.Map;
 /**
  * 查询参数
  *
- * @author Mark sunlightcs@gmail.com
+ *
  */
 public class Query<T> {
 

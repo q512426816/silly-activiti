@@ -1,3 +1,11 @@
+/*
+ *  Copyright  iqiny.com
+ *
+ *  https://gitee.com/iqiny/silly
+ *
+ *  project name：silly-parent 1.0.3-RELEASE
+ *  project description：top silly project pom.xml file
+ */
 package com.iqiny.example.sillyactiviti.common.utils;
 
 import org.slf4j.Logger;
@@ -10,7 +18,7 @@ import java.net.UnknownHostException;
 /**
  * IP地址
  *
- * @author Mark sunlightcs@gmail.com
+ *
  */
 public class IPUtils {
     private static Logger logger = LoggerFactory.getLogger(IPUtils.class);
