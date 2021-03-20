@@ -27,6 +27,6 @@ public class NcrSillyServiceImpl extends MyWriteSillyService<NcrMaster, NcrNode,
 
     @Override
     public String usedCategory() {
-        return "NCR";
+        return NcrMaster.CATEGORY;
     }
 }

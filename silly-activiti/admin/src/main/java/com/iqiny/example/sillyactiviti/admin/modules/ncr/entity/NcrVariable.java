@@ -15,12 +15,7 @@ import com.iqiny.example.sillyactiviti.admin.common.silly.mybatisplus.entity.MyS
 public class NcrVariable extends MySillyVariable<NcrVariable> {
 
     @Override
-    public String getBelong() {
-        return null;
-    }
-
-    @Override
-    public void setBelong(String belong) {
-
+    public String category() {
+        return NcrMaster.CATEGORY;
     }
 }

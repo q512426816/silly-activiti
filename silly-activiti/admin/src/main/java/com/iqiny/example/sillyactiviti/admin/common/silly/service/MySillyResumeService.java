@@ -30,14 +30,6 @@ public class MySillyResumeService extends BaseService<MySillyResumeDao, MySillyR
 
     private final Map<String, String> handleMap = new HashMap<>();
 
-    {
-        handleMap.put(SillyConstant.SillyResumeType.PROCESS_TYPE_NEXT, "完成任务");
-        handleMap.put(SillyConstant.SillyResumeType.PROCESS_TYPE_BACK, "执行任务驳回");
-        handleMap.put(SillyConstant.SillyResumeType.PROCESS_TYPE_CLOSE, "执行流程关闭");
-        handleMap.put(SillyConstant.SillyResumeType.PROCESS_TYPE_FLOW, "执行任务流转");
-        handleMap.put(SillyConstant.SillyResumeType.PROCESS_TYPE_START, "执行流程启动");
-    }
-
 
     @Override
     public String makeResumeHandleInfo(String handleType, String nextUserIds, String taskName, String content) {
@@ -95,11 +87,15 @@ public class MySillyResumeService extends BaseService<MySillyResumeDao, MySillyR
 
     @Override
     public void init() {
-        
+        handleMap.put(SillyConstant.SillyResumeType.PROCESS_TYPE_NEXT, "完成任务");
+        handleMap.put(SillyConstant.SillyResumeType.PROCESS_TYPE_BACK, "执行任务驳回");
+        handleMap.put(SillyConstant.SillyResumeType.PROCESS_TYPE_CLOSE, "执行流程关闭");
+        handleMap.put(SillyConstant.SillyResumeType.PROCESS_TYPE_FLOW, "执行任务流转");
+        handleMap.put(SillyConstant.SillyResumeType.PROCESS_TYPE_START, "执行流程启动");
     }
 
     @Override
     public String usedCategory() {
-        return null;
+        return DEFAULT_CATEGORY;
     }
 }

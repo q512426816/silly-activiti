@@ -13,5 +13,8 @@ import com.iqiny.example.sillyactiviti.admin.common.silly.mybatisplus.entity.MyS
 
 @TableName("silly_ncr_node")
 public class NcrNode extends MySillyNode<NcrNode, NcrVariable> {
-
+    @Override
+    public String category() {
+        return NcrMaster.CATEGORY;
+    }
 }

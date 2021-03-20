@@ -85,4 +85,9 @@ public class NcrMaster extends MySillyMaster<NcrMaster> {
     public void setProcessVersion(String processVersion) {
         this.processVersion = processVersion;
     }
+
+    @Override
+    public String category() {
+        return NcrMaster.CATEGORY;
+    }
 }

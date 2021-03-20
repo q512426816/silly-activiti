@@ -6,18 +6,15 @@
  *  project name：silly-parent 1.0.3-RELEASE
  *  project description：top silly project pom.xml file
  */
-package com.iqiny.example.sillyactiviti.admin.modules.ncr.silly;
+package com.iqiny.example.sillyactiviti.admin.modules.ncr.entity;
 
-import com.iqiny.example.sillyactiviti.admin.modules.ncr.entity.NcrMaster;
-import com.iqiny.example.sillyactiviti.admin.modules.ncr.entity.NcrNode;
-import com.iqiny.example.sillyactiviti.admin.modules.ncr.entity.NcrVariable;
 import com.iqiny.silly.core.base.SillyTaskData;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class NcrSillySaveData implements SillyTaskData<NcrNode,NcrVariable> {
+public class NcrSillySaveData implements SillyTaskData<NcrNode, NcrVariable> {
 
     private NcrMaster master;
 
@@ -25,4 +22,8 @@ public class NcrSillySaveData implements SillyTaskData<NcrNode,NcrVariable> {
 
     private List<NcrVariable> variableList;
 
+    @Override
+    public String category() {
+        return NcrMaster.CATEGORY;
+    }
 }

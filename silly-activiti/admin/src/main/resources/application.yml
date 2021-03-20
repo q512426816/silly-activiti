@@ -66,6 +66,11 @@ mybatis-plus:
     call-setters-on-nulls: true
     jdbc-type-for-null: 'null'
 
+
+silly:
+  enabled: true
+  scanEntityPackage: com.iqiny.example.**.entity
+
 jwt:
   header: Authorization
   # 令牌前缀
