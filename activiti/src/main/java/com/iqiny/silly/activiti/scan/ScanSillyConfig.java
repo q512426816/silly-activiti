@@ -13,7 +13,6 @@ import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.SillyReflectUtil;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyEntity;
-import com.iqiny.silly.core.base.SillyTaskData;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
@@ -50,7 +49,6 @@ public class ScanSillyConfig extends ActivitiSillyConfig {
     protected Class<SillyNode> nodeSuperType = SillyNode.class;
     protected Class<SillyVariable> variableSuperType = SillyVariable.class;
     protected Class<SillyResume> resumeSuperType = SillyResume.class;
-    protected Class<SillyTaskData> taskDataSuperType = SillyTaskData.class;
 
     protected Map<String, ScanSillyFactory> scanSillyFactoryMap = new LinkedHashMap<>();
 
@@ -65,7 +63,6 @@ public class ScanSillyConfig extends ActivitiSillyConfig {
             types.add(nodeSuperType);
             types.add(variableSuperType);
             types.add(resumeSuperType);
-            types.add(taskDataSuperType);
             try {
                 scanRefreshClasses(entityScanPackage, types);
             } catch (IOException e) {

@@ -22,7 +22,7 @@ import com.iqiny.silly.core.resume.SillyResume;
  * @author QINY
  * @since 1.0
  */
-public interface SillyFactory<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable, R extends SillyResume, D extends SillyTaskData<N, V>> extends SillyEntity {
+public interface SillyFactory<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable, R extends SillyResume> extends SillyEntity {
 
     /**
      * 创建 主对象
@@ -44,13 +44,6 @@ public interface SillyFactory<M extends SillyMaster, N extends SillyNode<V>, V e
      * @return 变量对象
      */
     V newVariable();
-
-    /**
-     * 创建任务数据对象
-     *
-     * @return 任务数据对象
-     */
-    D newSillyTaskData();
 
     /**
      * 创建 流程履历对象

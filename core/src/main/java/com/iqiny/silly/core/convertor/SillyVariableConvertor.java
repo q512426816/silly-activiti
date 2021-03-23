@@ -32,6 +32,12 @@ public interface SillyVariableConvertor<T> {
      */
     T convert(Map<String, Object> map, String key, String value);
 
-    <V extends SillyVariable> List<V> saveVariable(V variable);
+    /**
+     * 生成真正需要保存的数据
+     *
+     * @param variable
+     * @return
+     */
+    List<SillyVariable> makeSaveVariable(SillyVariable variable);
 
 }

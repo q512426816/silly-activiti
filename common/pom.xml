@@ -15,6 +15,7 @@
 
     <properties>
         <apache.commons.version>3.12.0</apache.commons.version>
+        <commons-collections.version>3.2.1</commons-collections.version>
 
     </properties>
 
@@ -24,6 +25,11 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${apache.commons.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>${commons-collections.version}</version>
         </dependency>
     </dependencies>
 </project>

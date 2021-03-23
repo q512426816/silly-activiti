@@ -1,4 +1,31 @@
 (function () {
+
+	$.getWindowSize = function () {
+		return ["Height", "Width"].map(function (name) {
+			return window["inner" + name] ||
+				document.compatMode === "CSS1Compat" && document.documentElement["client" + name] || document.body["client" + name];
+		});
+	};
+
+
+	function getDiagWidth() {
+		var val = document.body.clientWidth;
+		var dialogWidth = "";
+		if (val < 768) {
+			dialogWidth = '100%'
+		} else if (val < 1200) {
+			dialogWidth = '80%'
+		} else {
+			dialogWidth = '70%'
+		}
+		return dialogWidth;
+	}
+
+	function isMobile() {
+		var val = document.body.clientWidth;
+		return val < 768;
+	}
+
 	/**
 	 * 基础弹出层 vue
 	 */
@@ -382,11 +409,7 @@
 			}
 		},
 		created: function () {
-			var scripts = [null, null];
-			$('.page-content-area').ace_ajax('loadScripts', scripts, function () {});
-
 			this.init();
-
 		}
 	});
 

@@ -11,12 +11,7 @@ package com.iqiny.silly.core.base;
 /**
  * 主表与任务表关系对象
  */
-public interface SillyMasterTask extends SillyEntity {
-
-    @Override
-    default String category(){
-        return SUPPORT_ALL;
-    }
+public interface SillyMasterTask {
 
     String getMasterId();
 

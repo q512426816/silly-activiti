@@ -9,7 +9,6 @@
 package com.iqiny.silly.activiti;
 
 import com.iqiny.silly.activiti.convertor.SillyListConvertor;
-import com.iqiny.silly.activiti.convertor.SillyListListConvertor;
 import com.iqiny.silly.activiti.spring.SpringSillyContent;
 import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.config.AbstractSillyConfig;
@@ -58,7 +57,6 @@ public class ActivitiSillyConfig extends AbstractSillyConfig {
     @Override
     protected void hookInitSillyConvertorMap() {
         addSillyVariableConvertor(new SillyListConvertor());
-        addSillyVariableConvertor(new SillyListListConvertor());
         final Set<SillyVariableConvertor> beanSet = SpringSillyContent.getBeanSet(SillyVariableConvertor.class);
         for (SillyVariableConvertor convertor : beanSet) {
             addSillyVariableConvertor(convertor);

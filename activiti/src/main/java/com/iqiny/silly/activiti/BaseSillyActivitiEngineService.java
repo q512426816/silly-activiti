@@ -13,6 +13,9 @@ import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.core.SillyMaster;
+import com.iqiny.silly.core.config.CurrentUserUtil;
+import com.iqiny.silly.core.config.SillyConfig;
+import com.iqiny.silly.core.config.SillyConfigUtil;
 import com.iqiny.silly.core.service.SillyEngineService;
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.RepositoryService;
@@ -33,6 +36,9 @@ import java.util.*;
  */
 public abstract class BaseSillyActivitiEngineService implements SillyEngineService<Task> {
 
+    protected SillyConfig sillyConfig;
+    protected CurrentUserUtil currentUserUtil;
+
     protected RuntimeService runtimeService;
     protected HistoryService historyService;
     protected TaskService taskService;
@@ -40,6 +46,8 @@ public abstract class BaseSillyActivitiEngineService implements SillyEngineServi
 
     @Override
     public void init() {
+        this.sillyConfig = SillyConfigUtil.getSillyConfig(usedCategory());
+        this.currentUserUtil = this.sillyConfig.getCurrentUserUtil();
         this.runtimeService = SpringSillyContent.getBean(RuntimeService.class);
         this.historyService = SpringSillyContent.getBean(HistoryService.class);
         this.taskService = SpringSillyContent.getBean(TaskService.class);
@@ -230,7 +238,7 @@ public abstract class BaseSillyActivitiEngineService implements SillyEngineServi
         }
         return processDefinitionId;
     }
-    
+
 
     @Override
     public void deleteProcessInstance(String processInstanceId, String deleteReason) {

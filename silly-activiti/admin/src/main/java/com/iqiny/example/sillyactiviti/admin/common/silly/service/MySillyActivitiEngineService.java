@@ -9,7 +9,7 @@
 package com.iqiny.example.sillyactiviti.admin.common.silly.service;
 
 import com.iqiny.silly.activiti.BaseSillyActivitiEngineService;
-import com.iqiny.silly.core.base.SillyMasterTask;
+import com.iqiny.silly.core.read.MySillyMasterTask;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,14 +22,15 @@ import java.util.List;
 @Transactional(rollbackFor = Exception.class)
 public class MySillyActivitiEngineService extends BaseSillyActivitiEngineService {
 
-
     @Override
-    public <S extends SillyMasterTask> List<S> getDoingMasterTask(String category, String userId) {
+    public List<MySillyMasterTask> getDoingMasterTask(String category, String userId) {
         return null;
     }
 
     @Override
-    public <S extends SillyMasterTask> List<S> getHistoryMasterTask(String category, String userId) {
+    public List<MySillyMasterTask> getHistoryMasterTask(String category, String userId) {
         return null;
     }
+
+
 }

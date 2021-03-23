@@ -9,23 +9,32 @@
 package com.iqiny.silly.mybatisplus.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.google.common.collect.Lists;
 import com.iqiny.silly.activiti.EnhanceSillyReadService;
 import com.iqiny.silly.common.SillyConstant;
+import com.iqiny.silly.common.util.SillyMapUtils;
 import com.iqiny.silly.common.util.StringUtils;
+import com.iqiny.silly.core.read.MySillyMasterTask;
+import com.iqiny.silly.core.read.SillyMasterTaskUtil;
 import com.iqiny.silly.mybatisplus.BaseMySillyMaster;
 import com.iqiny.silly.mybatisplus.BaseMySillyNode;
 import com.iqiny.silly.mybatisplus.BaseMySillyVariable;
+import com.iqiny.silly.mybatisplus.utils.PageUtils;
+import com.iqiny.silly.mybatisplus.utils.QueryUtil;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public abstract class BaseMySillyReadService<M extends BaseMySillyMaster<M>, N extends BaseMySillyNode<N, V>, V extends BaseMySillyVariable<V>>
         extends EnhanceSillyReadService<M, N, V> {
 
-    public static final String VARIABLE_QUERY_START = "variableQuery[";
-    public static final String VARIABLE_QUERY_END = "]";
+    protected String variableQueryStart() {
+        return "variableQuery[";
+    }
+
+    protected String variableQueryEnd() {
+        return "]";
+    }
 
     @Override
     public M getMaster(String masterId) {
@@ -63,6 +72,100 @@ public abstract class BaseMySillyReadService<M extends BaseMySillyMaster<M>, N e
         return sillyFactory.newVariable().selectList(qw);
     }
 
+
+    /**
+     * 分页查询进行中任务 （经过流程引擎筛选）
+     *
+     * @param params
+     * @return
+     */
+    public PageUtils queryDoingPage(Map<String, Object> params) {
+        final List<MySillyMasterTask> masterTasks = sillyEngineService.getDoingMasterTask(usedCategory(), currentUserUtil.currentUserId());
+        final SillyMasterTaskUtil masterTaskUtil = SillyMasterTaskUtil.create(masterTasks);
+        final Set<String> masterIds = findMasterIdByMap(masterTaskUtil.getMasterIds(), params);
+
+        return doQuery(params, masterIds, masterTaskUtil);
+    }
+
+    /**
+     * 分页查询历史任务 （经过流程引擎筛选）
+     *
+     * @param params
+     * @return
+     */
+    public PageUtils queryHistoryPage(Map<String, Object> params) {
+        final List<MySillyMasterTask> masterTasks = sillyEngineService.getHistoryMasterTask(usedCategory(), currentUserUtil.currentUserId());
+        final SillyMasterTaskUtil masterTaskUtil = SillyMasterTaskUtil.create(masterTasks);
+        final Set<String> masterIds = findMasterIdByMap(masterTaskUtil.getMasterIds(), params);
+        return doQuery(params, masterIds, masterTaskUtil);
+    }
+
+    /**
+     * 分页查询记录（不经过流程引擎）
+     *
+     * @param params
+     * @return
+     */
+    public PageUtils queryPage(Map<String, Object> params) {
+        final Set<String> masterIds = findMasterIdByMap(params);
+        // masterIds == null 时表示没有变量表查询操作，!=null 表示有变量表操作
+        return doQuery(params, masterIds, null);
+    }
+
+    /**
+     * 真正执行查询的方法
+     *
+     * @param params
+     * @param masterIds
+     * @param masterTaskUtil
+     * @return
+     */
+    protected PageUtils doQuery(Map<String, Object> params, Set<String> masterIds, SillyMasterTaskUtil masterTaskUtil) {
+        if (masterIds != null) {
+            if (masterIds.isEmpty()) {
+                return new PageUtils(makeNewPage(params));
+            }
+            final List<List<String>> partitionMasterIds = Lists.partition(new ArrayList<>(masterIds), 1000);
+            params.put("partitionMasterIds", partitionMasterIds);
+        }
+
+        IPage<Map<String, Object>> page = doQueryPage(makeNewPage(params), params);
+        setRecordInfo(page.getRecords(), masterTaskUtil);
+        return new PageUtils(page);
+    }
+
+    protected IPage<Map<String, Object>> makeNewPage(Map<String, Object> params) {
+        return new QueryUtil<Map<String, Object>>().getPage(params);
+    }
+
+    protected abstract IPage<Map<String, Object>> doQueryPage(IPage<Map<String, Object>> page, Map<String, Object> params);
+
+    /**
+     * 子类重写此方法设置分页数据信息
+     *
+     * @param records
+     */
+    protected void setRecordInfo(List<Map<String, Object>> records, SillyMasterTaskUtil masterTaskUtil) {
+        for (Map<String, Object> record : records) {
+            setOneRecordInfo(record, masterTaskUtil);
+        }
+    }
+
+    /**
+     * 子类重写此方法设置分页数据信息
+     *
+     * @param record
+     */
+    protected void setOneRecordInfo(Map<String, Object> record, SillyMasterTaskUtil masterTaskUtil) {
+        if (masterTaskUtil != null) {
+            final String masterId = SillyMapUtils.getString(record, "id");
+            String taskId = masterTaskUtil.getOneTaskId(masterId);
+            SillyMapUtils.put(record, "taskId", taskId);
+        }
+
+    }
+
+
     protected Set<String> findMasterIdByMap(Map<String, Object> params) {
         return findMasterIdByMap(null, params);
     }
@@ -80,12 +183,15 @@ public abstract class BaseMySillyReadService<M extends BaseMySillyMaster<M>, N e
         if (masterIdList != null) {
             masterIds.addAll(masterIdList);
         }
+
+        final String start = variableQueryStart();
+        final String end = variableQueryEnd();
         for (String key : keys) {
-            // 获取以 variableQuery[ 开头， ] 结尾的参数 查询 变量表数据
-            if (StringUtils.isEmpty(key) || !key.startsWith(VARIABLE_QUERY_START) || !key.endsWith(VARIABLE_QUERY_END)) {
+            // 默认获取以 variableQuery[ 开头， ] 结尾的参数 查询 变量表数据
+            if (StringUtils.isEmpty(key) || !key.startsWith(start) || !key.endsWith(end)) {
                 continue;
             }
-            final String name = key.substring(VARIABLE_QUERY_START.length(), key.lastIndexOf(VARIABLE_QUERY_END));
+            final String name = key.substring(start.length(), key.lastIndexOf(end));
             final String value = (String) params.get(key);
             if (StringUtils.isNotEmpty(value)) {
                 QueryWrapper<V> qw = new QueryWrapper<>();
@@ -113,5 +219,5 @@ public abstract class BaseMySillyReadService<M extends BaseMySillyMaster<M>, N e
 
         return loadData ? masterIds : null;
     }
-    
+
 }

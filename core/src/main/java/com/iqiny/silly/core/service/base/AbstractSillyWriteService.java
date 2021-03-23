@@ -343,15 +343,16 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
                 throw new SillyException("未配置相关数据处理器" + variable.getVariableType());
             }
 
-            List<V> saveVariableList = handler.saveVariable(variable);
-            for (V v : saveVariableList) {
+            // 获取处理之后 真正需要保存的 variable 数据
+            List<SillyVariable> saveVariableList = handler.makeSaveVariable(variable);
+            for (SillyVariable v : saveVariableList) {
                 v.setId(null);
                 v.setTaskId(node.getTaskId());
                 v.setMasterId(node.getMasterId());
                 v.setNodeKey(node.getNodeKey());
                 v.setNodeId(node.getId());
                 v.setStatus(SillyConstant.ActivitiNode.STATUS_CURRENT);
-                saveList.add(v);
+                saveList.add((V) v);
             }
         }
         if (!saveList.isEmpty()) {

@@ -8,13 +8,12 @@
  */
 package com.iqiny.example.sillyactiviti.admin.modules.ncr.entity;
 
-import com.iqiny.silly.core.base.SillyTaskData;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class NcrSillySaveData implements SillyTaskData<NcrNode, NcrVariable> {
+public class NcrSillySaveData {
 
     private NcrMaster master;
 
@@ -22,7 +21,6 @@ public class NcrSillySaveData implements SillyTaskData<NcrNode, NcrVariable> {
 
     private List<NcrVariable> variableList;
 
-    @Override
     public String category() {
         return NcrMaster.CATEGORY;
     }

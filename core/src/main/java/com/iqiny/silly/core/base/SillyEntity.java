@@ -13,7 +13,7 @@ public interface SillyEntity {
     /**
      * 特殊种类 表示 兼容其他全部类型
      */
-    String SUPPORT_ALL = "SILLY_SUPPORT_ALL";
+    String SUPPORT_ALL = SillyInitializable.DEFAULT_CATEGORY;
 
     /**
      * 种类，需要保证唯一

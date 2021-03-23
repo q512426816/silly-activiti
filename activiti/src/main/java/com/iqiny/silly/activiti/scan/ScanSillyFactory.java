@@ -10,7 +10,6 @@ package com.iqiny.silly.activiti.scan;
 
 import com.iqiny.silly.common.util.SillyReflectUtil;
 import com.iqiny.silly.core.base.SillyFactory;
-import com.iqiny.silly.core.base.SillyTaskData;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
@@ -23,17 +22,15 @@ import com.iqiny.silly.core.resume.SillyResume;
  * @param <N>
  * @param <V>
  * @param <R>
- * @param <D>
  */
-public class ScanSillyFactory<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable, R extends SillyResume, D extends SillyTaskData<N, V>>
-        implements SillyFactory<M, N, V, R, D> {
+public class ScanSillyFactory<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable, R extends SillyResume>
+        implements SillyFactory<M, N, V, R> {
 
     private final String category;
     private Class<M> masterClazz;
     private Class<N> nodeClazz;
     private Class<V> variableClazz;
     private Class<R> resumeClazz;
-    private Class<D> taskDataClazz;
 
 
     public ScanSillyFactory(String category) {
@@ -61,11 +58,6 @@ public class ScanSillyFactory<M extends SillyMaster, N extends SillyNode<V>, V e
     }
 
     @Override
-    public D newSillyTaskData() {
-        return SillyReflectUtil.newInstance(taskDataClazz);
-    }
-
-    @Override
     public R newResume() {
         return SillyReflectUtil.newInstance(resumeClazz);
     }
@@ -86,10 +78,6 @@ public class ScanSillyFactory<M extends SillyMaster, N extends SillyNode<V>, V e
         this.resumeClazz = resumeClazz;
     }
 
-    public void setTaskDataClazz(Class<D> taskDataClazz) {
-        this.taskDataClazz = taskDataClazz;
-    }
-
     @SuppressWarnings("all")
     public void setEntityClazz(Class<?> clazz) {
         if (SillyMaster.class.isAssignableFrom(clazz)) {
@@ -100,8 +88,6 @@ public class ScanSillyFactory<M extends SillyMaster, N extends SillyNode<V>, V e
             variableClazz = (Class<V>) clazz;
         } else if (SillyResume.class.isAssignableFrom(clazz)) {
             resumeClazz = (Class<R>) clazz;
-        } else if (SillyTaskData.class.isAssignableFrom(clazz)) {
-            taskDataClazz = (Class<D>) clazz;
         }
     }
 
@@ -118,9 +104,6 @@ public class ScanSillyFactory<M extends SillyMaster, N extends SillyNode<V>, V e
         }
         if (resumeClazz == null) {
             resumeClazz = supportAll.resumeClazz;
-        }
-        if (taskDataClazz == null) {
-            taskDataClazz = supportAll.taskDataClazz;
         }
     }
 }

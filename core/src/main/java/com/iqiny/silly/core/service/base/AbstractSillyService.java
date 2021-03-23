@@ -9,13 +9,12 @@
 package com.iqiny.silly.core.service.base;
 
 import com.iqiny.silly.common.exception.SillyException;
-import com.iqiny.silly.core.base.SillyTaskData;
-import com.iqiny.silly.core.config.CurrentUserUtil;
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
+import com.iqiny.silly.core.config.CurrentUserUtil;
 import com.iqiny.silly.core.config.SillyConfig;
 import com.iqiny.silly.core.config.SillyConfigUtil;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
@@ -35,7 +34,7 @@ import java.util.Map;
  */
 public abstract class AbstractSillyService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable, T> implements SillyService {
 
-    protected SillyFactory<M, N, V, ? extends SillyResume, ? extends SillyTaskData> sillyFactory;
+    protected SillyFactory<M, N, V, ? extends SillyResume> sillyFactory;
 
     protected SillyEngineService<T> sillyEngineService;
 
@@ -61,7 +60,7 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         return SillyConfigUtil.getSillyConfig(usedCategory());
     }
 
-    public void setSillyFactory(SillyFactory<M, N, V, ? extends SillyResume, ? extends SillyTaskData> sillyFactory) {
+    public void setSillyFactory(SillyFactory<M, N, V, ? extends SillyResume> sillyFactory) {
         this.sillyFactory = sillyFactory;
     }
 

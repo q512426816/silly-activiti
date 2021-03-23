@@ -9,9 +9,12 @@
 package com.iqiny.silly.activiti.convertor;
 
 
+import com.iqiny.silly.common.util.SillyReflectUtil;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 
 import java.util.ArrayList;
@@ -24,6 +27,10 @@ import java.util.Map;
  * map: {key: "key", value: ["1","2","3"]}
  */
 public class SillyListConvertor implements SillyVariableConvertor<List<String>> {
+
+    protected Log log = LogFactory.getLog(SillyListConvertor.class);
+
+    protected String splitStr = ",";
 
     @Override
     public String name() {
@@ -48,20 +55,36 @@ public class SillyListConvertor implements SillyVariableConvertor<List<String>> 
     }
 
     @Override
-    public <V extends SillyVariable> List<V> saveVariable(V variable) {
+    public List<SillyVariable> makeSaveVariable(SillyVariable variable) {
         final String variableText = variable.getVariableText();
-        List<V> list = new ArrayList<>();
+        List<SillyVariable> list = new ArrayList<>();
+        if (StringUtils.isEmpty(variableText)) {
+            return list;
+        }
+
         try {
-            final String[] split = variableText.split(",");
+            final String[] split = variableText.split(splitStr);
             for (String val : split) {
-                final V copy = (V) variable.getClass().getConstructor().newInstance();
+                final SillyVariable copy = SillyReflectUtil.newInstance(variable.getClass());
                 BeanUtils.copyProperties(variable, copy);
                 copy.setVariableText(val);
                 list.add(copy);
+                beforeMakeAddOne(list, copy);
             }
         } catch (Exception e) {
+            log.warn("数据处理转换异常："+ e.getMessage());
         }
         return list;
+    }
+
+    /**
+     * 添加完成一个变量后执行的方法
+     *
+     * @param list
+     * @param variable
+     */
+    protected void beforeMakeAddOne(List<SillyVariable> list, SillyVariable variable) {
+
     }
 
 }
