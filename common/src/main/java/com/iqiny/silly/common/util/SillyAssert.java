@@ -60,4 +60,10 @@ public class SillyAssert {
             throw SillyException.newInstance(msg);
         }
     }
+
+    public static void isFalse(boolean flag, String msg) {
+        if (flag) {
+            throw SillyException.newInstance(msg);
+        }
+    }
 }

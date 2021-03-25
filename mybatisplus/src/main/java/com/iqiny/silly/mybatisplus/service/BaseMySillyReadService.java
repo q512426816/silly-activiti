@@ -28,6 +28,12 @@ import java.util.*;
 public abstract class BaseMySillyReadService<M extends BaseMySillyMaster<M>, N extends BaseMySillyNode<N, V>, V extends BaseMySillyVariable<V>>
         extends EnhanceSillyReadService<M, N, V> {
 
+    public static final String DEFAULT_QUERY_IDS_PARAM_NAME = "partitionMasterIds";
+
+    protected String queryIdsParamName() {
+        return DEFAULT_QUERY_IDS_PARAM_NAME;
+    }
+
     protected String variableQueryStart() {
         return "variableQuery[";
     }
@@ -126,7 +132,7 @@ public abstract class BaseMySillyReadService<M extends BaseMySillyMaster<M>, N e
                 return new PageUtils(makeNewPage(params));
             }
             final List<List<String>> partitionMasterIds = Lists.partition(new ArrayList<>(masterIds), 1000);
-            params.put("partitionMasterIds", partitionMasterIds);
+            params.put(queryIdsParamName(), partitionMasterIds);
         }
 
         IPage<Map<String, Object>> page = doQueryPage(makeNewPage(params), params);
@@ -171,11 +177,6 @@ public abstract class BaseMySillyReadService<M extends BaseMySillyMaster<M>, N e
     }
 
     protected Set<String> findMasterIdByMap(List<String> masterIdList, Map<String, Object> params) {
-        if (params == null) {
-            return new LinkedHashSet<>();
-        }
-
-        final Set<String> keys = params.keySet();
         // 已加载数据标识
         boolean loadData = (masterIdList != null);
         // 变量表查询返回的主表ID集合
@@ -183,9 +184,14 @@ public abstract class BaseMySillyReadService<M extends BaseMySillyMaster<M>, N e
         if (masterIdList != null) {
             masterIds.addAll(masterIdList);
         }
+        if (params == null) {
+            params = new HashMap<>();
+        }
 
         final String start = variableQueryStart();
         final String end = variableQueryEnd();
+
+        final Set<String> keys = params.keySet();
         for (String key : keys) {
             // 默认获取以 variableQuery[ 开头， ] 结尾的参数 查询 变量表数据
             if (StringUtils.isEmpty(key) || !key.startsWith(start) || !key.endsWith(end)) {

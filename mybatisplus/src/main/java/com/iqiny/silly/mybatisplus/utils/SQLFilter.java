@@ -9,6 +9,7 @@
 package com.iqiny.silly.mybatisplus.utils;
 
 
+import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.StringUtils;
 
 /**
@@ -39,9 +40,7 @@ public class SQLFilter {
 
         //判断是否包含非法字符
         for (String keyword : keywords) {
-            if (str.contains(keyword)) {
-                throw new RuntimeException("包含非法字符");
-            }
+            SillyAssert.isFalse(!str.contains(keyword), "包含非法字符");
         }
 
         return str;

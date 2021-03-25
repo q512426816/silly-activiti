@@ -24,9 +24,35 @@ import java.util.Map;
  */
 public class QueryUtil<T> {
 
+    /**
+     * 当前页码
+     */
+    public static final String PAGE = "pageNo";
+    /**
+     * 每页显示记录数
+     */
+    public static final String LIMIT = "rows";
+    /**
+     * 排序字段
+     */
+    public static final String ORDER_FIELD = "sidx";
+    /**
+     * 排序方式
+     */
+    public static final String ORDER = "sord";
+    /**
+     * 升序
+     */
+    public static final String ASC = "asc";
+    /**
+     * 降序
+     */
+    public static final String DESC = "desc";
+    
+
     public IPage<T> getPage(Map<String, Object> params) {
-        String order = (String) params.get(Constant.ORDER);
-        return this.getPage(params, null, Constant.ASC.equalsIgnoreCase(order));
+        String order = (String) params.get(ORDER);
+        return this.getPage(params, null, ASC.equalsIgnoreCase(order));
     }
 
     public IPage<T> getPage(Map<String, Object> params, String defaultOrderField, boolean isAsc) {
@@ -34,23 +60,23 @@ public class QueryUtil<T> {
         long curPage = 1;
         long limit = 10;
 
-        if (params.get(Constant.PAGE) != null) {
-            curPage = Long.parseLong(params.get(Constant.PAGE).toString());
+        if (params.get(PAGE) != null) {
+            curPage = Long.parseLong(params.get(PAGE).toString());
         }
-        if (params.get(Constant.LIMIT) != null) {
-            limit = Long.parseLong(params.get(Constant.LIMIT).toString());
+        if (params.get(LIMIT) != null) {
+            limit = Long.parseLong(params.get(LIMIT).toString());
         }
 
         //分页对象
         Page<T> page = new Page<>(curPage, limit);
 
         //分页参数
-        params.put(Constant.PAGE, page);
+        params.put(PAGE, page);
 
         //排序字段
         //防止SQL注入（因为sidx、order是通过拼接SQL实现排序的，会有SQL注入风险）
         List<String> orderFields = new ArrayList<>();
-        final Object orderFieldObj = params.get(Constant.ORDER_FIELD);
+        final Object orderFieldObj = params.get(ORDER_FIELD);
         if (orderFieldObj instanceof String) {
             orderFields.add(SQLFilter.sqlInject((String) orderFieldObj));
         } else if (orderFieldObj instanceof Collection) {
