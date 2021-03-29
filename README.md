@@ -6,9 +6,11 @@
 
 ##### 20210316 :smile:  -  **1.0.2-RELEASE 后端服务JAR正式发布可用** ！！！
 
+##### 20210330 - 1.0.3-RELEASE 发布！！！ 添加 spring-boot-starter, 优化操作服务
+
 #### 介绍
 
-##### 缺点：性能不高、占用大量数据空间
+##### 缺点：性能不高、占用大量数据空间，待优化
 
 ##### 优点：急速开发、无需表设计，拓展性强、支持复杂的各种数据结构、支持多版本同时执行
 
@@ -55,7 +57,7 @@
   <dependency>
       <groupId>com.iqiny.silly</groupId>
       <artifactId>silly-all</artifactId>
-      <version>1.0.2-RELEASE</version>
+      <version>1.0.3-RELEASE</version>
   </dependency>
 ```
 
