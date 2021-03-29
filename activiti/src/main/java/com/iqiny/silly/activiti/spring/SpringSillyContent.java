@@ -45,7 +45,6 @@ public class SpringSillyContent implements ApplicationContextAware, Initializing
         for (Map.Entry<String, T> entry : entries) {
             set.add(entry.getValue());
         }
-
         return set;
     }
 
@@ -73,14 +72,7 @@ public class SpringSillyContent implements ApplicationContextAware, Initializing
 
     @Override
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
-        System.out.println("===============================================");
-        System.out.println("");
-        System.out.println("欢迎使用 Silly【1.0.3-RELEASE】流程数据服务框架");
-        System.out.println("");
-        System.out.println("===============================================");
-
         SpringSillyContent.applicationContext = applicationContext;
-
     }
 
     @Override

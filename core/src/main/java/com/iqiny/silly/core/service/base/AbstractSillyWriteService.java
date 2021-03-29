@@ -375,15 +375,14 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         }
         Map<String, Object> varMap = node.getVariableMap();
         List<V> variableList = node.getVariableList();
-        if (variableList == null) {
-            return null;
-        }
-        for (SillyVariable variable : variableList) {
-            final SillyVariableConvertor<?> handler = getSillyConvertor(variable.getActivitiHandler());
-            if (handler != null) {
-                String vn = variable.getVariableName();
-                String vt = variable.getVariableText();
-                handler.convert(varMap, vn, vt);
+        if (variableList != null) {
+            for (SillyVariable variable : variableList) {
+                final SillyVariableConvertor<?> handler = getSillyConvertor(variable.getActivitiHandler());
+                if (handler != null) {
+                    String vn = variable.getVariableName();
+                    String vt = variable.getVariableText();
+                    handler.convert(varMap, vn, vt);
+                }
             }
         }
         return varMap;

@@ -9,13 +9,19 @@
 package com.iqiny.silly.mybatisplus.utils;
 
 
-import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.StringUtils;
+
+import java.util.regex.Pattern;
 
 /**
  * SQL过滤
  */
 public class SQLFilter {
+
+    private static final String REG = "(?:')|(?:--)|(/\\*(?:.|[\\n\\r])*?\\*/)|"
+            + "(\\b(select|update|and|or|delete|insert|trancate|char|substr|ascii|declare|exec|count|master|into|drop|execute)\\b)";
+    private static final Pattern SQL_PATTERN = Pattern.compile(REG, Pattern.CASE_INSENSITIVE);
+
 
     /**
      * SQL注入过滤
@@ -32,15 +38,8 @@ public class SQLFilter {
         str = StringUtils.replace(str, ";", "");
         str = StringUtils.replace(str, "\\", "");
 
-        //转换成小写
-        //str = str.toLowerCase();
-
-        //非法字符
-        String[] keywords = {"master ", "truncate ", "insert ", "select ", "delete ", "update ", "declare ", "alter ", "drop "};
-
-        //判断是否包含非法字符
-        for (String keyword : keywords) {
-            SillyAssert.isFalse(!str.contains(keyword), "包含非法字符");
+        if (SQL_PATTERN.matcher(str).find()) {
+            return "";
         }
 
         return str;
