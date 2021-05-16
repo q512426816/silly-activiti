@@ -5,7 +5,7 @@
 
     <groupId>com.iqiny.silly</groupId>
     <artifactId>silly-bom</artifactId>
-    <version>1.0.3-RELEASE</version>
+    <version>1.0.4-RELEASE</version>
 
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
@@ -14,6 +14,7 @@
     <url>http://silly.iqiny.com</url>
 
     <properties>
+        <silly.version>1.0.4-RELEASE</silly.version>
         <activiti.version>7.1.0.M6</activiti.version>
         <mybatis-plus.version>3.1.2</mybatis-plus.version>
 
@@ -26,6 +27,36 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.iqiny.silly</groupId>
+                <artifactId>silly-common</artifactId>
+                <version>${silly.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.iqiny.silly</groupId>
+                <artifactId>silly-core</artifactId>
+                <version>${silly.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.iqiny.silly</groupId>
+                <artifactId>silly-activiti</artifactId>
+                <version>${silly.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.iqiny.silly</groupId>
+                <artifactId>silly-mybatisplus</artifactId>
+                <version>${silly.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.iqiny.silly</groupId>
+                <artifactId>silly-spring-boot-starter</artifactId>
+                <version>${silly.version}</version>
+            </dependency>
+
             <!-- activiti-engine -->
             <dependency>
                 <groupId>org.activiti</groupId>

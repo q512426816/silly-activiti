@@ -3,7 +3,7 @@
  *
  *  https://gitee.com/iqiny/silly
  *
- *  project name：silly-parent 1.0.3-RELEASE
+ *  project name：silly-parent 1.0.4-RELEASE
  *  project description：top silly project pom.xml file
  */
 package com.iqiny.example.sillyactiviti.common.security.jwt;
@@ -54,7 +54,7 @@ public class TokenProvider {
                 ji.setIssueDate(claims.getIssuedAt().getTime());
                 return ji;
             }
-        } catch (ExpiredJwtException e) {
+        } catch (Exception ignorn) {
             
         }
 

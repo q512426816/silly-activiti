@@ -3,7 +3,7 @@
  *
  *  https://gitee.com/iqiny/silly
  *
- *  project name：silly-common 1.0.3-RELEASE
+ *  project name：silly-common 1.0.4-RELEASE
  *  project description：top silly project pom.xml file
  */
 package com.iqiny.silly.common.exception;

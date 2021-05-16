@@ -20,6 +20,14 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>com.iqiny.silly</groupId>
+                <artifactId>silly-bom</artifactId>
+                <version>${revision}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring-boot.version}</version>
@@ -32,9 +40,8 @@
     <dependencies>
         <!--silly-all-->
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>silly-all</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.iqiny.silly</groupId>
+            <artifactId>silly-activiti</artifactId>
         </dependency>
         <!--spring-->
         <dependency>
@@ -48,5 +55,5 @@
             <optional>true</optional>
         </dependency>
     </dependencies>
-    
+
 </project>
