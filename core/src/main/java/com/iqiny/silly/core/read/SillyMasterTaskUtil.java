@@ -8,24 +8,26 @@
  */
 package com.iqiny.silly.core.read;
 
+import com.iqiny.silly.core.base.SillyMasterTask;
+
 import java.util.*;
 
-public class SillyMasterTaskUtil {
+public class SillyMasterTaskUtil<S extends SillyMasterTask> {
 
-    public static SillyMasterTaskUtil create(List<MySillyMasterTask> masterTaskList) {
-        final SillyMasterTaskUtil sillyMasterTaskUtil = new SillyMasterTaskUtil();
-        sillyMasterTaskUtil.setMasterTaskList(masterTaskList);
-        return sillyMasterTaskUtil;
-    }
-
-    private List<MySillyMasterTask> masterTaskList;
+    private List<S> masterTaskList;
     private Map<String, Set<String>> masterTaskMap;
 
-    public List<MySillyMasterTask> getMasterTaskList() {
+    public static SillyMasterTaskUtil<? extends SillyMasterTask> create(List<SillyMasterTask> masterTasks) {
+        SillyMasterTaskUtil<SillyMasterTask> taskUtil = new SillyMasterTaskUtil<>();
+        taskUtil.setMasterTaskList(masterTasks);
+        return taskUtil;
+    }
+
+    public List<S> getMasterTaskList() {
         return masterTaskList;
     }
 
-    public void setMasterTaskList(List<MySillyMasterTask> masterTaskList) {
+    public void setMasterTaskList(List<S> masterTaskList) {
         this.masterTaskList = masterTaskList;
     }
 
@@ -34,7 +36,7 @@ public class SillyMasterTaskUtil {
             return new ArrayList<>();
         }
         Set<String> set = new LinkedHashSet<>();
-        for (MySillyMasterTask masterTask : masterTaskList) {
+        for (S masterTask : masterTaskList) {
             if (masterTask != null) {
                 set.add(masterTask.getMasterId());
             }
@@ -44,7 +46,7 @@ public class SillyMasterTaskUtil {
 
     private void init() {
         masterTaskMap = new LinkedHashMap<>();
-        for (MySillyMasterTask masterTask : masterTaskList) {
+        for (S masterTask : masterTaskList) {
             if (masterTask == null) {
                 continue;
             }

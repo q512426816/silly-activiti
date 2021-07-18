@@ -23,7 +23,7 @@
 
     <properties>
         <!-- version -->
-        <revision>1.0.4-RELEASE</revision>
+        <revision>1.0.5-RELEASE</revision>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>

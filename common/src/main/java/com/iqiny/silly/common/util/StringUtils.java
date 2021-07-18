@@ -8,6 +8,8 @@
  */
 package com.iqiny.silly.common.util;
 
+import com.iqiny.silly.common.SillyConstant;
+
 import java.util.Collection;
 
 public class StringUtils extends org.apache.commons.lang3.StringUtils {
@@ -24,7 +26,7 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
     }
 
     public static String join(Collection<String> list) {
-        return join(list, ",");
+        return join(list, SillyConstant.ARRAY_SPLIT_STR);
     }
 
     public static String join(Collection<String> list, String split) {

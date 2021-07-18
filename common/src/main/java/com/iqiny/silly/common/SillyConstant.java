@@ -9,6 +9,9 @@
 package com.iqiny.silly.common;
 
 public class SillyConstant {
+
+    public static final String ARRAY_SPLIT_STR = ",";
+
     private SillyConstant() {
     }
 
@@ -111,5 +114,10 @@ public class SillyConstant {
          * 履历类型 关闭
          */
         public static final String PROCESS_TYPE_CLOSE = "close";
+    }
+
+    public class YesOrNo {
+        public static final String YES = "1";
+        public static final String NO = "0";
     }
 }

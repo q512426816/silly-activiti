@@ -103,7 +103,7 @@ public class DataFilterAspect {
         sqlFilter.append(" (");
 
         if (deptIdList.size() > 0) {
-            sqlFilter.append(tableAlias).append(dataFilter.deptId()).append(" in(").append(StringUtils.join(deptIdList, ",")).append(")");
+            sqlFilter.append(tableAlias).append(dataFilter.deptId()).append(" in(").append(StringUtils.join(deptIdList, SillyConstant.ARRAY_SPLIT_STR)).append(")");
         }
 
         //没有本部门数据权限，也能查询本人数据

@@ -56,4 +56,20 @@ public interface SillyReadService<M extends SillyMaster, N extends SillyNode<V>,
      */
     Map<String, Object> getMasterMap(String masterId);
 
+    /**
+     * 获取节点集合数据
+     *
+     * @param masterId
+     * @return
+     */
+    List<N> getAllNodeList(String masterId);
+
+    /**
+     * 获取单个节点数据
+     *
+     * @param masterId
+     * @param nodeKey
+     * @return
+     */
+    N getNode(String masterId, String nodeKey);
 }

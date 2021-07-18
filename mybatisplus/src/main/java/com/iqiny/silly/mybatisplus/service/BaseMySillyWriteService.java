@@ -10,14 +10,26 @@ package com.iqiny.silly.mybatisplus.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iqiny.silly.activiti.EnhanceSillyWriteService;
+import com.iqiny.silly.common.util.StringUtils;
+import com.iqiny.silly.core.convertor.SillyVariableConvertor;
+import com.iqiny.silly.core.service.SillyReadService;
 import com.iqiny.silly.mybatisplus.BaseMySillyMaster;
 import com.iqiny.silly.mybatisplus.BaseMySillyNode;
 import com.iqiny.silly.mybatisplus.BaseMySillyVariable;
+import org.activiti.engine.task.Task;
 
 import java.util.List;
+import java.util.Map;
 
 public abstract class BaseMySillyWriteService<M extends BaseMySillyMaster<M>, N extends BaseMySillyNode<N, V>, V extends BaseMySillyVariable<V>>
         extends EnhanceSillyWriteService<M, N, V> {
+
+    protected SillyReadService<M, N, V> sillyReadService;
+
+    @Override
+    protected void otherInit() {
+        sillyReadService = getSillyConfig().getSillyReadService(usedCategory());
+    }
 
     @Override
     public boolean insert(M master) {
@@ -47,6 +59,14 @@ public abstract class BaseMySillyWriteService<M extends BaseMySillyMaster<M>, N 
     @Override
     public boolean insert(N node) {
         node.preInsert();
+        String taskId = node.getTaskId();
+        if (StringUtils.isNotEmpty(taskId)) {
+            Task task = sillyEngineService.findTaskById(taskId);
+            node.setNodeName(task.getName());
+            if (StringUtils.isEmpty(node.getNodeKey())) {
+                node.setNodeKey(task.getTaskDefinitionKey());
+            }
+        }
         return node.insert();
     }
 

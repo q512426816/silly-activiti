@@ -8,10 +8,16 @@
  */
 package com.iqiny.silly.core.base;
 
+import java.util.Map;
+
 /**
  * 主表与任务表关系对象
  */
 public interface SillyMasterTask {
+
+    String getCategory();
+
+    void setCategory(String category);
 
     String getMasterId();
 
@@ -20,4 +26,9 @@ public interface SillyMasterTask {
     String getTaskId();
 
     void setTaskId(String taskId);
+
+    Map<String, Object> getParams();
+
+    void setParams(Map<String, Object> params);
+    
 }

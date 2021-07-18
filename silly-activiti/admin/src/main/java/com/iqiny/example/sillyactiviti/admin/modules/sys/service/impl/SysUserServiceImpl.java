@@ -124,7 +124,7 @@ public class SysUserServiceImpl extends BaseService<SysUserDao, SysUserEntity> i
         final List<String> perms = baseMapper.queryAllPerms(userId);
         List<String> allPerms = new ArrayList<>();
         for (String perm : perms) {
-            allPerms.addAll(Arrays.asList(perm.split(",")));
+            allPerms.addAll(Arrays.asList(perm.split(SillyConstant.ARRAY_SPLIT_STR)));
         }
         return allPerms;
     }

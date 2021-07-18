@@ -113,4 +113,11 @@ public interface SillyNode<V extends SillyVariable> extends SillyEntity {
 
     void setHandleType(String handleType);
 
+    /**
+     * 节点名称
+     */
+    String getNodeName();
+
+    void setNodeName(String nodeName);
+
 }

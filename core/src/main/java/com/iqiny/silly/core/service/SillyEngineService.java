@@ -9,6 +9,7 @@
 package com.iqiny.silly.core.service;
 
 import com.iqiny.silly.core.base.SillyInitializable;
+import com.iqiny.silly.core.base.SillyMasterTask;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.read.MySillyMasterTask;
 
@@ -133,7 +134,7 @@ public interface SillyEngineService<T> extends SillyInitializable {
      * @param userId
      * @return
      */
-    List<MySillyMasterTask> getDoingMasterTask(String category, String userId);
+    List<SillyMasterTask> getDoingMasterTask(String category, String userId);
 
     /**
      * 获取历史的主表ID
@@ -142,7 +143,7 @@ public interface SillyEngineService<T> extends SillyInitializable {
      * @param userId
      * @return
      */
-    List<MySillyMasterTask> getHistoryMasterTask(String category, String userId);
+    List<SillyMasterTask> getHistoryMasterTask(String category, String userId);
 
     /**
      * 根据业务表ID 获取任务列表

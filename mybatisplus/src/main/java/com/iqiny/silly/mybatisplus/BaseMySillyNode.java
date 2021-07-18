@@ -29,6 +29,7 @@ public abstract class BaseMySillyNode<T extends Model<T>, V extends SillyVariabl
     protected int seq;
 
     protected String nodeKey;
+    protected String nodeName;
     protected String taskId;
 
     protected String parallelFlag;
@@ -154,5 +155,15 @@ public abstract class BaseMySillyNode<T extends Model<T>, V extends SillyVariabl
     @Override
     public void setVariableMap(Map<String, Object> variableMap) {
         this.variableMap = variableMap;
+    }
+
+    @Override
+    public String getNodeName() {
+        return nodeName;
+    }
+
+    @Override
+    public void setNodeName(String nodeName) {
+        this.nodeName = nodeName;
     }
 }

@@ -15,10 +15,17 @@ import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
+import com.iqiny.silly.core.config.property.SillyProcessMasterProperty;
+import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
+import com.iqiny.silly.core.config.property.SillyProcessProperty;
+import com.iqiny.silly.core.config.property.SillyProcessVariableProperty;
+import com.iqiny.silly.core.convertor.SillyAutoConvertor;
+import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.resume.SillyResume;
 import com.iqiny.silly.core.service.base.AbstractSillyWriteService;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cglib.beans.BeanMap;
 
 import java.util.*;
 
@@ -218,7 +225,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
             for (Task task : taskList) {
                 taskNames.add(task.getName());
             }
-            master.setTaskName(StringUtils.join(taskNames, ","));
+            master.setTaskName(StringUtils.join(taskNames, SillyConstant.ARRAY_SPLIT_STR));
             updateFlag = true;
         }
         if (StringUtils.isEmpty(master.getHandleUserName())) {
@@ -245,12 +252,12 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
             return null;
         }
 
-        final String[] split = userIds.split(",");
+        final String[] split = userIds.split(SillyConstant.ARRAY_SPLIT_STR);
         Set<String> userNames = new LinkedHashSet<>();
         for (String userId : split) {
             userNames.add(currentUserUtil.userIdToName(userId));
         }
-        return StringUtils.join(userNames, ",");
+        return StringUtils.join(userNames, SillyConstant.ARRAY_SPLIT_STR);
     }
 
     protected String userIdsToName(Set<String> userIds) {
@@ -262,7 +269,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         for (String userId : userIds) {
             userNames.add(currentUserUtil.userIdToName(userId));
         }
-        return StringUtils.join(userNames, ",");
+        return StringUtils.join(userNames, SillyConstant.ARRAY_SPLIT_STR);
     }
 
     protected Set<String> nextProcess(List<Task> taskList) {
@@ -287,7 +294,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         sillyEngineService.changeUser(taskId, userId);
         // 获取任务处置人员
         final List<String> userIds = sillyEngineService.getTaskUserIds(task);
-        final String joinUserIds = StringUtils.join(userIds, ",");
+        final String joinUserIds = StringUtils.join(userIds, SillyConstant.ARRAY_SPLIT_STR);
         // 记录履历
         String handleInfo = this.sillyResumeService.makeResumeHandleInfo(SillyConstant.SillyResumeType.PROCESS_TYPE_FLOW, joinUserIds, task.getName(), reason);
         doSaveProcessResume(masterId, handleInfo, SillyConstant.SillyResumeType.PROCESS_TYPE_FLOW, task.getTaskDefinitionKey(), task.getName(), joinUserIds, null);
@@ -297,5 +304,207 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         master.setHandleUserName(userIdsToName(joinUserIds));
         updateById(master);
     }
+
+    public List<V> toVariableList(Map<String, Object> map) {
+        return toVariableList(map, SillyConstant.ActivitiVariable.BELONG_VARIABLE, null);
+    }
+
+    public List<V> toVariableList(Map<String, Object> map, String belong) {
+        return toVariableList(map, belong, null);
+    }
+
+    public List<V> toVariableList(Map<String, Object> map, String belong, String activitiHandler) {
+        List<V> list = new ArrayList<>();
+        for (String key : map.keySet()) {
+            Object object = map.get(key);
+            doVariableList(object, list, key, belong, activitiHandler);
+        }
+        return list;
+    }
+
+    private void doVariableList(Object object, List<V> list, String key, String belong, String activitiHandler) {
+        if (object == null || StringUtils.isEmpty(key)) {
+            return;
+        }
+
+        if (object instanceof String) {
+            String variableText = (String) object;
+            doSetVariableList(list, key, variableText, SillyConstant.ActivitiNode.CONVERTOR_STRING, belong, activitiHandler);
+        } else if (object instanceof Collection<?>) {
+            Collection<?> objectList = (Collection<?>) object;
+            StringJoiner variableTextSj = new StringJoiner(SillyConstant.ARRAY_SPLIT_STR);
+            for (Object o : objectList) {
+                if (o instanceof String) {
+                    variableTextSj.add((String) o);
+                } else {
+                    throw new SillyException("不支持此数据集合内类型进行变量转换" + o.getClass());
+                }
+            }
+            doSetVariableList(list, key, variableTextSj.toString(), SillyConstant.ActivitiNode.CONVERTOR_LIST, belong, activitiHandler);
+        } else {
+            throw new SillyException("不支持此数据类型进行变量转换" + object.getClass());
+        }
+    }
+
+    private void doSetVariableList(List<V> list, String key, String variableText, String variableType, String belong, String activitiHandler) {
+        if (StringUtils.isEmpty(key) || StringUtils.isEmpty(variableText)) {
+            return;
+        }
+
+        boolean autoCovFlag = false;
+        // 仅对 string、list 类型的数据进行自动转换
+        if (variableType.equals(SillyConstant.ActivitiNode.CONVERTOR_STRING) || variableType.equals(SillyConstant.ActivitiNode.CONVERTOR_LIST)) {
+            for (String name : sillyConvertorMap.keySet()) {
+                SillyVariableConvertor<?> convertor = sillyConvertorMap.get(name);
+                if (convertor instanceof SillyAutoConvertor) {
+                    SillyAutoConvertor autoConvertor = (SillyAutoConvertor) convertor;
+                    if (autoConvertor.auto() && autoConvertor.canConvertor(key, variableText)) {
+                        convertorToVariableList(list, key, variableText, name, belong, activitiHandler);
+                        autoCovFlag = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+
+        if (!autoCovFlag) {
+            convertorToVariableList(list, key, variableText, variableType, belong, activitiHandler);
+        }
+    }
+
+    private void convertorToVariableList(List<V> list, String key, String variableText, String variableType, String belong, String activitiHandler) {
+        V v = sillyFactory.newVariable();
+        v.setBelong(belong);
+        v.setActivitiHandler(activitiHandler);
+        v.setVariableName(key);
+        v.setVariableText(variableText);
+        v.setVariableType(variableType);
+        List<SillyVariable> cvList = getSillyConvertor(variableType).makeSaveVariable(v);
+        for (SillyVariable sv : cvList) {
+            list.add((V) sv);
+        }
+    }
+
+    private SillyProcessProperty<?> processProperty() {
+        return getSillyConfig().getSillyProcessProperty(usedCategory());
+    }
+
+    protected void saveData(String taskId, Map<String, Object> saveMap) {
+        saveData(false, taskId, saveMap);
+    }
+
+    protected void submitData(String taskId, Map<String, Object> saveMap) {
+        saveData(true, taskId, saveMap);
+    }
+
+    protected void saveData(boolean submit, String taskId, Map<String, Object> saveMap) {
+        Task task = sillyEngineService.findTaskById(taskId);
+        SillyAssert.notNull(task, "任务未找到" + taskId);
+        SillyProcessNodeProperty<?> nodeProperty = getNodeProperty(task);
+        String masterId = sillyEngineService.getBusinessKey(task.getProcessInstanceId());
+        List<V> vs = mapToVariables(saveMap, nodeProperty);
+        M m = sillyFactory.newMaster();
+        m.setId(masterId);
+        N n = sillyFactory.newNode();
+        n.setMasterId(masterId);
+        n.setTaskId(taskId);
+        n.setParallelFlag(nodeProperty.isParallel() ? SillyConstant.YesOrNo.YES : SillyConstant.YesOrNo.NO);
+        setMasterAndNodeByVariables(vs, m, n);
+
+        if (submit) {
+            submit(m, n);
+        } else {
+            save(m, n);
+        }
+    }
+
+    public SillyProcessNodeProperty<?> getNodeProperty(Task task) {
+        String processKey = sillyEngineService.getActKeyNameByProcessInstanceId(task.getProcessInstanceId());
+        String nodeKey = task.getTaskDefinitionKey();
+        return getNodeProperty(processKey, nodeKey);
+    }
+
+    public SillyProcessNodeProperty<?> getNodeProperty(String processKey, String nodeKey) {
+        SillyProcessProperty<?> property = processProperty();
+        SillyAssert.notNull(property, "配置未找到 category：" + usedCategory());
+        SillyProcessMasterProperty<?> masterProperty = property.getMaster().get(processKey);
+        SillyAssert.notNull(masterProperty, "配置未找到 processKey：" + processKey);
+        SillyProcessNodeProperty<?> nodeProperty = masterProperty.getNode().get(nodeKey);
+        SillyAssert.notNull(nodeProperty, "配置未找到 nodeKey：" + nodeKey);
+        return nodeProperty;
+    }
+
+    /**
+     * Map 根据配置对象转 Variable 对象集合
+     *
+     * @param map
+     * @return
+     */
+    public List<V> mapToVariables(Map<String, Object> map, SillyProcessNodeProperty<?> nodeProperty) {
+        SillyAssert.notNull(nodeProperty, "节点配置不可为空");
+        List<V> list = new ArrayList<>();
+        Map<String, ? extends SillyProcessVariableProperty> variableMap = nodeProperty.getVariable();
+        for (String vKey : variableMap.keySet()) {
+            SillyProcessVariableProperty variableProperty = variableMap.get(vKey);
+            Object variableObj = map.remove(vKey);
+            String variableText = null;
+            if (variableObj != null) {
+                variableText = variableObj.toString();
+            }
+
+            if (StringUtils.isEmpty(variableText)) {
+                if (variableProperty.isRequest()) {
+                    throw new SillyException("此参数值不可为空" + vKey);
+                }
+                continue;
+            }
+
+            convertorToVariableList(list,
+                    variableProperty.getVariableName(),
+                    variableText,
+                    variableProperty.getVariableType(),
+                    variableProperty.getBelong(),
+                    variableProperty.getActivitiHandler()
+            );
+        }
+
+        for (String key : map.keySet()) {
+            if (!nodeProperty.isAllowOtherVariable()) {
+                if (nodeProperty.isOtherVariableThrowException()) {
+                    throw new SillyException("不允许保存此额外变量数据" + key);
+                } else {
+                    continue;
+                }
+
+            }
+
+            doVariableList(map.get(key), list, key, SillyConstant.ActivitiVariable.BELONG_VARIABLE, null);
+        }
+
+
+        return list;
+    }
+
+    public void setMasterAndNodeByVariables(List<V> vList, M m, N n) {
+        Map<String, Object> masterMap = new HashMap<>();
+        Map<String, Object> nodeMap = new HashMap<>();
+        for (V v : vList) {
+            String type = v.getVariableType();
+            String name = v.getVariableName();
+            String value = v.getVariableText();
+
+            if (Objects.equals(v.getBelong(), SillyConstant.ActivitiVariable.BELONG_MASTER)) {
+                getSillyConvertor(type).convert(masterMap, name, value);
+            } else if (Objects.equals(v.getBelong(), SillyConstant.ActivitiVariable.BELONG_NODE)) {
+                getSillyConvertor(type).convert(nodeMap, name, value);
+            }
+        }
+
+        BeanMap.create(m).putAll(masterMap);
+        BeanMap.create(n).putAll(nodeMap);
+        n.setVariableList(vList);
+    }
+
 
 }

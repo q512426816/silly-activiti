@@ -9,6 +9,7 @@
 package com.iqiny.silly.activiti.convertor;
 
 
+import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.util.SillyReflectUtil;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.core.SillyVariable;
@@ -30,7 +31,7 @@ public class SillyListConvertor implements SillyVariableConvertor<List<String>> 
 
     protected Log log = LogFactory.getLog(SillyListConvertor.class);
 
-    protected String splitStr = ",";
+    protected String splitStr = SillyConstant.ARRAY_SPLIT_STR;
 
     @Override
     public String name() {
@@ -47,7 +48,7 @@ public class SillyListConvertor implements SillyVariableConvertor<List<String>> 
             varList = new ArrayList<>();
         }
         if (StringUtils.isNotEmpty(value)) {
-            String[] vtArr = value.split(",");
+            String[] vtArr = value.split(SillyConstant.ARRAY_SPLIT_STR);
             varList.addAll(Arrays.asList(vtArr));
         }
         varMap.put(key, varList);

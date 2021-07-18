@@ -8,19 +8,29 @@
  */
 package com.iqiny.silly.core.config;
 
+import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.util.SillyAssert;
+import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.base.SillyInitializable;
+import com.iqiny.silly.core.config.property.SillyProcessMasterProperty;
+import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
+import com.iqiny.silly.core.config.property.SillyProcessProperty;
+import com.iqiny.silly.core.config.property.SillyProcessVariableProperty;
 import com.iqiny.silly.core.convertor.SillyStringConvertor;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.resume.SillyResumeService;
 import com.iqiny.silly.core.service.SillyEngineService;
+import com.iqiny.silly.core.service.SillyReadService;
+import com.iqiny.silly.core.service.SillyWriteService;
 
 import java.util.*;
 
 /**
  * 配置类
  */
+
+@SuppressWarnings("all")
 public abstract class AbstractSillyConfig implements SillyConfig {
 
     /**
@@ -53,6 +63,20 @@ public abstract class AbstractSillyConfig implements SillyConfig {
      */
     protected final Map<String, SillyFactory> sillyFactoryMap = new HashMap<>();
 
+    /**
+     * 傻瓜读取服务类
+     */
+    protected final Map<String, SillyReadService> sillyReadServiceMap = new HashMap<>();
+
+    /**
+     * 傻瓜写入服务类
+     */
+    protected final Map<String, SillyWriteService> sillyWriteServiceMap = new HashMap<>();
+
+    /**
+     * 傻瓜流程参数属性配置
+     */
+    protected final Map<String, SillyProcessProperty> sillyProcessPropertyMap = new HashMap<>();
 
     @Override
     public void init() {
@@ -63,6 +87,10 @@ public abstract class AbstractSillyConfig implements SillyConfig {
         initSillyFactory();
         // 3 初始化傻瓜转换器
         initSillyConvertorMap();
+        // 4 初始化傻瓜服务
+        initSillyService();
+        // 5 初始化傻瓜流程参数
+        initSillyProcessProperty();
 
         checkConfig();
 
@@ -150,6 +178,71 @@ public abstract class AbstractSillyConfig implements SillyConfig {
      */
     protected abstract void hookInitSillyConvertorMap();
 
+    protected void initSillyService() {
+        initReadSillyService();
+        initWriteSillyService();
+    }
+
+    protected abstract void initReadSillyService();
+
+    protected abstract void initWriteSillyService();
+
+    protected void addSillyReadService(SillyReadService readService) {
+        sillyReadServiceMap.put(readService.usedCategory(), readService);
+    }
+
+    protected void addSillyWriteService(SillyWriteService writeService) {
+        sillyWriteServiceMap.put(writeService.usedCategory(), writeService);
+    }
+
+    private void initSillyProcessProperty() {
+        hookSillyProcessPropertyMap();
+    }
+
+    protected void addSillyProcessProperty(String category, SillyProcessProperty sillyProcessProperty) {
+        initSillyProcessProperty(category, sillyProcessProperty);
+        sillyProcessPropertyMap.put(category, sillyProcessProperty);
+    }
+
+
+    protected abstract void hookSillyProcessPropertyMap();
+
+    protected void initSillyProcessProperty(String category, SillyProcessProperty property) {
+        if (StringUtils.isEmpty(property.getCategory())) {
+            property.setCategory(category);
+        }
+        Map<String, SillyProcessMasterProperty> masterMap = property.getMaster();
+        for (String key : masterMap.keySet()) {
+            SillyProcessMasterProperty masterProperty = masterMap.get(key);
+            if (StringUtils.isEmpty(masterProperty.getProcessKey())) {
+                masterProperty.setProcessKey(key);
+            }
+
+            Map<String, SillyProcessNodeProperty> nodeMap = masterProperty.getNode();
+            for (String nodeKey : nodeMap.keySet()) {
+                SillyProcessNodeProperty nodeProperty = nodeMap.get(nodeKey);
+                if (StringUtils.isEmpty(nodeProperty.getNodeKey())) {
+                    nodeProperty.setNodeKey(nodeKey);
+                }
+
+                Map<String, SillyProcessVariableProperty> variableMap = nodeProperty.getVariable();
+                for (String variableName : variableMap.keySet()) {
+                    SillyProcessVariableProperty variableProperty = variableMap.get(variableName);
+                    if (StringUtils.isEmpty(variableProperty.getVariableName())) {
+                        variableProperty.setVariableName(variableName);
+                    }
+                    if (StringUtils.isEmpty(variableProperty.getVariableType())) {
+                        variableProperty.setVariableType(SillyConstant.ActivitiNode.CONVERTOR_STRING);
+                    }
+                    if (StringUtils.isEmpty(variableProperty.getBelong())) {
+                        variableProperty.setBelong(SillyConstant.ActivitiVariable.BELONG_VARIABLE);
+                    }
+                }
+
+            }
+        }
+    }
+
     @Override
     public CurrentUserUtil getCurrentUserUtil() {
         return currentUserUtil;
@@ -175,4 +268,20 @@ public abstract class AbstractSillyConfig implements SillyConfig {
     public SillyFactory getSillyFactory(String category) {
         return sillyFactoryMap.get(category);
     }
+
+    @Override
+    public SillyReadService getSillyReadService(String category) {
+        return sillyReadServiceMap.get(category);
+    }
+
+    @Override
+    public SillyWriteService getSillyWriteService(String category) {
+        return sillyWriteServiceMap.get(category);
+    }
+
+    @Override
+    public SillyProcessProperty getSillyProcessProperty(String category) {
+        return sillyProcessPropertyMap.get(category);
+    }
+
 }

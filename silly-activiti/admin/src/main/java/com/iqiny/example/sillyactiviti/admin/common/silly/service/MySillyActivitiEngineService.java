@@ -9,7 +9,7 @@
 package com.iqiny.example.sillyactiviti.admin.common.silly.service;
 
 import com.iqiny.silly.activiti.BaseSillyActivitiEngineService;
-import com.iqiny.silly.core.read.MySillyMasterTask;
+import com.iqiny.silly.core.base.SillyMasterTask;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,12 +23,12 @@ import java.util.List;
 public class MySillyActivitiEngineService extends BaseSillyActivitiEngineService {
 
     @Override
-    public List<MySillyMasterTask> getDoingMasterTask(String category, String userId) {
+    public List<SillyMasterTask> getDoingMasterTask(String category, String userId) {
         return null;
     }
 
     @Override
-    public List<MySillyMasterTask> getHistoryMasterTask(String category, String userId) {
+    public List<SillyMasterTask> getHistoryMasterTask(String category, String userId) {
         return null;
     }
 

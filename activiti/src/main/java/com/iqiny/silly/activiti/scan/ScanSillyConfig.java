@@ -36,6 +36,7 @@ import java.util.Set;
 
 import static org.springframework.util.StringUtils.tokenizeToStringArray;
 
+@SuppressWarnings("all")
 public class ScanSillyConfig extends ActivitiSillyConfig {
 
     private final static Log log = LogFactory.getLog(ScanSillyConfig.class);

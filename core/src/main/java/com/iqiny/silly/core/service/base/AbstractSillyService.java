@@ -53,7 +53,11 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         setCurrentUserUtil(sillyConfig.getCurrentUserUtil());
         setSillyConvertorMap(sillyConfig.getSillyConvertorMap());
         setSillyResumeService(sillyConfig.getSillyResumeService());
+
+        otherInit();
     }
+
+    protected abstract void otherInit();
 
     @Override
     public SillyConfig getSillyConfig() {
