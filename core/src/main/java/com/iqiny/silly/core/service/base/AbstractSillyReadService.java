@@ -3,7 +3,7 @@
  *
  *  https://gitee.com/iqiny/silly
  *
- *  project name：silly-core 1.0.4-RELEASE
+ *  project name：silly-core 1.0.5-RELEASE
  *  project description：top silly project pom.xml file
  */
 package com.iqiny.silly.core.service.base;
@@ -35,6 +35,10 @@ import java.util.*;
 @SuppressWarnings("unchecked")
 public abstract class AbstractSillyReadService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable, T> extends AbstractSillyService<M, N, V, T> implements SillyReadService<M, N, V> {
 
+    @Override
+    protected void otherInit() {
+
+    }
 
     /**
      * 查询主表数据

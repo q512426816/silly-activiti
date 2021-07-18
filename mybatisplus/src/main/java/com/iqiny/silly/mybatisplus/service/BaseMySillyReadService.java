@@ -3,7 +3,7 @@
  *
  *  https://gitee.com/iqiny/silly
  *
- *  project name：silly-mybatisplus 1.0.4-RELEASE
+ *  project name：silly-mybatisplus 1.0.5-RELEASE
  *  project description：top silly project pom.xml file
  */
 package com.iqiny.silly.mybatisplus.service;
@@ -264,6 +264,8 @@ public abstract class BaseMySillyReadService<M extends BaseMySillyMaster<M>, N e
             tempName = key.substring(start.length(), key.lastIndexOf(end));
         } else if (key.equals(variableQueryKey())) {
             tempName = key;
+        } else {
+            return null;
         }
 
 
@@ -302,5 +304,27 @@ public abstract class BaseMySillyReadService<M extends BaseMySillyMaster<M>, N e
 
     protected void convertorRecordValue(String convertorName, Map<String, Object> record, String field) {
         getSillyConvertor(convertorName).convert(record, field, MapUtils.getString(record, field));
+    }
+
+
+    @Override
+    public List<N> getAllNodeList(String masterId) {
+        final N n = sillyFactory.newNode();
+        n.setMasterId(masterId);
+        QueryWrapper<N> qw = new QueryWrapper<>();
+        qw.setEntity(n);
+        qw.orderByAsc("CREATE_DATE");
+        return sillyFactory.newNode().selectList(qw);
+    }
+
+    @Override
+    public N getNode(String masterId, String nodeKey) {
+        final N n = sillyFactory.newNode();
+        n.setMasterId(masterId);
+        n.setNodeKey(nodeKey);
+        QueryWrapper<N> qw = new QueryWrapper<>();
+        qw.setEntity(n);
+        qw.orderByAsc("CREATE_DATE");
+        return sillyFactory.newNode().selectOne(qw);
     }
 }
