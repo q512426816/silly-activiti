@@ -15,7 +15,10 @@ import java.util.*;
 public class SillyMasterTaskUtil<S extends SillyMasterTask> {
 
     private List<S> masterTaskList;
-    private Map<String, Set<String>> masterTaskMap;
+    /**
+     * MASTER_ID  => MASTER_TASK
+     */
+    private Map<String, Set<S>> masterTaskMap;
 
     public static SillyMasterTaskUtil<? extends SillyMasterTask> create(List<SillyMasterTask> masterTasks) {
         SillyMasterTaskUtil<SillyMasterTask> taskUtil = new SillyMasterTaskUtil<>();
@@ -51,17 +54,17 @@ public class SillyMasterTaskUtil<S extends SillyMasterTask> {
                 continue;
             }
             final String masterId = masterTask.getMasterId();
-            final Set<String> taskIds = masterTaskMap.getOrDefault(masterId, new LinkedHashSet<>());
-            taskIds.add(masterTask.getTaskId());
+            final Set<S> taskIds = masterTaskMap.getOrDefault(masterId, new LinkedHashSet<>());
+            taskIds.add(masterTask);
             masterTaskMap.putIfAbsent(masterId, taskIds);
         }
     }
 
-    public String getOneTaskId(String masterId) {
+    public S getOneTaskId(String masterId) {
         if (masterTaskMap == null) {
             init();
         }
-        final Set<String> taskIds = masterTaskMap.get(masterId);
+        final Set<S> taskIds = masterTaskMap.get(masterId);
         if (taskIds != null && !taskIds.isEmpty()) {
             return taskIds.iterator().next();
         }

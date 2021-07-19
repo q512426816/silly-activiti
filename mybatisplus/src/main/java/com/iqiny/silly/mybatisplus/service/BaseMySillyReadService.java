@@ -200,8 +200,9 @@ public abstract class BaseMySillyReadService<M extends BaseMySillyMaster<M>, N e
     protected void setOneRecordInfo(Map<String, Object> record, SillyMasterTaskUtil<? extends SillyMasterTask> masterTaskUtil) {
         if (masterTaskUtil != null) {
             final String masterId = SillyMapUtils.getString(record, "id");
-            String taskId = masterTaskUtil.getOneTaskId(masterId);
-            SillyMapUtils.put(record, "taskId", taskId);
+            SillyMasterTask one = masterTaskUtil.getOneTaskId(masterId);
+            SillyMapUtils.put(record, "taskId", one.getTaskId());
+            SillyMapUtils.put(record, "params", one.getParams());
         }
         setOneRecordInfo(record);
     }
