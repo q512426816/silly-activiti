@@ -54,7 +54,7 @@
         <dependency>
             <groupId>com.iqiny.silly</groupId>
             <artifactId>silly-spring-boot-starter</artifactId>
-            <version>1.0.5-RELEASE</version>
+            <version>1.0.6-RELEASE</version>
         </dependency>
 
         <!-- activiti -->

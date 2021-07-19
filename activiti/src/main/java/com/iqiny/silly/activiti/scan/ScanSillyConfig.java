@@ -3,7 +3,7 @@
  *
  *  https://gitee.com/iqiny/silly
  *
- *  project name：silly-activiti 1.0.5-RELEASE
+ *  project name：silly-activiti 1.0.6-RELEASE
  *  project description：top silly project pom.xml file
  */
 package com.iqiny.silly.activiti.scan;
@@ -16,6 +16,7 @@ import com.iqiny.silly.core.base.SillyEntity;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
+import com.iqiny.silly.core.group.SillyTaskGroupHandle;
 import com.iqiny.silly.core.resume.SillyResume;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

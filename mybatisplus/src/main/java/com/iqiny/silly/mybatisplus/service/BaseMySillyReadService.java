@@ -3,7 +3,7 @@
  *
  *  https://gitee.com/iqiny/silly
  *
- *  project name：silly-mybatisplus 1.0.5-RELEASE
+ *  project name：silly-mybatisplus 1.0.6-RELEASE
  *  project description：top silly project pom.xml file
  */
 package com.iqiny.silly.mybatisplus.service;
@@ -90,6 +90,7 @@ public abstract class BaseMySillyReadService<M extends BaseMySillyMaster<M>, N e
      * @param params
      * @return
      */
+    @Override
     public IPage<Map<String, Object>> queryDoingPage(Map<String, Object> params) {
         final List<SillyMasterTask> masterTasks = sillyEngineService.getDoingMasterTask(usedCategory(), currentUserUtil.currentUserId());
         final SillyMasterTaskUtil<? extends SillyMasterTask> masterTaskUtil = SillyMasterTaskUtil.create(masterTasks);
@@ -112,6 +113,7 @@ public abstract class BaseMySillyReadService<M extends BaseMySillyMaster<M>, N e
      * @param params
      * @return
      */
+    @Override
     public IPage<Map<String, Object>> queryHistoryPage(Map<String, Object> params) {
         final List<SillyMasterTask> masterTasks = sillyEngineService.getHistoryMasterTask(usedCategory(), currentUserUtil.currentUserId());
         final SillyMasterTaskUtil<? extends SillyMasterTask> masterTaskUtil = SillyMasterTaskUtil.create(masterTasks);

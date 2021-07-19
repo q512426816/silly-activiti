@@ -3,7 +3,7 @@
  *
  *  https://gitee.com/iqiny/silly
  *
- *  project name：silly-activiti 1.0.5-RELEASE
+ *  project name：silly-activiti 1.0.6-RELEASE
  *  project description：top silly project pom.xml file
  */
 package com.iqiny.silly.activiti;
@@ -11,12 +11,16 @@ package com.iqiny.silly.activiti;
 import com.alibaba.fastjson.JSON;
 import com.iqiny.silly.activiti.convertor.SillyListConvertor;
 import com.iqiny.silly.activiti.spring.SpringSillyContent;
+import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.config.AbstractSillyConfig;
 import com.iqiny.silly.core.config.CurrentUserUtil;
 import com.iqiny.silly.core.config.property.SillyProcessProperty;
 import com.iqiny.silly.core.config.property.impl.DefaultProcessProperty;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
+import com.iqiny.silly.core.group.SillyTaskCategoryGroup;
+import com.iqiny.silly.core.group.SillyTaskGroup;
+import com.iqiny.silly.core.group.SillyTaskGroupHandle;
 import com.iqiny.silly.core.resume.SillyResumeService;
 import com.iqiny.silly.core.service.SillyEngineService;
 import com.iqiny.silly.core.service.SillyReadService;
@@ -99,6 +103,29 @@ public class ActivitiSillyConfig extends AbstractSillyConfig {
         refreshProcessResource();
     }
 
+    @Override
+    protected SillyTaskGroupHandle loadSillyTaskGroupHandle() {
+        SillyTaskGroupHandle handle = SpringSillyContent.getBean(SillyTaskGroupHandle.class);
+        loadSillyTaskGroup(handle);
+        loadSillyTaskCategoryGroup(handle);
+        SillyAssert.notNull(handle, "任务组处理器未能正确加载");
+        return handle;
+    }
+
+    protected void loadSillyTaskCategoryGroup(SillyTaskGroupHandle handle) {
+        Set<SillyTaskCategoryGroup> beanSet = SpringSillyContent.getBeanSet(SillyTaskCategoryGroup.class);
+        for (SillyTaskCategoryGroup sillyTaskCategoryGroup : beanSet) {
+            handle.addCategorySillyTaskGroup(sillyTaskCategoryGroup);
+        }
+    }
+
+    protected void loadSillyTaskGroup(SillyTaskGroupHandle handle) {
+        Set<SillyTaskGroup> beanSet = SpringSillyContent.getBeanSet(SillyTaskGroup.class);
+        for (SillyTaskGroup sillyTaskGroup : beanSet) {
+            handle.addSillyTaskGroup(sillyTaskGroup);
+        }
+    }
+
     /**
      * 加载/刷新傻瓜流程配置资源
      */
@@ -134,9 +161,11 @@ public class ActivitiSillyConfig extends AbstractSillyConfig {
     @Override
     protected void initComplete() {
         log.info(this.getClass().getName() + " 初始化完成");
-        log.info("转换器：" + sillyConvertorMap.size() + "个，对象工厂：" + sillyFactoryMap.size() + "个" +
-                "读取服务：" + sillyReadServiceMap.size() + "个，写入服务：" + sillyWriteServiceMap.size() + "个" +
+        log.info("转换器：" + sillyConvertorMap.size() + "个，对象工厂：" + sillyFactoryMap.size() + "个，" +
+                "读取服务：" + sillyReadServiceMap.size() + "个，写入服务：" + sillyWriteServiceMap.size() + "个，" +
                 "流程属性：" + sillyProcessPropertyMap.size() + "个");
+        log.info("成功注册" + sillyTaskGroupHandle.allSillyTaskGroup().size() + " 个任务组对象");
+        log.info("成功注册" + sillyTaskGroupHandle.allCategoryGroup().size() + " 个类型任务组对象");
     }
 
     public String getProcessPattern() {

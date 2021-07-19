@@ -5,7 +5,7 @@
 
     <groupId>com.iqiny.silly</groupId>
     <artifactId>silly-bom</artifactId>
-    <version>1.0.5-RELEASE</version>
+    <version>1.0.6-RELEASE</version>
 
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
@@ -14,7 +14,7 @@
     <url>http://silly.iqiny.com</url>
 
     <properties>
-        <silly.version>1.0.5-RELEASE</silly.version>
+        <silly.version>1.0.6-RELEASE</silly.version>
         <activiti.version>7.1.0.M6</activiti.version>
         <mybatis-plus.version>3.1.2</mybatis-plus.version>
 

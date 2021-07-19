@@ -3,7 +3,7 @@
  *
  *  https://gitee.com/iqiny/silly
  *
- *  project name：silly-core 1.0.5-RELEASE
+ *  project name：silly-core 1.0.6-RELEASE
  *  project description：top silly project pom.xml file
  */
 package com.iqiny.silly.core.config;
@@ -19,6 +19,7 @@ import com.iqiny.silly.core.config.property.SillyProcessProperty;
 import com.iqiny.silly.core.config.property.SillyProcessVariableProperty;
 import com.iqiny.silly.core.convertor.SillyStringConvertor;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
+import com.iqiny.silly.core.group.SillyTaskGroupHandle;
 import com.iqiny.silly.core.resume.SillyResumeService;
 import com.iqiny.silly.core.service.SillyEngineService;
 import com.iqiny.silly.core.service.SillyReadService;
@@ -78,6 +79,11 @@ public abstract class AbstractSillyConfig implements SillyConfig {
      */
     protected final Map<String, SillyProcessProperty> sillyProcessPropertyMap = new HashMap<>();
 
+    /**
+     * 傻瓜任务组处理类
+     */
+    protected SillyTaskGroupHandle sillyTaskGroupHandle;
+
     @Override
     public void init() {
         preInit();
@@ -91,6 +97,8 @@ public abstract class AbstractSillyConfig implements SillyConfig {
         initSillyService();
         // 5 初始化傻瓜流程参数
         initSillyProcessProperty();
+        // 6 初始化傻瓜任务组处理类
+        initSillyTaskGroupHandle();
 
         checkConfig();
 
@@ -99,6 +107,7 @@ public abstract class AbstractSillyConfig implements SillyConfig {
 
         initComplete();
     }
+
 
     @Override
     public Set<String> supportCategories() {
@@ -243,6 +252,12 @@ public abstract class AbstractSillyConfig implements SillyConfig {
         }
     }
 
+    protected void initSillyTaskGroupHandle() {
+        sillyTaskGroupHandle = loadSillyTaskGroupHandle();
+    }
+
+    protected abstract SillyTaskGroupHandle loadSillyTaskGroupHandle();
+
     @Override
     public CurrentUserUtil getCurrentUserUtil() {
         return currentUserUtil;
@@ -283,5 +298,9 @@ public abstract class AbstractSillyConfig implements SillyConfig {
     public SillyProcessProperty getSillyProcessProperty(String category) {
         return sillyProcessPropertyMap.get(category);
     }
-
+    
+    @Override
+    public SillyTaskGroupHandle getSillyTaskGroupHandle() {
+        return sillyTaskGroupHandle;
+    }
 }

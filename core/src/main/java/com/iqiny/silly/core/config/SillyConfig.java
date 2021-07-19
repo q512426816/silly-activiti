@@ -3,7 +3,7 @@
  *
  *  https://gitee.com/iqiny/silly
  *
- *  project name：silly-core 1.0.5-RELEASE
+ *  project name：silly-core 1.0.6-RELEASE
  *  project description：top silly project pom.xml file
  */
 package com.iqiny.silly.core.config;
@@ -11,11 +11,15 @@ package com.iqiny.silly.core.config;
 import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.config.property.SillyProcessProperty;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
+import com.iqiny.silly.core.group.SillyTaskCategoryGroup;
+import com.iqiny.silly.core.group.SillyTaskGroup;
+import com.iqiny.silly.core.group.SillyTaskGroupHandle;
 import com.iqiny.silly.core.resume.SillyResumeService;
 import com.iqiny.silly.core.service.SillyEngineService;
 import com.iqiny.silly.core.service.SillyReadService;
 import com.iqiny.silly.core.service.SillyWriteService;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -52,4 +56,7 @@ public interface SillyConfig {
     SillyWriteService getSillyWriteService(String category);
 
     SillyProcessProperty getSillyProcessProperty(String category);
+
+    SillyTaskGroupHandle getSillyTaskGroupHandle();
+
 }

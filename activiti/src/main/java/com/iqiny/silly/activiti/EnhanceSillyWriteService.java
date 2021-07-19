@@ -3,7 +3,7 @@
  *
  *  https://gitee.com/iqiny/silly
  *
- *  project name：silly-activiti 1.0.5-RELEASE
+ *  project name：silly-activiti 1.0.6-RELEASE
  *  project description：top silly project pom.xml file
  */
 package com.iqiny.silly.activiti;
@@ -322,7 +322,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         return list;
     }
 
-    private void doVariableList(Object object, List<V> list, String key, String belong, String activitiHandler) {
+    protected void doVariableList(Object object, List<V> list, String key, String belong, String activitiHandler) {
         if (object == null || StringUtils.isEmpty(key)) {
             return;
         }
@@ -373,7 +373,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         }
     }
 
-    private void convertorToVariableList(List<V> list, String key, String variableText, String variableType, String belong, String activitiHandler) {
+    protected void convertorToVariableList(List<V> list, String key, String variableText, String variableType, String belong, String activitiHandler) {
         V v = sillyFactory.newVariable();
         v.setBelong(belong);
         v.setActivitiHandler(activitiHandler);
@@ -384,10 +384,6 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         for (SillyVariable sv : cvList) {
             list.add((V) sv);
         }
-    }
-
-    private SillyProcessProperty<?> processProperty() {
-        return getSillyConfig().getSillyProcessProperty(usedCategory());
     }
 
     protected void saveData(String taskId, Map<String, Object> saveMap) {
@@ -417,22 +413,6 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         } else {
             save(m, n);
         }
-    }
-
-    public SillyProcessNodeProperty<?> getNodeProperty(Task task) {
-        String processKey = sillyEngineService.getActKeyNameByProcessInstanceId(task.getProcessInstanceId());
-        String nodeKey = task.getTaskDefinitionKey();
-        return getNodeProperty(processKey, nodeKey);
-    }
-
-    public SillyProcessNodeProperty<?> getNodeProperty(String processKey, String nodeKey) {
-        SillyProcessProperty<?> property = processProperty();
-        SillyAssert.notNull(property, "配置未找到 category：" + usedCategory());
-        SillyProcessMasterProperty<?> masterProperty = property.getMaster().get(processKey);
-        SillyAssert.notNull(masterProperty, "配置未找到 processKey：" + processKey);
-        SillyProcessNodeProperty<?> nodeProperty = masterProperty.getNode().get(nodeKey);
-        SillyAssert.notNull(nodeProperty, "配置未找到 nodeKey：" + nodeKey);
-        return nodeProperty;
     }
 
     /**
@@ -484,6 +464,13 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
 
 
         return list;
+    }
+
+
+    public SillyProcessNodeProperty<?> getNodeProperty(Task task) {
+        String processKey = sillyEngineService.getActKeyNameByProcessInstanceId(task.getProcessInstanceId());
+        String nodeKey = task.getTaskDefinitionKey();
+        return getNodeProperty(processKey, nodeKey);
     }
 
     public void setMasterAndNodeByVariables(List<V> vList, M m, N n) {

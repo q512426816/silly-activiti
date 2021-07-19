@@ -3,7 +3,7 @@
  *
  *  https://gitee.com/iqiny/silly
  *
- *  project name：silly-activiti 1.0.5-RELEASE
+ *  project name：silly-activiti 1.0.6-RELEASE
  *  project description：top silly project pom.xml file
  */
 package com.iqiny.silly.activiti;
@@ -11,6 +11,7 @@ package com.iqiny.silly.activiti;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
+import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
 import com.iqiny.silly.core.service.base.AbstractSillyReadService;
 import org.activiti.engine.task.Task;
 
@@ -24,4 +25,10 @@ import org.activiti.engine.task.Task;
 public abstract class EnhanceSillyReadService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable>
         extends AbstractSillyReadService<M, N, V, Task> {
 
+    public SillyProcessNodeProperty<?> getNodeProperty(String taskId) {
+        Task task = sillyEngineService.findTaskById(taskId);
+        String masterId = sillyEngineService.getBusinessKey(task.getProcessInstanceId());
+        M master = getMaster(masterId);
+        return getNodeProperty(master.processKey(), task.getTaskDefinitionKey());
+    }
 }

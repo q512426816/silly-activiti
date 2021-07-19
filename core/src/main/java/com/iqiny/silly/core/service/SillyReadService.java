@@ -3,7 +3,7 @@
  *
  *  https://gitee.com/iqiny/silly
  *
- *  project name：silly-core 1.0.5-RELEASE
+ *  project name：silly-core 1.0.6-RELEASE
  *  project description：top silly project pom.xml file
  */
 package com.iqiny.silly.core.service;
@@ -72,4 +72,21 @@ public interface SillyReadService<M extends SillyMaster, N extends SillyNode<V>,
      * @return
      */
     N getNode(String masterId, String nodeKey);
+
+    /**
+     * 获取进行中的任务列表分页数据
+     *
+     * @param params
+     * @return
+     */
+    Object queryDoingPage(Map<String, Object> params);
+
+    /**
+     * 获取历史任务分页数据
+     *
+     * @param params
+     * @return
+     */
+    Object queryHistoryPage(Map<String, Object> params);
+
 }
