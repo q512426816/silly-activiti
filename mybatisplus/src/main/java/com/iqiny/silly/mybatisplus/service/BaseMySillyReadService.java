@@ -17,6 +17,7 @@ import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.util.SillyMapUtils;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyMasterTask;
+import com.iqiny.silly.core.read.MySillyMasterTask;
 import com.iqiny.silly.core.read.SillyMasterTaskUtil;
 import com.iqiny.silly.mybatisplus.BaseMySillyMaster;
 import com.iqiny.silly.mybatisplus.BaseMySillyNode;
@@ -200,11 +201,20 @@ public abstract class BaseMySillyReadService<M extends BaseMySillyMaster<M>, N e
     protected void setOneRecordInfo(Map<String, Object> record, SillyMasterTaskUtil<? extends SillyMasterTask> masterTaskUtil) {
         if (masterTaskUtil != null) {
             final String masterId = SillyMapUtils.getString(record, "id");
-            SillyMasterTask one = masterTaskUtil.getOneTaskId(masterId);
+            SillyMasterTask one = masterTaskUtil.getOneTask(masterId);
+            if (one == null) {
+                one = new MySillyMasterTask();
+            }
             SillyMapUtils.put(record, "taskId", one.getTaskId());
-            SillyMapUtils.put(record, "params", one.getParams());
+            SillyMapUtils.put(record, "taskObj", one);
+            SillyMapUtils.put(record, "taskList", masterTaskUtil.getTaskSet(masterId));
+            otherSetTaskRecord(record, masterTaskUtil);
         }
         setOneRecordInfo(record);
+    }
+
+    protected void otherSetTaskRecord(Map<String, Object> record, SillyMasterTaskUtil<? extends SillyMasterTask> masterTaskUtil) {
+
     }
 
 

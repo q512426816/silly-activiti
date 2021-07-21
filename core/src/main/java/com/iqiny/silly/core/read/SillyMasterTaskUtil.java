@@ -60,14 +60,21 @@ public class SillyMasterTaskUtil<S extends SillyMasterTask> {
         }
     }
 
-    public S getOneTaskId(String masterId) {
+    public S getOneTask(String masterId) {
         if (masterTaskMap == null) {
             init();
         }
-        final Set<S> taskIds = masterTaskMap.get(masterId);
-        if (taskIds != null && !taskIds.isEmpty()) {
-            return taskIds.iterator().next();
+        final Set<S> tasks = masterTaskMap.get(masterId);
+        if (tasks != null && !tasks.isEmpty()) {
+            return tasks.iterator().next();
         }
         return null;
+    }
+
+    public Set<S> getTaskSet(String masterId) {
+        if (masterTaskMap == null) {
+            init();
+        }
+        return masterTaskMap.get(masterId);
     }
 }

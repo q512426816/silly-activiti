@@ -19,6 +19,14 @@ public interface SillyMasterTask {
 
     void setCategory(String category);
 
+    String getNodeKey();
+
+    void setNodeKey(String nodeKey);
+
+    String getTaskType();
+
+    void setTaskType(String taskType);
+
     String getMasterId();
 
     void setMasterId(String masterId);

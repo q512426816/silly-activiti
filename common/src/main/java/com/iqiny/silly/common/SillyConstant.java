@@ -116,6 +116,21 @@ public class SillyConstant {
         public static final String PROCESS_TYPE_CLOSE = "close";
     }
 
+    public class UserTaskType {
+        /**
+         * 责任人任务
+         */
+        public static final String TASK_TYPE_ASSIGNEE = "assignee";
+        /**
+         * 参与者任务
+         */
+        public static final String TASK_TYPE_USER = "user";
+        /**
+         * 参与组任务
+         */
+        public static final String TASK_TYPE_GROUP = "group";
+    }
+
     public class YesOrNo {
         public static final String YES = "1";
         public static final String NO = "0";
