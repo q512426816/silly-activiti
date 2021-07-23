@@ -210,6 +210,10 @@ public abstract class AbstractSillyConfig implements SillyConfig {
 
     protected void addSillyProcessProperty(String category, SillyProcessProperty sillyProcessProperty) {
         initSillyProcessProperty(category, sillyProcessProperty);
+        if (StringUtils.isEmpty(category)) {
+            category = sillyProcessProperty.getCategory();
+        }
+        SillyAssert.notEmpty(category, "category不可为空");
         sillyProcessPropertyMap.put(category, sillyProcessProperty);
     }
 
@@ -298,7 +302,7 @@ public abstract class AbstractSillyConfig implements SillyConfig {
     public SillyProcessProperty getSillyProcessProperty(String category) {
         return sillyProcessPropertyMap.get(category);
     }
-    
+
     @Override
     public SillyTaskGroupHandle getSillyTaskGroupHandle() {
         return sillyTaskGroupHandle;

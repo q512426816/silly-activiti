@@ -52,7 +52,9 @@ public class SillyConfigUtil {
     }
 
     public static SillyConfig getSillyConfig(String category) {
-        SillyAssert.notNull(category);
+        if (category == null) {
+            category = SillyInitializable.DEFAULT_CATEGORY;
+        }
         final SillyConfig sillyConfig = SILLY_CONFIG_MAP.get(category);
         return sillyConfig == null ? defaultSillyConfig : sillyConfig;
     }

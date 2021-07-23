@@ -26,6 +26,8 @@ import com.iqiny.silly.core.service.SillyEngineService;
 import com.iqiny.silly.core.service.SillyReadService;
 import com.iqiny.silly.core.service.SillyWriteService;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
@@ -34,6 +36,9 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 @SuppressWarnings("all")
@@ -41,7 +46,7 @@ public class ActivitiSillyConfig extends AbstractSillyConfig {
 
     private final static Log log = LogFactory.getLog(ActivitiSillyConfig.class);
 
-    protected String processPattern = "classpath*:silly/*.json";
+    protected String processPattern = "classpath*:/silly/*.json";
 
     protected Class<? extends SillyProcessProperty> processPropertyClazz = DefaultProcessProperty.class;
 
@@ -146,10 +151,13 @@ public class ActivitiSillyConfig extends AbstractSillyConfig {
             return;
         }
         try {
-            File jsonFile = resource.getFile();
-            String json = FileUtils.readFileToString(jsonFile);
+            // 生成jar后必须以流的形式读取
+            InputStream inputStream = resource.getInputStream();
+            StringWriter writer = new StringWriter();
+            IOUtils.copy(inputStream, writer, StandardCharsets.UTF_8.name());
+            String json = writer.toString();
             SillyProcessProperty processProperty = JSON.parseObject(json, getProcessPropertyClazz());
-            String fileName = jsonFile.getName();
+            String fileName = resource.getFilename();
             String category = fileName.substring(0, fileName.lastIndexOf("."));
             addSillyProcessProperty(category, processProperty);
             log.info("成功更新流程配置文件:" + category);
