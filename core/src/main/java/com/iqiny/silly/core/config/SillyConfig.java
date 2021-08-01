@@ -11,6 +11,7 @@ package com.iqiny.silly.core.config;
 import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.config.html.SillyHtmlTagTemplate;
 import com.iqiny.silly.core.config.property.SillyProcessProperty;
+import com.iqiny.silly.core.config.property.SillyPropertyHandle;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.group.SillyTaskGroupHandle;
 import com.iqiny.silly.core.resume.SillyResumeService;
@@ -54,6 +55,8 @@ public interface SillyConfig {
     SillyWriteService getSillyWriteService(String category);
 
     SillyProcessProperty getSillyProcessProperty(String category);
+
+    SillyPropertyHandle getSillyPropertyHandle();
 
     SillyTaskGroupHandle getSillyTaskGroupHandle();
 

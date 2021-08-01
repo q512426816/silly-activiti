@@ -10,13 +10,16 @@ package com.iqiny.silly.activiti;
 
 import com.alibaba.fastjson.JSON;
 import com.iqiny.silly.activiti.convertor.SillyListConvertor;
+import com.iqiny.silly.activiti.spring.SillySpelPropertyHandle;
 import com.iqiny.silly.activiti.spring.SpringSillyContent;
 import com.iqiny.silly.common.util.SillyAssert;
+import com.iqiny.silly.common.util.SillyReflectUtil;
 import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.config.AbstractSillyConfig;
 import com.iqiny.silly.core.config.CurrentUserUtil;
 import com.iqiny.silly.core.config.html.SillyHtmlTagTemplate;
 import com.iqiny.silly.core.config.property.SillyProcessProperty;
+import com.iqiny.silly.core.config.property.SillyPropertyHandle;
 import com.iqiny.silly.core.config.property.impl.DefaultProcessProperty;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.group.SillyTaskCategoryGroup;
@@ -47,6 +50,8 @@ public class ActivitiSillyConfig extends AbstractSillyConfig {
     protected String processPattern = "classpath*:/silly/*.json";
 
     protected Class<? extends SillyProcessProperty> processPropertyClazz = DefaultProcessProperty.class;
+
+    protected Class<? extends SillyPropertyHandle> propertyHandleClazz = SillySpelPropertyHandle.class;
 
     public ActivitiSillyConfig() {
     }
@@ -199,4 +204,16 @@ public class ActivitiSillyConfig extends AbstractSillyConfig {
         this.processPropertyClazz = processPropertyClazz;
     }
 
+    public Class<? extends SillyPropertyHandle> getPropertyHandleClazz() {
+        return propertyHandleClazz;
+    }
+
+    public void setPropertyHandleClazz(Class<? extends SillyPropertyHandle> propertyHandleClazz) {
+        this.propertyHandleClazz = propertyHandleClazz;
+    }
+
+    @Override
+    public SillyPropertyHandle getSillyPropertyHandle() {
+        return SillyReflectUtil.newInstance(propertyHandleClazz);
+    }
 }

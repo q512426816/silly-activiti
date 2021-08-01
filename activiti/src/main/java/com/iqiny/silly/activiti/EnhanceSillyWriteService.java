@@ -18,8 +18,7 @@ import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
 import com.iqiny.silly.core.config.property.SillyProcessVariableProperty;
-import com.iqiny.silly.core.convertor.SillyAutoConvertor;
-import com.iqiny.silly.core.convertor.SillyVariableConvertor;
+import com.iqiny.silly.core.config.property.SillyPropertyHandle;
 import com.iqiny.silly.core.resume.SillyResume;
 import com.iqiny.silly.core.service.base.AbstractSillyWriteService;
 import org.activiti.engine.task.Task;
@@ -400,12 +399,16 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
      */
     public List<V> mapToVariables(Map<String, Object> map, SillyProcessNodeProperty<?> nodeProperty) {
         SillyAssert.notNull(nodeProperty, "节点配置不可为空");
+
+        SillyPropertyHandle sillyPropertyHandle = getSillyConfig().getSillyPropertyHandle();
+        sillyPropertyHandle.setValues(map);
+
         List<V> list = new ArrayList<>();
         Map<String, ? extends SillyProcessVariableProperty> variableMap = nodeProperty.getVariable();
         for (String vKey : variableMap.keySet()) {
             SillyProcessVariableProperty variableProperty = variableMap.get(vKey);
             Object variableObj = map.remove(vKey);
-            String variableText = variableProperty.getDefaultText();
+            String variableText = sillyPropertyHandle.getStringValue(variableProperty.getDefaultText());
             if (variableObj != null) {
                 variableText = variableObj.toString();
             }
@@ -427,6 +430,10 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         }
 
         for (String key : map.keySet()) {
+            if (nodeProperty.ignoreField(key)) {
+                continue;
+            }
+
             if (!nodeProperty.isAllowOtherVariable()) {
                 if (nodeProperty.isOtherVariableThrowException()) {
                     throw new SillyException("不允许保存此额外变量数据" + key);
@@ -479,6 +486,5 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         String nodeJson = JSON.toJSONString(nodeMap);
         return (N) JSON.parseObject(nodeJson, sillyFactory.newNode().getClass());
     }
-
 
 }

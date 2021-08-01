@@ -47,4 +47,9 @@ public interface SillyProcessNodeProperty<VP extends SillyProcessVariablePropert
     Map<String, VP> getVariable();
 
     void setNodeKey(String nodeKey);
+
+    /**
+     * 忽略此参数，不存储，不校验
+     */
+    boolean ignoreField(String fieldName);
 }

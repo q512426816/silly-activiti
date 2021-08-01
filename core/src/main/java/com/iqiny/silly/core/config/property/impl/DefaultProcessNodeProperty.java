@@ -11,6 +11,7 @@ package com.iqiny.silly.core.config.property.impl;
 import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -40,6 +41,8 @@ public class DefaultProcessNodeProperty implements SillyProcessNodeProperty<Defa
      * 节点名称
      */
     private String nodeName;
+
+    private List<String> ignoreFieldNames;
 
 
     /**
@@ -97,5 +100,19 @@ public class DefaultProcessNodeProperty implements SillyProcessNodeProperty<Defa
     @Override
     public Map<String, DefaultProcessVariableProperty> getVariable() {
         return variable;
+    }
+
+    public List<String> getIgnoreFieldNames() {
+        return ignoreFieldNames;
+    }
+
+    public void setIgnoreFieldNames(List<String> ignoreFieldNames) {
+        this.ignoreFieldNames = ignoreFieldNames;
+    }
+
+    @Override
+    public boolean ignoreField(String fieldName) {
+        List<String> ignoreFieldNames = getIgnoreFieldNames();
+        return ignoreFieldNames != null && ignoreFieldNames.contains(fieldName);
     }
 }
