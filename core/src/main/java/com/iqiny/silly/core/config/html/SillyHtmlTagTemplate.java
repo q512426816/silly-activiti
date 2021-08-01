@@ -17,6 +17,6 @@ public interface SillyHtmlTagTemplate {
 
     String getHtmlType();
 
-    String getHtml(SillyHtmlTagConfig<?> tagConfig);
+    String getHtml(SillyHtmlTagConfig tagConfig);
     
 }

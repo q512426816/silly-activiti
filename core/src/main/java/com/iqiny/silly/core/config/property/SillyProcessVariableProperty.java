@@ -8,16 +8,23 @@
  */
 package com.iqiny.silly.core.config.property;
 
+import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.core.config.html.SillyHtmlTagConfig;
 import com.iqiny.silly.core.config.html.SillyHtmlTagTemplate;
 
 
-public interface SillyProcessVariableProperty<C extends SillyHtmlTagConfig<?>> {
+public interface SillyProcessVariableProperty<C extends SillyHtmlTagConfig> {
 
     /**
      * 变量描述
      */
     String getDesc();
+
+
+    /**
+     * 是否必填表达式
+     */
+    String getRequestEl();
 
     /**
      * 是否必须填写(默认 true)

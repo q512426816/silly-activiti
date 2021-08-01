@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * 傻瓜变量 对应的 html 标签内属性 配置
  */
-public interface SillyHtmlTagConfig<T extends SillyHtmlTagAttrConfig> {
+public interface SillyHtmlTagConfig {
 
     String getTagName();
 
@@ -40,9 +40,9 @@ public interface SillyHtmlTagConfig<T extends SillyHtmlTagAttrConfig> {
 
     void setRequestDesc(String requestDesc);
 
-    List<T> getAttrConfigs();
+    Map<String, String> getAttrConfigs();
 
-    void setAttrConfigs(List<T> attrConfigs);
+    void setAttrConfigs(Map<String, String> attrConfigs);
 
     Map<String, Object> getParams();
 }

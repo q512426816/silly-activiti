@@ -8,14 +8,19 @@
  */
 package com.iqiny.silly.core.config.property.impl;
 
+import com.iqiny.silly.common.SillyConstant;
+import com.iqiny.silly.core.config.SillyConfig;
+import com.iqiny.silly.core.config.SillyConfigUtil;
 import com.iqiny.silly.core.config.html.SillyHtmlTagTemplate;
 import com.iqiny.silly.core.config.html.base.SillyBaseHtmlTagConfig;
 import com.iqiny.silly.core.config.property.SillyProcessVariableProperty;
+import com.iqiny.silly.core.config.property.SillyPropertyHandle;
 
 
 public class DefaultProcessVariableProperty implements SillyProcessVariableProperty<SillyBaseHtmlTagConfig> {
 
     private String desc;
+    private String requestEl = SillyConstant.YesOrNo.YES;
     private boolean request = true;
     private String activitiHandler;
     private String variableType;
@@ -128,5 +133,14 @@ public class DefaultProcessVariableProperty implements SillyProcessVariablePrope
     public String getHtml() {
         SillyHtmlTagTemplate htmlTemplate = getHtmlTemplate();
         return htmlTemplate == null ? null : htmlTemplate.getHtml(getHtmlConfig());
+    }
+
+    @Override
+    public String getRequestEl() {
+        return requestEl;
+    }
+
+    public void setRequestEl(String requestEl) {
+        this.requestEl = requestEl;
     }
 }

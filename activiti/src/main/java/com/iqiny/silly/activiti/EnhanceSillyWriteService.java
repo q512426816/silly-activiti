@@ -414,7 +414,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
             }
 
             if (StringUtils.isEmpty(variableText)) {
-                if (variableProperty.isRequest()) {
+                if (sillyPropertyHandle.getBooleanValue(variableProperty.getRequestEl())) {
                     throw new SillyException("此参数值不可为空" + vKey);
                 }
                 continue;

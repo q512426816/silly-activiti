@@ -1,5 +1,14 @@
+/*
+ *  Copyright  iqiny.com
+ *
+ *  https://gitee.com/iqiny/silly
+ *
+ *  project name：silly-activiti 1.0.6-RELEASE
+ *  project description：top silly project pom.xml file
+ */
 package com.iqiny.silly.activiti.spring;
 
+import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.config.property.SillyPropertyHandle;
@@ -73,6 +82,11 @@ public class SillySpelPropertyHandle implements SillyPropertyHandle {
     @Override
     public Object getValue(String expression) {
         return isSillySpel(expression) ? getSpelValue(expression) : expression;
+    }
+
+    @Override
+    public boolean getBooleanValue(String expression) {
+        return getValue(expression).equals(SillyConstant.YesOrNo.YES);
     }
 
     @Override

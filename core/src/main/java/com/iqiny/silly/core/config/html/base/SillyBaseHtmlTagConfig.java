@@ -14,7 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SillyBaseHtmlTagConfig implements SillyHtmlTagConfig<SillyBaseHtmlTagAttrConfig> {
+public class SillyBaseHtmlTagConfig implements SillyHtmlTagConfig {
 
     protected String tagName;
     protected String fieldName;
@@ -24,7 +24,7 @@ public class SillyBaseHtmlTagConfig implements SillyHtmlTagConfig<SillyBaseHtmlT
     protected String requestDesc;
     protected Map<String, Object> params = new LinkedHashMap<>();
 
-    protected List<SillyBaseHtmlTagAttrConfig> attrConfigs;
+    protected Map<String, String> attrConfigs = new LinkedHashMap<>();
 
 
     @Override
@@ -87,12 +87,12 @@ public class SillyBaseHtmlTagConfig implements SillyHtmlTagConfig<SillyBaseHtmlT
     }
 
     @Override
-    public List<SillyBaseHtmlTagAttrConfig> getAttrConfigs() {
+    public Map<String, String> getAttrConfigs() {
         return attrConfigs;
     }
 
     @Override
-    public void setAttrConfigs(List<SillyBaseHtmlTagAttrConfig> attrConfigs) {
+    public void setAttrConfigs(Map<String, String> attrConfigs) {
         this.attrConfigs = attrConfigs;
     }
 
