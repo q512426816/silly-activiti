@@ -15,6 +15,7 @@ import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
+import com.iqiny.silly.core.convertor.SillyAutoConvertor;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.service.SillyWriteService;
 
@@ -338,7 +339,22 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
                 throw new SillyException("流程参数名称不可为空！" + variable.getVariableText());
             }
 
-            final SillyVariableConvertor<?> handler = getSillyConvertor(variable.getVariableType());
+            String variableType = variable.getVariableType();
+            SillyVariableConvertor<?> handler = getSillyConvertor(variableType);
+            // 仅对 string、list 类型的数据进行自动转换
+            if (variableType.equals(SillyConstant.ActivitiNode.CONVERTOR_STRING) || variableType.equals(SillyConstant.ActivitiNode.CONVERTOR_LIST)) {
+                for (String name : sillyConvertorMap.keySet()) {
+                    SillyVariableConvertor<?> convertor = sillyConvertorMap.get(name);
+                    if (convertor instanceof SillyAutoConvertor) {
+                        SillyAutoConvertor autoConvertor = (SillyAutoConvertor) convertor;
+                        if (autoConvertor.auto() && autoConvertor.canConvertor(variable.getVariableName(), variable.getVariableText())) {
+                            handler = convertor;
+                            break;
+                        }
+                    }
+                }
+            }
+
             if (handler == null) {
                 throw new SillyException("未配置相关数据处理器" + variable.getVariableType());
             }

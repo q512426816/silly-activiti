@@ -8,9 +8,12 @@
  */
 package com.iqiny.silly.core.config.property.impl;
 
+import com.iqiny.silly.core.config.html.SillyHtmlTagTemplate;
+import com.iqiny.silly.core.config.html.base.SillyBaseHtmlTagConfig;
 import com.iqiny.silly.core.config.property.SillyProcessVariableProperty;
 
-public class DefaultProcessVariableProperty implements SillyProcessVariableProperty {
+
+public class DefaultProcessVariableProperty implements SillyProcessVariableProperty<SillyBaseHtmlTagConfig> {
 
     private String desc;
     private boolean request = true;
@@ -19,6 +22,11 @@ public class DefaultProcessVariableProperty implements SillyProcessVariablePrope
     private String variableName;
     private String defaultText;
     private String belong;
+
+    private String htmlType;
+    private SillyBaseHtmlTagConfig htmlConfig;
+    private SillyHtmlTagTemplate tagTemplate;
+
 
     @Override
     public String getDesc() {
@@ -84,5 +92,41 @@ public class DefaultProcessVariableProperty implements SillyProcessVariablePrope
     @Override
     public void setBelong(String belong) {
         this.belong = belong;
+    }
+
+    @Override
+    public String getHtmlType() {
+        return htmlType;
+    }
+
+    @Override
+    public void setHtmlType(String htmlType) {
+        this.htmlType = htmlType;
+    }
+
+    @Override
+    public SillyBaseHtmlTagConfig getHtmlConfig() {
+        return htmlConfig;
+    }
+
+    @Override
+    public void setHtmlConfig(SillyBaseHtmlTagConfig htmlConfig) {
+        this.htmlConfig = htmlConfig;
+    }
+
+    @Override
+    public SillyHtmlTagTemplate getHtmlTemplate() {
+        return tagTemplate;
+    }
+
+    @Override
+    public void setHtmlTemplate(SillyHtmlTagTemplate htmlTemplate) {
+        this.tagTemplate = htmlTemplate;
+    }
+
+    @Override
+    public String getHtml() {
+        SillyHtmlTagTemplate htmlTemplate = getHtmlTemplate();
+        return htmlTemplate == null ? null : htmlTemplate.getHtml(getHtmlConfig());
     }
 }

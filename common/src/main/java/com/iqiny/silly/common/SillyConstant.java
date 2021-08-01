@@ -35,10 +35,7 @@ public class SillyConstant {
          * 流程变量描述 使用 list 类型
          */
         public static final String CONVERTOR_LIST = "list";
-        /**
-         * 流程变量描述 使用 List<List<Object>> 类型
-         */
-        public static final String CONVERTOR_LIST_LIST = "list_list";
+
         /**
          * 流程变量描述 使用 string 类型
          */

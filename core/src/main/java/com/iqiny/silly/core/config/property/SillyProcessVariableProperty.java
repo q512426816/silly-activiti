@@ -8,7 +8,11 @@
  */
 package com.iqiny.silly.core.config.property;
 
-public interface SillyProcessVariableProperty {
+import com.iqiny.silly.core.config.html.SillyHtmlTagConfig;
+import com.iqiny.silly.core.config.html.SillyHtmlTagTemplate;
+
+
+public interface SillyProcessVariableProperty<C extends SillyHtmlTagConfig<?>> {
 
     /**
      * 变量描述
@@ -26,18 +30,22 @@ public interface SillyProcessVariableProperty {
      * 流程类型，为空则不加入流程引擎内
      */
     String getActivitiHandler();
+
     /**
      * 变量类型
      */
     String getVariableType();
+
     /**
      * 变量名称
      */
     String getVariableName();
+
     /**
      * 默认值（字符串）
      */
     String getDefaultText();
+
     /**
      * 变量归属对象 master / node / variable
      */
@@ -48,4 +56,18 @@ public interface SillyProcessVariableProperty {
     void setVariableType(String convertorString);
 
     void setBelong(String belongVariable);
+
+    String getHtmlType();
+
+    void setHtmlType(String htmlType);
+
+    C getHtmlConfig();
+
+    void setHtmlConfig(C htmlConfig);
+
+    SillyHtmlTagTemplate getHtmlTemplate();
+
+    void setHtmlTemplate(SillyHtmlTagTemplate htmlTemplate);
+
+    String getHtml();
 }

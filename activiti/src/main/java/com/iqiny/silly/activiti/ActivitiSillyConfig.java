@@ -15,6 +15,7 @@ import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.config.AbstractSillyConfig;
 import com.iqiny.silly.core.config.CurrentUserUtil;
+import com.iqiny.silly.core.config.html.SillyHtmlTagTemplate;
 import com.iqiny.silly.core.config.property.SillyProcessProperty;
 import com.iqiny.silly.core.config.property.impl.DefaultProcessProperty;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
@@ -25,16 +26,13 @@ import com.iqiny.silly.core.resume.SillyResumeService;
 import com.iqiny.silly.core.service.SillyEngineService;
 import com.iqiny.silly.core.service.SillyReadService;
 import com.iqiny.silly.core.service.SillyWriteService;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -84,6 +82,14 @@ public class ActivitiSillyConfig extends AbstractSillyConfig {
         final Set<SillyVariableConvertor> beanSet = SpringSillyContent.getBeanSet(SillyVariableConvertor.class);
         for (SillyVariableConvertor convertor : beanSet) {
             addSillyVariableConvertor(convertor);
+        }
+    }
+
+    @Override
+    protected void hookInitSillyHtmlTagTemplateMap() {
+        final Set<SillyHtmlTagTemplate> beanSet = SpringSillyContent.getBeanSet(SillyHtmlTagTemplate.class);
+        for (SillyHtmlTagTemplate htmlTagTemplate : beanSet) {
+            addSillyHtmlTagTemplateMap(htmlTagTemplate);
         }
     }
 
@@ -147,7 +153,8 @@ public class ActivitiSillyConfig extends AbstractSillyConfig {
     }
 
     protected void loadSillyProcessProperty(Resource resource) {
-        if (resource == null || !resource.isFile()) {
+        if (resource == null || !resource.isReadable()) {
+            log.warn(resource.getFilename() + "不可读取，将跳过加载");
             return;
         }
         try {
@@ -191,4 +198,5 @@ public class ActivitiSillyConfig extends AbstractSillyConfig {
     public void setProcessPropertyClazz(Class<? extends SillyProcessProperty> processPropertyClazz) {
         this.processPropertyClazz = processPropertyClazz;
     }
+
 }

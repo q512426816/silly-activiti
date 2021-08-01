@@ -111,7 +111,7 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         this.sillyTaskGroupHandle = sillyTaskGroupHandle;
     }
 
-    private SillyProcessProperty<?> processProperty() {
+    public SillyProcessProperty<?> processProperty() {
         return getSillyConfig().getSillyProcessProperty(usedCategory());
     }
 
@@ -123,6 +123,41 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         SillyProcessNodeProperty<?> nodeProperty = masterProperty.getNode().get(nodeKey);
         SillyAssert.notNull(nodeProperty, "配置未找到 nodeKey：" + nodeKey);
         return nodeProperty;
+    }
+
+    /**
+     * 获取最新版本下的节点数据
+     *
+     * @param nodeKey
+     * @return
+     */
+    public SillyProcessNodeProperty<?> getLastNodeProperty(String nodeKey) {
+        SillyProcessProperty<?> property = processProperty();
+        SillyAssert.notNull(property, "配置未找到 category：" + this.usedCategory());
+        String processKey = property.getLastProcessKey();
+        if (StringUtils.isEmpty(nodeKey)) {
+            nodeKey = property.getFirstNodeKey();
+        }
+
+        return getNodeProperty(processKey, nodeKey);
+    }
+
+    /**
+     * 获取最新流程的最新节点配置属性
+     *
+     * @return
+     */
+    public SillyProcessNodeProperty<?> getLastNodeProcessProperty() {
+        return getLastNodeProperty(null);
+    }
+
+    /**
+     * 获取最新流程 KEY
+     *
+     * @return
+     */
+    public String getLastProcessKey() {
+        return processProperty().getLastProcessKey();
     }
 
 }

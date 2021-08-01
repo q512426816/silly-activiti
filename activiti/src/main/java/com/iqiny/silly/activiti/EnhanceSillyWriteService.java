@@ -8,6 +8,7 @@
  */
 package com.iqiny.silly.activiti;
 
+import com.alibaba.fastjson.JSON;
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.SillyAssert;
@@ -15,9 +16,7 @@ import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
-import com.iqiny.silly.core.config.property.SillyProcessMasterProperty;
 import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
-import com.iqiny.silly.core.config.property.SillyProcessProperty;
 import com.iqiny.silly.core.config.property.SillyProcessVariableProperty;
 import com.iqiny.silly.core.convertor.SillyAutoConvertor;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
@@ -25,7 +24,6 @@ import com.iqiny.silly.core.resume.SillyResume;
 import com.iqiny.silly.core.service.base.AbstractSillyWriteService;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.BeanUtils;
-import org.springframework.cglib.beans.BeanMap;
 
 import java.util.*;
 
@@ -351,39 +349,17 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
             return;
         }
 
-        boolean autoCovFlag = false;
-        // 仅对 string、list 类型的数据进行自动转换
-        if (variableType.equals(SillyConstant.ActivitiNode.CONVERTOR_STRING) || variableType.equals(SillyConstant.ActivitiNode.CONVERTOR_LIST)) {
-            for (String name : sillyConvertorMap.keySet()) {
-                SillyVariableConvertor<?> convertor = sillyConvertorMap.get(name);
-                if (convertor instanceof SillyAutoConvertor) {
-                    SillyAutoConvertor autoConvertor = (SillyAutoConvertor) convertor;
-                    if (autoConvertor.auto() && autoConvertor.canConvertor(key, variableText)) {
-                        convertorToVariableList(list, key, variableText, name, belong, activitiHandler);
-                        autoCovFlag = true;
-                        break;
-                    }
-                }
-            }
-        }
-
-
-        if (!autoCovFlag) {
-            convertorToVariableList(list, key, variableText, variableType, belong, activitiHandler);
-        }
+        paramToVariableList(list, key, variableText, variableType, belong, activitiHandler);
     }
 
-    protected void convertorToVariableList(List<V> list, String key, String variableText, String variableType, String belong, String activitiHandler) {
+    protected void paramToVariableList(List<V> list, String key, String variableText, String variableType, String belong, String activitiHandler) {
         V v = sillyFactory.newVariable();
         v.setBelong(belong);
         v.setActivitiHandler(activitiHandler);
         v.setVariableName(key);
         v.setVariableText(variableText);
         v.setVariableType(variableType);
-        List<SillyVariable> cvList = getSillyConvertor(variableType).makeSaveVariable(v);
-        for (SillyVariable sv : cvList) {
-            list.add((V) sv);
-        }
+        list.add(v);
     }
 
     protected void saveData(String taskId, Map<String, Object> saveMap) {
@@ -400,13 +376,14 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         SillyProcessNodeProperty<?> nodeProperty = getNodeProperty(task);
         String masterId = sillyEngineService.getBusinessKey(task.getProcessInstanceId());
         List<V> vs = mapToVariables(saveMap, nodeProperty);
-        M m = sillyFactory.newMaster();
+        M m = makeMasterByVariables(vs);
         m.setId(masterId);
-        N n = sillyFactory.newNode();
+        N n = makeNodeByVariables(vs);
+        n.setVariableList(vs);
         n.setMasterId(masterId);
         n.setTaskId(taskId);
         n.setParallelFlag(nodeProperty.isParallel() ? SillyConstant.YesOrNo.YES : SillyConstant.YesOrNo.NO);
-        setMasterAndNodeByVariables(vs, m, n);
+
 
         if (submit) {
             submit(m, n);
@@ -428,7 +405,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         for (String vKey : variableMap.keySet()) {
             SillyProcessVariableProperty variableProperty = variableMap.get(vKey);
             Object variableObj = map.remove(vKey);
-            String variableText = null;
+            String variableText = variableProperty.getDefaultText();
             if (variableObj != null) {
                 variableText = variableObj.toString();
             }
@@ -440,7 +417,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
                 continue;
             }
 
-            convertorToVariableList(list,
+            paramToVariableList(list,
                     variableProperty.getVariableName(),
                     variableText,
                     variableProperty.getVariableType(),
@@ -473,24 +450,34 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         return getNodeProperty(processKey, nodeKey);
     }
 
-    public void setMasterAndNodeByVariables(List<V> vList, M m, N n) {
+    public M makeMasterByVariables(List<V> vList) {
         Map<String, Object> masterMap = new HashMap<>();
-        Map<String, Object> nodeMap = new HashMap<>();
         for (V v : vList) {
-            String type = v.getVariableType();
             String name = v.getVariableName();
             String value = v.getVariableText();
 
             if (Objects.equals(v.getBelong(), SillyConstant.ActivitiVariable.BELONG_MASTER)) {
-                getSillyConvertor(type).convert(masterMap, name, value);
-            } else if (Objects.equals(v.getBelong(), SillyConstant.ActivitiVariable.BELONG_NODE)) {
-                getSillyConvertor(type).convert(nodeMap, name, value);
+                masterMap.put(name, value);
             }
         }
 
-        BeanMap.create(m).putAll(masterMap);
-        BeanMap.create(n).putAll(nodeMap);
-        n.setVariableList(vList);
+        String masterJson = JSON.toJSONString(masterMap);
+        return (M) JSON.parseObject(masterJson, sillyFactory.newMaster().getClass());
+    }
+
+    public N makeNodeByVariables(List<V> vList) {
+        Map<String, Object> nodeMap = new HashMap<>();
+        for (V v : vList) {
+            String name = v.getVariableName();
+            String value = v.getVariableText();
+
+            if (Objects.equals(v.getBelong(), SillyConstant.ActivitiVariable.BELONG_NODE)) {
+                nodeMap.put(name, value);
+            }
+        }
+
+        String nodeJson = JSON.toJSONString(nodeMap);
+        return (N) JSON.parseObject(nodeJson, sillyFactory.newNode().getClass());
     }
 
 

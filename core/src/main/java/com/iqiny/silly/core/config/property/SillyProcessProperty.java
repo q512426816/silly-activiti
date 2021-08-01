@@ -19,23 +19,36 @@ public interface SillyProcessProperty<MP extends SillyProcessMasterProperty> {
      * 流程业务分类
      */
     String getCategory();
+
+    void setCategory(String category);
     /**
      * 最新流程Key
      */
     String getLastProcessKey();
+
+    void setLastProcessKey(String lastProcessKey);
     /**
      * 最新流程版本号
      */
     String getLastProcessVersion();
+
+    void setLastProcessVersion(String lastProcessVersion);
     /**
      * 流程描述
      */
     String getProcessDesc();
 
+    void setProcessDesc(String processDesc);
+
+    /**
+     * 第一个节点Key
+     */
+    String getFirstNodeKey();
+
+    void setFirstNodeKey(String firstNodeKey);
+
     /**
      * 流程KEY： 对应的配置参数
      */
     Map<String, MP> getMaster();
-
-    void setCategory(String category);
 }

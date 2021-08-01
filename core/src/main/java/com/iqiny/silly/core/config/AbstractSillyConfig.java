@@ -8,11 +8,14 @@
  */
 package com.iqiny.silly.core.config;
 
+import com.alibaba.fastjson.JSON;
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.base.SillyInitializable;
+import com.iqiny.silly.core.config.html.SillyHtmlTagConfig;
+import com.iqiny.silly.core.config.html.SillyHtmlTagTemplate;
 import com.iqiny.silly.core.config.property.SillyProcessMasterProperty;
 import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
 import com.iqiny.silly.core.config.property.SillyProcessProperty;
@@ -84,6 +87,11 @@ public abstract class AbstractSillyConfig implements SillyConfig {
      */
     protected SillyTaskGroupHandle sillyTaskGroupHandle;
 
+    /**
+     * 傻瓜HTML 标签模板配置
+     */
+    protected final Map<String, SillyHtmlTagTemplate> sillyHtmlTagTemplateMap = new HashMap<>();
+
     @Override
     public void init() {
         preInit();
@@ -93,6 +101,8 @@ public abstract class AbstractSillyConfig implements SillyConfig {
         initSillyFactory();
         // 3 初始化傻瓜转换器
         initSillyConvertorMap();
+        // 4 初始化傻瓜标签模板
+        initSillyHtmlTagTemplateMap();
         // 4 初始化傻瓜服务
         initSillyService();
         // 5 初始化傻瓜流程参数
@@ -187,6 +197,21 @@ public abstract class AbstractSillyConfig implements SillyConfig {
      */
     protected abstract void hookInitSillyConvertorMap();
 
+
+    protected void initSillyHtmlTagTemplateMap() {
+        hookInitSillyHtmlTagTemplateMap();
+    }
+
+    protected void addSillyHtmlTagTemplateMap(SillyHtmlTagTemplate htmlTagTemplate) {
+        sillyHtmlTagTemplateMap.put(htmlTagTemplate.getHtmlType(), htmlTagTemplate);
+    }
+
+
+    /**
+     * 初始完成 傻瓜转换器 回调方法
+     */
+    protected abstract void hookInitSillyHtmlTagTemplateMap();
+
     protected void initSillyService() {
         initReadSillyService();
         initWriteSillyService();
@@ -250,9 +275,37 @@ public abstract class AbstractSillyConfig implements SillyConfig {
                     if (StringUtils.isEmpty(variableProperty.getBelong())) {
                         variableProperty.setBelong(SillyConstant.ActivitiVariable.BELONG_VARIABLE);
                     }
+
+                    if (StringUtils.isNotEmpty(variableProperty.getHtmlType())) {
+                        setVariablePropertyHtmlConfig(variableProperty);
+                    }
                 }
 
             }
+        }
+    }
+
+    protected void setVariablePropertyHtmlConfig(SillyProcessVariableProperty variableProperty) {
+        SillyHtmlTagTemplate htmlTemplate = SillyConfigUtil.getSillyConfig().getHtmlTemplate(variableProperty.getHtmlType());
+        SillyAssert.notNull(htmlTemplate, "htmlConfig 未找到 " + variableProperty.getHtmlType());
+        variableProperty.setHtmlTemplate(htmlTemplate);
+
+        SillyHtmlTagConfig htmlConfig = variableProperty.getHtmlConfig();
+
+        if (htmlConfig.getFieldName() == null) {
+            htmlConfig.setFieldName(variableProperty.getVariableName());
+        }
+        if (htmlConfig.getDesc() == null) {
+            htmlConfig.setDesc(variableProperty.getDesc());
+        }
+        if (htmlConfig.getLabel() == null) {
+            htmlConfig.setLabel(variableProperty.getDesc());
+        }
+        if (htmlConfig.getTagName() == null) {
+            htmlConfig.setLabel(htmlTemplate.getHtmlType());
+        }
+        if (htmlConfig.isRequest() == null) {
+            htmlConfig.setRequest(variableProperty.isRequest());
         }
     }
 
@@ -306,5 +359,10 @@ public abstract class AbstractSillyConfig implements SillyConfig {
     @Override
     public SillyTaskGroupHandle getSillyTaskGroupHandle() {
         return sillyTaskGroupHandle;
+    }
+
+    @Override
+    public SillyHtmlTagTemplate getHtmlTemplate(String htmlType) {
+        return sillyHtmlTagTemplateMap.get(htmlType);
     }
 }

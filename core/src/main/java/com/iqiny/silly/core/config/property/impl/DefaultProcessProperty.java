@@ -31,6 +31,10 @@ public class DefaultProcessProperty implements SillyProcessProperty<DefaultProce
      */
     private String lastProcessVersion;
     /**
+     * 第一个节点Key
+     */
+    private String firstNodeKey;
+    /**
      * 流程描述
      */
     private String processDesc;
@@ -55,6 +59,7 @@ public class DefaultProcessProperty implements SillyProcessProperty<DefaultProce
         return lastProcessKey;
     }
 
+    @Override
     public void setLastProcessKey(String lastProcessKey) {
         this.lastProcessKey = lastProcessKey;
     }
@@ -64,6 +69,7 @@ public class DefaultProcessProperty implements SillyProcessProperty<DefaultProce
         return lastProcessVersion;
     }
 
+    @Override
     public void setLastProcessVersion(String lastProcessVersion) {
         this.lastProcessVersion = lastProcessVersion;
     }
@@ -73,6 +79,7 @@ public class DefaultProcessProperty implements SillyProcessProperty<DefaultProce
         return processDesc;
     }
 
+    @Override
     public void setProcessDesc(String processDesc) {
         this.processDesc = processDesc;
     }
@@ -80,5 +87,15 @@ public class DefaultProcessProperty implements SillyProcessProperty<DefaultProce
     @Override
     public Map<String, DefaultProcessMasterProperty> getMaster() {
         return master;
+    }
+
+    @Override
+    public String getFirstNodeKey() {
+        return firstNodeKey;
+    }
+
+    @Override
+    public void setFirstNodeKey(String firstNodeKey) {
+        this.firstNodeKey = firstNodeKey;
     }
 }
