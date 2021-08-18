@@ -245,7 +245,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
 
         master.setProcessId(processInstanceId);
 
-        afterStartProcess(master, t);
+        afterStartProcess(master, node, t);
 
     }
 
@@ -264,7 +264,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         }
     }
 
-    protected abstract void afterStartProcess(M master, T t);
+    protected abstract void afterStartProcess(M master, N node, T t);
 
     /**
      * 保存流程节点数据
@@ -286,6 +286,8 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
     private void updateToHistory(N node, boolean isParallel) {
         // （若有）更新之前的流程信息 为历史状态
         final N whereNode = sillyFactory.newNode();
+        SillyAssert.notEmpty(node.getMasterId(), "node.masterId 不可为空");
+        SillyAssert.notEmpty(node.getNodeKey(), "node.nodeKey 不可为空");
         whereNode.setMasterId(node.getMasterId());
         whereNode.setNodeKey(node.getNodeKey());
         if (isParallel) {

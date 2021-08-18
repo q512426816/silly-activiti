@@ -31,7 +31,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         extends AbstractSillyWriteService<M, N, V, Task> {
 
     @Override
-    protected void afterStartProcess(M master, Task task) {
+    protected void afterStartProcess(M master, N node, Task task) {
         final M copyMaster = sillyFactory.newMaster();
         BeanUtils.copyProperties(master, copyMaster);
         if (StringUtils.isEmpty(master.getStatus())) {
@@ -39,6 +39,16 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         }
         if (StringUtils.isEmpty(master.getTaskName())) {
             copyMaster.setTaskName(task.getName());
+        }
+
+        if (StringUtils.isEmpty(node.getTaskId())) {
+            node.setTaskId(task.getId());
+        }
+        if (StringUtils.isEmpty(node.getNodeKey())) {
+            node.setNodeKey(task.getTaskDefinitionKey());
+        }
+        if (StringUtils.isEmpty(node.getNodeName())) {
+            node.setNodeName(task.getName());
         }
 
         copyMaster.setStartDate(new Date());
@@ -381,8 +391,9 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         n.setVariableList(vs);
         n.setMasterId(masterId);
         n.setTaskId(taskId);
+        n.setNodeKey(nodeProperty.getNodeKey());
+        n.setNodeName(nodeProperty.getNodeName());
         n.setParallelFlag(nodeProperty.isParallel() ? SillyConstant.YesOrNo.YES : SillyConstant.YesOrNo.NO);
-
 
         if (submit) {
             submit(m, n);

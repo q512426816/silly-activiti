@@ -9,12 +9,9 @@
 package com.iqiny.silly.core.config.property.impl;
 
 import com.iqiny.silly.common.SillyConstant;
-import com.iqiny.silly.core.config.SillyConfig;
-import com.iqiny.silly.core.config.SillyConfigUtil;
 import com.iqiny.silly.core.config.html.SillyHtmlTagTemplate;
 import com.iqiny.silly.core.config.html.base.SillyBaseHtmlTagConfig;
 import com.iqiny.silly.core.config.property.SillyProcessVariableProperty;
-import com.iqiny.silly.core.config.property.SillyPropertyHandle;
 
 
 public class DefaultProcessVariableProperty implements SillyProcessVariableProperty<SillyBaseHtmlTagConfig> {

@@ -286,7 +286,7 @@ public abstract class AbstractSillyConfig implements SillyConfig {
     }
 
     protected void setVariablePropertyHtmlConfig(SillyProcessVariableProperty variableProperty) {
-        SillyHtmlTagTemplate htmlTemplate = SillyConfigUtil.getSillyConfig().getHtmlTemplate(variableProperty.getHtmlType());
+        SillyHtmlTagTemplate htmlTemplate = getHtmlTemplate(variableProperty.getHtmlType());
         SillyAssert.notNull(htmlTemplate, "htmlConfig 未找到 " + variableProperty.getHtmlType());
         variableProperty.setHtmlTemplate(htmlTemplate);
 
