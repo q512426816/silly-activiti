@@ -371,15 +371,15 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         list.add(v);
     }
 
-    protected void saveData(String taskId, Map<String, Object> saveMap) {
-        saveData(false, taskId, saveMap);
+    protected M saveData(String taskId, Map<String, Object> saveMap) {
+        return saveData(false, taskId, saveMap);
     }
 
-    protected void submitData(String taskId, Map<String, Object> saveMap) {
-        saveData(true, taskId, saveMap);
+    protected M submitData(String taskId, Map<String, Object> saveMap) {
+        return saveData(true, taskId, saveMap);
     }
 
-    protected void saveData(boolean submit, String taskId, Map<String, Object> saveMap) {
+    protected M saveData(boolean submit, String taskId, Map<String, Object> saveMap) {
         Task task = sillyEngineService.findTaskById(taskId);
         SillyAssert.notNull(task, "任务未找到" + taskId);
         SillyProcessNodeProperty<?> nodeProperty = getNodeProperty(task);
@@ -400,6 +400,8 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         } else {
             save(m, n);
         }
+
+        return m;
     }
 
     /**
