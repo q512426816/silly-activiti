@@ -19,10 +19,7 @@ import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.config.CurrentUserUtil;
 import com.iqiny.silly.core.config.SillyConfig;
 import com.iqiny.silly.core.config.SillyConfigUtil;
-import com.iqiny.silly.core.config.property.SillyProcessMasterProperty;
-import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
-import com.iqiny.silly.core.config.property.SillyProcessProperty;
-import com.iqiny.silly.core.config.property.SillyProcessVariableProperty;
+import com.iqiny.silly.core.config.property.*;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.group.SillyTaskGroupHandle;
 import com.iqiny.silly.core.resume.SillyResume;
@@ -52,6 +49,8 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
 
     protected Map<String, SillyVariableConvertor> sillyConvertorMap;
 
+    protected Map<String, SillyVariableSaveHandle> sillySaveHandleMap;
+
     protected SillyTaskGroupHandle sillyTaskGroupHandle;
 
     @Override
@@ -62,6 +61,7 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         setSillyEngineService(sillyConfig.getSillyEngineService());
         setCurrentUserUtil(sillyConfig.getCurrentUserUtil());
         setSillyConvertorMap(sillyConfig.getSillyConvertorMap());
+        setSillySaveHandleMap(sillyConfig.getSillyVariableSaveHandleMap());
         setSillyResumeService(sillyConfig.getSillyResumeService());
         setSillyTaskGroupHandle(getSillyConfig().getSillyTaskGroupHandle());
 
@@ -95,12 +95,41 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         this.sillyResumeService = sillyResumeService;
     }
 
+    public void setSillySaveHandleMap(Map<String, SillyVariableSaveHandle> sillySaveHandleMap) {
+        this.sillySaveHandleMap = sillySaveHandleMap;
+    }
+
     protected SillyVariableConvertor<?> getSillyConvertor(String handleKey) {
         if (sillyConvertorMap == null) {
             throw new SillyException("Silly数据处理器未设置！");
         }
 
         return sillyConvertorMap.get(handleKey);
+    }
+
+    /**
+     * 批量保存处置类处理
+     * @param node
+     * @param variables
+     * @return
+     */
+    protected boolean batchSaveHandle(N node, V variables) {
+        String saveHandleNames = variables.getSaveHandleName();
+        SillyAssert.notEmpty(saveHandleNames, "批处理数据保存不可为空");
+        String[] saveHandleNameArr = StringUtils.split(saveHandleNames, SillyConstant.ARRAY_SPLIT_STR);
+        boolean lastFlag = true;
+        for (String saveHandleName : saveHandleNameArr) {
+            lastFlag = getSillyVariableSaveHandle(saveHandleName.trim()).handle(usedCategory(), node, variables);
+        }
+        return lastFlag;
+    }
+
+    protected SillyVariableSaveHandle getSillyVariableSaveHandle(String saveHandleName) {
+        if (sillySaveHandleMap == null) {
+            throw new SillyException("Silly数据保存处理器未设置！");
+        }
+
+        return sillySaveHandleMap.get(saveHandleName);
     }
 
     public SillyTaskGroupHandle getSillyTaskGroupHandle() {

@@ -11,6 +11,7 @@ package com.iqiny.silly.common.util;
 import com.iqiny.silly.common.SillyConstant;
 
 import java.util.Collection;
+import java.util.StringJoiner;
 
 public class StringUtils extends org.apache.commons.lang3.StringUtils {
 
@@ -33,14 +34,11 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
         if (list == null) {
             return null;
         }
-        StringBuilder sb = new StringBuilder();
+
+        StringJoiner sj = new StringJoiner(split);
         for (String s : list) {
-            sb.append(s).append(split);
+            sj.add(s);
         }
-        int lastIndex = sb.lastIndexOf(split);
-        if (lastIndex >= 0) {
-            sb.deleteCharAt(lastIndex);
-        }
-        return sb.toString();
+        return sj.toString();
     }
 }

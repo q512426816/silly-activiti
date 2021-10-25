@@ -19,6 +19,7 @@ public class DefaultProcessVariableProperty implements SillyProcessVariablePrope
     private String desc;
     private String requestEl = SillyConstant.YesOrNo.YES;
     private boolean request = true;
+    private String[] saveHandleNames = new String[]{DefaultVariableSaveHandle.NAME};
     private String activitiHandler;
     private String variableType;
     private String variableName;
@@ -46,6 +47,15 @@ public class DefaultProcessVariableProperty implements SillyProcessVariablePrope
 
     public void setRequest(boolean request) {
         this.request = request;
+    }
+
+    @Override
+    public String[] getSaveHandleNames() {
+        return saveHandleNames;
+    }
+
+    public void setSaveHandleNames(String[] saveHandleNames) {
+        this.saveHandleNames = saveHandleNames;
     }
 
     @Override

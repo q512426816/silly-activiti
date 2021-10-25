@@ -95,4 +95,14 @@ public interface SillyVariable extends SillyEntity {
 
     void setBelong(String belong);
 
+    /**
+     * 变量保存处理器名称 （多个按 , 拼接，按顺序执行）
+     */
+    String getSaveHandleName();
+
+    /**
+     * 变量保存处理器名称
+     */
+    void setSaveHandleName(String saveHandleName);
+
 }

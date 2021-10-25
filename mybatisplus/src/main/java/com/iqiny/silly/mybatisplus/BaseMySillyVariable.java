@@ -8,8 +8,10 @@
  */
 package com.iqiny.silly.mybatisplus;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import com.iqiny.silly.core.base.core.SillyVariable;
+import com.iqiny.silly.core.config.property.impl.DefaultVariableSaveHandle;
 
 /**
  * SillyVariable 集成MybatisPlus
@@ -31,6 +33,9 @@ public abstract class BaseMySillyVariable<T extends Model<T>> extends BaseMyBase
     protected String variableName;
     protected String variableText;
     protected String belong;
+
+    @TableField(exist = false)
+    protected String saveHandleName = DefaultVariableSaveHandle.NAME;
 
     @Override
     public String getNodeId() {
@@ -131,5 +136,14 @@ public abstract class BaseMySillyVariable<T extends Model<T>> extends BaseMyBase
     public void setBelong(String belong) {
         this.belong = belong;
     }
-    
+
+    @Override
+    public String getSaveHandleName() {
+        return saveHandleName;
+    }
+
+    @Override
+    public void setSaveHandleName(String saveHandleName) {
+        this.saveHandleName = saveHandleName;
+    }
 }

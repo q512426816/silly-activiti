@@ -20,7 +20,9 @@ import com.iqiny.silly.core.config.CurrentUserUtil;
 import com.iqiny.silly.core.config.html.SillyHtmlTagTemplate;
 import com.iqiny.silly.core.config.property.SillyProcessProperty;
 import com.iqiny.silly.core.config.property.SillyPropertyHandle;
+import com.iqiny.silly.core.config.property.SillyVariableSaveHandle;
 import com.iqiny.silly.core.config.property.impl.DefaultProcessProperty;
+import com.iqiny.silly.core.config.property.impl.DefaultVariableSaveHandle;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.group.SillyTaskCategoryGroup;
 import com.iqiny.silly.core.group.SillyTaskGroup;
@@ -87,6 +89,15 @@ public class ActivitiSillyConfig extends AbstractSillyConfig {
         final Set<SillyVariableConvertor> beanSet = SpringSillyContent.getBeanSet(SillyVariableConvertor.class);
         for (SillyVariableConvertor convertor : beanSet) {
             addSillyVariableConvertor(convertor);
+        }
+    }
+
+    @Override
+    protected void hookInitSillyVariableSaveHandleMap() {
+        addSillyVariableSaveHandle(new DefaultVariableSaveHandle());
+        final Set<SillyVariableSaveHandle> beanSet = SpringSillyContent.getBeanSet(SillyVariableSaveHandle.class);
+        for (SillyVariableSaveHandle saveHandle : beanSet) {
+            addSillyVariableSaveHandle(saveHandle);
         }
     }
 

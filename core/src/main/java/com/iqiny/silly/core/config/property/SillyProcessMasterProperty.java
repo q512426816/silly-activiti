@@ -34,4 +34,5 @@ public interface SillyProcessMasterProperty<NP extends SillyProcessNodeProperty>
     Map<String, NP> getNode();
 
     void setProcessKey(String key);
+
 }

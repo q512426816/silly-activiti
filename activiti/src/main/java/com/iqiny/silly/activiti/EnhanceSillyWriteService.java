@@ -19,6 +19,7 @@ import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
 import com.iqiny.silly.core.config.property.SillyProcessVariableProperty;
 import com.iqiny.silly.core.config.property.SillyPropertyHandle;
+import com.iqiny.silly.core.config.property.impl.DefaultVariableSaveHandle;
 import com.iqiny.silly.core.resume.SillyResume;
 import com.iqiny.silly.core.service.base.AbstractSillyWriteService;
 import org.activiti.engine.task.Task;
@@ -336,7 +337,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
 
         if (object instanceof String) {
             String variableText = (String) object;
-            doSetVariableList(list, key, variableText, SillyConstant.ActivitiNode.CONVERTOR_STRING, belong, activitiHandler);
+            doSetVariableList(list, key, variableText, SillyConstant.ActivitiNode.CONVERTOR_STRING, belong, activitiHandler, DefaultVariableSaveHandle.NAME);
         } else if (object instanceof Collection<?>) {
             Collection<?> objectList = (Collection<?>) object;
             StringJoiner variableTextSj = new StringJoiner(SillyConstant.ARRAY_SPLIT_STR);
@@ -347,23 +348,24 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
                     throw new SillyException("不支持此数据集合内类型进行变量转换" + o.getClass());
                 }
             }
-            doSetVariableList(list, key, variableTextSj.toString(), SillyConstant.ActivitiNode.CONVERTOR_LIST, belong, activitiHandler);
+            doSetVariableList(list, key, variableTextSj.toString(), SillyConstant.ActivitiNode.CONVERTOR_LIST, belong, activitiHandler, DefaultVariableSaveHandle.NAME);
         } else {
             throw new SillyException("不支持此数据类型进行变量转换" + object.getClass());
         }
     }
 
-    private void doSetVariableList(List<V> list, String key, String variableText, String variableType, String belong, String activitiHandler) {
+    private void doSetVariableList(List<V> list, String key, String variableText, String variableType, String belong, String activitiHandler, String saveHandleName) {
         if (StringUtils.isEmpty(key) || StringUtils.isEmpty(variableText)) {
             return;
         }
 
-        paramToVariableList(list, key, variableText, variableType, belong, activitiHandler);
+        paramToVariableList(list, key, variableText, variableType, belong, activitiHandler, saveHandleName);
     }
 
-    protected void paramToVariableList(List<V> list, String key, String variableText, String variableType, String belong, String activitiHandler) {
+    protected void paramToVariableList(List<V> list, String key, String variableText, String variableType, String belong, String activitiHandler, String saveHandleName) {
         V v = sillyFactory.newVariable();
         v.setBelong(belong);
+        v.setSaveHandleName(saveHandleName);
         v.setActivitiHandler(activitiHandler);
         v.setVariableName(key);
         v.setVariableText(variableText);
@@ -420,12 +422,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         Map<String, ? extends SillyProcessVariableProperty> variableMap = nodeProperty.getVariable();
         for (String vKey : variableMap.keySet()) {
             SillyProcessVariableProperty variableProperty = variableMap.get(vKey);
-            Object variableObj = map.remove(vKey);
-            String variableText = sillyPropertyHandle.getStringValue(variableProperty.getDefaultText());
-            if (variableObj != null) {
-                variableText = variableObj.toString();
-            }
-
+            String variableText = object2String(map.remove(vKey), sillyPropertyHandle.getStringValue(variableProperty.getDefaultText()));
             if (StringUtils.isEmpty(variableText)) {
                 if (sillyPropertyHandle.getBooleanValue(variableProperty.getRequestEl())) {
                     throw new SillyException("此参数值不可为空" + vKey);
@@ -438,7 +435,8 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
                     variableText,
                     variableProperty.getVariableType(),
                     variableProperty.getBelong(),
-                    variableProperty.getActivitiHandler()
+                    variableProperty.getActivitiHandler(),
+                    StringUtils.join(variableProperty.getSaveHandleNames(), SillyConstant.ARRAY_SPLIT_STR)
             );
         }
 
@@ -453,7 +451,6 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
                 } else {
                     continue;
                 }
-
             }
 
             doVariableList(map.get(key), list, key, SillyConstant.ActivitiVariable.BELONG_VARIABLE, null);
@@ -463,6 +460,18 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         return list;
     }
 
+    protected String object2String(Object variableObj, String defaultStr) {
+        String variableText = defaultStr;
+        if (variableObj != null) {
+            if (variableObj instanceof Collection) {
+                Collection c = (Collection) variableObj;
+                variableText = StringUtils.join(c);
+            } else {
+                variableText = variableObj.toString();
+            }
+        }
+        return variableText;
+    }
 
     public SillyProcessNodeProperty<?> getNodeProperty(Task task) {
         String processKey = sillyEngineService.getActKeyNameByProcessInstanceId(task.getProcessInstanceId());

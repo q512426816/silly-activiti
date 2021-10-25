@@ -16,10 +16,7 @@ import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.base.SillyInitializable;
 import com.iqiny.silly.core.config.html.SillyHtmlTagConfig;
 import com.iqiny.silly.core.config.html.SillyHtmlTagTemplate;
-import com.iqiny.silly.core.config.property.SillyProcessMasterProperty;
-import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
-import com.iqiny.silly.core.config.property.SillyProcessProperty;
-import com.iqiny.silly.core.config.property.SillyProcessVariableProperty;
+import com.iqiny.silly.core.config.property.*;
 import com.iqiny.silly.core.convertor.SillyStringConvertor;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.group.SillyTaskGroupHandle;
@@ -63,6 +60,11 @@ public abstract class AbstractSillyConfig implements SillyConfig {
     protected final Map<String, SillyVariableConvertor> sillyConvertorMap = new HashMap<>();
 
     /**
+     * 流程变量 类型转换器
+     */
+    protected final Map<String, SillyVariableSaveHandle> sillyVariableSaveHandleMap = new HashMap<>();
+
+    /**
      * 傻瓜工厂工厂
      */
     protected final Map<String, SillyFactory> sillyFactoryMap = new HashMap<>();
@@ -101,6 +103,8 @@ public abstract class AbstractSillyConfig implements SillyConfig {
         initSillyFactory();
         // 3 初始化傻瓜转换器
         initSillyConvertorMap();
+        // 3 初始化傻瓜数据保存器
+        initSillyVariableSaveHandleMap();
         // 4 初始化傻瓜标签模板
         initSillyHtmlTagTemplateMap();
         // 4 初始化傻瓜服务
@@ -157,6 +161,7 @@ public abstract class AbstractSillyConfig implements SillyConfig {
         SillyAssert.notNull(this.currentUserUtil);
         SillyAssert.notNull(this.sillyEngineService);
         SillyAssert.notNull(this.sillyConvertorMap);
+        SillyAssert.notNull(this.sillyVariableSaveHandleMap);
     }
 
     private void initSillyFactory() {
@@ -188,14 +193,25 @@ public abstract class AbstractSillyConfig implements SillyConfig {
         hookInitSillyConvertorMap();
     }
 
+    protected void initSillyVariableSaveHandleMap() {
+        hookInitSillyVariableSaveHandleMap();
+    }
+
     protected void addSillyVariableConvertor(SillyVariableConvertor convertor) {
         sillyConvertorMap.put(convertor.name(), convertor);
+    }
+
+    protected void addSillyVariableSaveHandle(SillyVariableSaveHandle saveHandle) {
+        sillyVariableSaveHandleMap.put(saveHandle.name(), saveHandle);
     }
 
     /**
      * 初始完成 傻瓜转换器 回调方法
      */
     protected abstract void hookInitSillyConvertorMap();
+
+
+    protected abstract void hookInitSillyVariableSaveHandleMap();
 
 
     protected void initSillyHtmlTagTemplateMap() {
@@ -328,6 +344,11 @@ public abstract class AbstractSillyConfig implements SillyConfig {
     @Override
     public Map<String, SillyVariableConvertor> getSillyConvertorMap() {
         return sillyConvertorMap;
+    }
+
+    @Override
+    public Map<String, SillyVariableSaveHandle> getSillyVariableSaveHandleMap() {
+        return sillyVariableSaveHandleMap;
     }
 
     @Override

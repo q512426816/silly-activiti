@@ -152,6 +152,4 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
         return map;
     }
 
-    protected abstract List<V> findVariableList(V where);
-
 }

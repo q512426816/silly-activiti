@@ -12,6 +12,7 @@ import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.config.html.SillyHtmlTagTemplate;
 import com.iqiny.silly.core.config.property.SillyProcessProperty;
 import com.iqiny.silly.core.config.property.SillyPropertyHandle;
+import com.iqiny.silly.core.config.property.SillyVariableSaveHandle;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.group.SillyTaskGroupHandle;
 import com.iqiny.silly.core.resume.SillyResumeService;
@@ -45,6 +46,8 @@ public interface SillyConfig {
     SillyEngineService getSillyEngineService();
 
     Map<String, SillyVariableConvertor> getSillyConvertorMap();
+
+    Map<String, SillyVariableSaveHandle> getSillyVariableSaveHandleMap();
 
     SillyResumeService getSillyResumeService();
 

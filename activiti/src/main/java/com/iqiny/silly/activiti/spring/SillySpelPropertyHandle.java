@@ -86,7 +86,13 @@ public class SillySpelPropertyHandle implements SillyPropertyHandle {
 
     @Override
     public boolean getBooleanValue(String expression) {
-        return getValue(expression).equals(SillyConstant.YesOrNo.YES);
+        if (StringUtils.isEmpty(expression)) {
+            return false;
+        }
+        if (getValue(expression).equals(SillyConstant.YesOrNo.YES)) {
+            return true;
+        }
+        return Boolean.parseBoolean(expression);
     }
 
     @Override

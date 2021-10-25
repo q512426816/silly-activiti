@@ -12,6 +12,8 @@ import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.core.config.html.SillyHtmlTagConfig;
 import com.iqiny.silly.core.config.html.SillyHtmlTagTemplate;
 
+import java.util.List;
+
 
 public interface SillyProcessVariableProperty<C extends SillyHtmlTagConfig> {
 
@@ -32,6 +34,11 @@ public interface SillyProcessVariableProperty<C extends SillyHtmlTagConfig> {
     default boolean isRequest() {
         return true;
     }
+
+    /**
+     * 数据处理保存的处理方法 （方法名称）
+     */
+    String[] getSaveHandleNames();
 
     /**
      * 流程类型，为空则不加入流程引擎内

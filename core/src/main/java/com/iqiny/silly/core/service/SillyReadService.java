@@ -49,6 +49,13 @@ public interface SillyReadService<M extends SillyMaster, N extends SillyNode<V>,
     List<V> getVariableList(String masterId, String nodeId);
 
     /**
+     * 查询变量表数据
+     *
+     * @return 变量表数据
+     */
+    List<V> findVariableList(V where);
+
+    /**
      * 查询主表数据 Map
      *
      * @param masterId 主表ID

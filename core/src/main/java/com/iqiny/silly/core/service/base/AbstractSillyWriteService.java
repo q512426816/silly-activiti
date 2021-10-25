@@ -341,6 +341,12 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
                 throw new SillyException("流程参数名称不可为空！" + variable.getVariableText());
             }
 
+            // 数据保存处置
+            boolean saveFlag = batchSaveHandle(node, variable);
+            if (!saveFlag) {
+                continue;
+            }
+
             String variableType = variable.getVariableType();
             SillyVariableConvertor<?> handler = getSillyConvertor(variableType);
             // 仅对 string、list 类型的数据进行自动转换
@@ -370,8 +376,9 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
                 v.setNodeKey(node.getNodeKey());
                 v.setNodeId(node.getId());
                 v.setStatus(SillyConstant.ActivitiNode.STATUS_CURRENT);
-                saveList.add((V) v);
             }
+
+            saveList.addAll((Collection<? extends V>) saveVariableList);
         }
         if (!saveList.isEmpty()) {
             boolean flag = batchInsert(saveList);
