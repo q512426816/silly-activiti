@@ -369,16 +369,18 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
 
             // 获取处理之后 真正需要保存的 variable 数据
             List<SillyVariable> saveVariableList = handler.makeSaveVariable(variable);
-            for (SillyVariable v : saveVariableList) {
-                v.setId(null);
-                v.setTaskId(node.getTaskId());
-                v.setMasterId(node.getMasterId());
-                v.setNodeKey(node.getNodeKey());
-                v.setNodeId(node.getId());
-                v.setStatus(SillyConstant.ActivitiNode.STATUS_CURRENT);
-            }
+            if (saveVariableList != null) {
+                for (SillyVariable v : saveVariableList) {
+                    v.setId(null);
+                    v.setTaskId(node.getTaskId());
+                    v.setMasterId(node.getMasterId());
+                    v.setNodeKey(node.getNodeKey());
+                    v.setNodeId(node.getId());
+                    v.setStatus(SillyConstant.ActivitiNode.STATUS_CURRENT);
+                }
 
-            saveList.addAll((Collection<? extends V>) saveVariableList);
+                saveList.addAll((Collection<? extends V>) saveVariableList);
+            }
         }
         if (!saveList.isEmpty()) {
             boolean flag = batchInsert(saveList);

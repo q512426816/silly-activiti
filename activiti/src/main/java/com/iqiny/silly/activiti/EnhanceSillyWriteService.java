@@ -416,7 +416,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         SillyAssert.notNull(nodeProperty, "节点配置不可为空");
 
         SillyPropertyHandle sillyPropertyHandle = getSillyConfig().getSillyPropertyHandle();
-        sillyPropertyHandle.setValues(map);
+        sillyPropertyHandle.setValues(new HashMap<>(map));
 
         List<V> list = new ArrayList<>();
         Map<String, ? extends SillyProcessVariableProperty> variableMap = nodeProperty.getVariable();
@@ -431,11 +431,11 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
             }
 
             paramToVariableList(list,
-                    variableProperty.getVariableName(),
+                    sillyPropertyHandle.getStringValue(variableProperty.getVariableName()),
                     variableText,
-                    variableProperty.getVariableType(),
-                    variableProperty.getBelong(),
-                    variableProperty.getActivitiHandler(),
+                    sillyPropertyHandle.getStringValue(variableProperty.getVariableType()),
+                    sillyPropertyHandle.getStringValue(variableProperty.getBelong()),
+                    sillyPropertyHandle.getStringValue(variableProperty.getActivitiHandler()),
                     StringUtils.join(variableProperty.getSaveHandleNames(), SillyConstant.ARRAY_SPLIT_STR)
             );
         }

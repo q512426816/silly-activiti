@@ -18,11 +18,12 @@ public interface SillyTaskCategoryGroup {
     String SPLIT_STR = "__CEY__";
 
     String category();
-    
-    String key();
+
+    String name();
 
     /**
      * 自己的数据名开头
+     *
      * @return
      */
     String prefixName();
@@ -33,7 +34,7 @@ public interface SillyTaskCategoryGroup {
      * @param groupId
      * @return
      */
-    boolean belongGroup(String groupId) ;
+    boolean belongGroup(String groupId);
 
     /**
      * 根据用户ID + 数据Key 判断此用户是否拥有此 GROUP_ID 权限
@@ -56,6 +57,13 @@ public interface SillyTaskCategoryGroup {
      * @return
      */
     String getGroupName();
+
+    /**
+     * 获取此 分组名称
+     *
+     * @return
+     */
+    String getGroupName(String groupId);
 
 
     String keyCovGroupId(String key);

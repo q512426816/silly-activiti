@@ -35,4 +35,11 @@ public interface SillyTaskGroup {
      */
     String getGroupName();
 
+    /**
+     * 获取此 分组名称
+     *
+     * @return
+     */
+    String getGroupName(String groupId);
+
 }

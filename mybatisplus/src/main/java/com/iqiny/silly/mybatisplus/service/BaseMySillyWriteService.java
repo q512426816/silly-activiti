@@ -9,6 +9,10 @@
 package com.iqiny.silly.mybatisplus.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.enums.SqlMethod;
+import com.baomidou.mybatisplus.core.toolkit.ReflectionKit;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
 import com.iqiny.silly.activiti.EnhanceSillyWriteService;
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.util.SillyAssert;
@@ -21,8 +25,14 @@ import com.iqiny.silly.mybatisplus.BaseMySillyNode;
 import com.iqiny.silly.mybatisplus.BaseMySillyVariable;
 import org.activiti.engine.task.Task;
 import org.apache.commons.collections.MapUtils;
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -91,16 +101,65 @@ public abstract class BaseMySillyWriteService<M extends BaseMySillyMaster<M>, N 
 
     @Override
     public boolean batchInsert(List<V> list) {
-        boolean flag = false;
         for (V v : list) {
             v.preInsert();
-            flag = v.insert();
-            if (!flag) {
-                return false;
-            }
         }
-        return flag;
+        return saveVariableBatch(list, 100);
     }
+
+    protected Class<?> currentModelClass() {
+        Type[] actualTypeArgument = ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments();
+        return ReflectionKit.getSuperClassGenericType((Class<?>) actualTypeArgument[1], 1);
+    }
+
+    protected String sqlStatement(SqlMethod sqlMethod) {
+        return SqlHelper.table(this.currentModelClass()).getSqlStatement(sqlMethod.getMethod());
+    }
+
+    protected SqlSession sqlSessionBatch() {
+        return SqlHelper.sqlSessionBatch(this.currentModelClass());
+    }
+
+    @Transactional(
+            rollbackFor = {Exception.class}
+    )
+    public boolean saveVariableBatch(Collection<V> entityList, int batchSize) {
+        String sqlStatement = this.sqlStatement(SqlMethod.INSERT_ONE);
+        SqlSession batchSqlSession = this.sqlSessionBatch();
+        Throwable var5 = null;
+
+        try {
+            int i = 0;
+
+            for(Iterator var7 = entityList.iterator(); var7.hasNext(); ++i) {
+                V anEntityList = (V)var7.next();
+                batchSqlSession.insert(sqlStatement, anEntityList);
+                if (i >= 1 && i % batchSize == 0) {
+                    batchSqlSession.flushStatements();
+                }
+            }
+
+            batchSqlSession.flushStatements();
+            return true;
+        } catch (Throwable var16) {
+            var5 = var16;
+            throw var16;
+        } finally {
+            if (batchSqlSession != null) {
+                if (var5 != null) {
+                    try {
+                        batchSqlSession.close();
+                    } catch (Throwable var15) {
+                        var5.addSuppressed(var15);
+                    }
+                } else {
+                    batchSqlSession.close();
+                }
+            }
+
+        }
+    }
+
 
     @Override
     public boolean update(V variable, V where) {

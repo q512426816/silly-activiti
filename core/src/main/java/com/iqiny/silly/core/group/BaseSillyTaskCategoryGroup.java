@@ -15,7 +15,7 @@ public abstract class BaseSillyTaskCategoryGroup implements SillyTaskCategoryGro
 
     @Override
     public String prefixName() {
-        return category() + SPLIT_STR + key();
+        return category() + SPLIT_STR + name();
     }
 
 
@@ -40,4 +40,8 @@ public abstract class BaseSillyTaskCategoryGroup implements SillyTaskCategoryGro
         return null;
     }
 
+    @Override
+    public String getGroupName(String groupId) {
+        return getGroupName();
+    }
 }

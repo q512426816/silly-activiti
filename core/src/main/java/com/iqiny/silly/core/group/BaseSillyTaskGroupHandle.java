@@ -26,13 +26,13 @@ public abstract class BaseSillyTaskGroupHandle implements SillyTaskGroupHandle {
         }
         SillyTaskGroup sillyTaskGroup = GROUP_MAP.get(groupId);
         if (sillyTaskGroup != null) {
-            return sillyTaskGroup.getGroupName();
+            return sillyTaskGroup.getGroupName(groupId);
         }
         for (String key : CATEGORY_GROUP_MAP.keySet()) {
             List<SillyTaskCategoryGroup> list = CATEGORY_GROUP_MAP.get(key);
             for (SillyTaskCategoryGroup categoryGroup : list) {
                 if (categoryGroup.belongGroup(groupId)) {
-                    return categoryGroup.getGroupName();
+                    return categoryGroup.getGroupName(groupId);
                 }
             }
         }
@@ -55,7 +55,7 @@ public abstract class BaseSillyTaskGroupHandle implements SillyTaskGroupHandle {
         List<SillyTaskCategoryGroup> list = CATEGORY_GROUP_MAP.get(category);
         if (list != null) {
             for (SillyTaskCategoryGroup categoryGroup : list) {
-                if (Objects.equals(categoryGroup.key(), key)) {
+                if (Objects.equals(categoryGroup.name(), key)) {
                     return categoryGroup;
                 }
             }

@@ -41,7 +41,7 @@ public class DataJoinVariableSaveHandle implements SillyVariableSaveHandle {
         whereVariable.setVariableName(variable.getVariableName());
         whereVariable.setStatus(SillyConstant.ActivitiNode.STATUS_CURRENT);
         List<SillyVariable> variableList = sillyConfig.getSillyReadService(category).findVariableList(whereVariable);
-
+      
         // 累计变量数据
         StringJoiner sj = new StringJoiner(SillyConstant.ARRAY_SPLIT_STR);
         for (SillyVariable sillyVariable : variableList) {
