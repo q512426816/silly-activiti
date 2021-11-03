@@ -14,12 +14,12 @@ import java.util.Map;
 public interface SillyProcessMasterProperty<NP extends SillyProcessNodeProperty> {
 
     /**
-     * 最新流程Key
+     * 流程Key
      */
     String getProcessKey();
 
     /**
-     * 最新流程版本号
+     * 流程版本号
      */
     String getProcessVersion();
 

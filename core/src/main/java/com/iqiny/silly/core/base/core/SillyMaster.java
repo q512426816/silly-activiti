@@ -80,11 +80,15 @@ public interface SillyMaster extends SillyEntity {
      * 获取流程KEY
      */
     String processKey();
+    
+    void setProcessKey(String processKey);
 
     /**
      * 获取流程版本
      */
     String processVersion();
+
+    void setProcessVersion(String processVersion);
 
     /**
      * 获取 主表启动的状态值
@@ -107,4 +111,5 @@ public interface SillyMaster extends SillyEntity {
     String getHandleUserName();
 
     void setHandleUserName(String userName);
+
 }

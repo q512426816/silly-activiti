@@ -19,6 +19,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 集成 SPEL 表达式配置
@@ -89,7 +90,7 @@ public class SillySpelPropertyHandle implements SillyPropertyHandle {
         if (StringUtils.isEmpty(expression)) {
             return false;
         }
-        if (getValue(expression).equals(SillyConstant.YesOrNo.YES)) {
+        if (Objects.equals(getValue(expression), SillyConstant.YesOrNo.YES)) {
             return true;
         }
         return Boolean.parseBoolean(expression);

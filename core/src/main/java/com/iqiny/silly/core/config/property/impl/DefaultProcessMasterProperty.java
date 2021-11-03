@@ -17,11 +17,11 @@ import java.util.Map;
 public class DefaultProcessMasterProperty implements SillyProcessMasterProperty<DefaultProcessNodeProperty> {
 
     /**
-     * 最新流程Key
+     * 流程Key
      */
     private String processKey;
     /**
-     * 最新流程版本号
+     * 流程版本号
      */
     private String processVersion;
     /**

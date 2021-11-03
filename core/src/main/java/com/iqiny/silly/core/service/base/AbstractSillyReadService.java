@@ -33,7 +33,8 @@ import java.util.*;
  * @param <V> 变量
  */
 @SuppressWarnings("unchecked")
-public abstract class AbstractSillyReadService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable, T> extends AbstractSillyService<M, N, V, T> implements SillyReadService<M, N, V> {
+public abstract class AbstractSillyReadService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable, T>
+        extends AbstractSillyService<M, N, V, T> implements SillyReadService<M, N, V> {
 
     @Override
     protected void otherInit() {

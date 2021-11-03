@@ -101,17 +101,17 @@ public abstract class AbstractSillyConfig implements SillyConfig {
         initFiled();
         // 2 初始化 傻瓜工厂
         initSillyFactory();
-        // 3 初始化傻瓜转换器
+        // 3 初始化 傻瓜转换器
         initSillyConvertorMap();
-        // 3 初始化傻瓜数据保存器
+        // 4 初始化 傻瓜数据保存器
         initSillyVariableSaveHandleMap();
-        // 4 初始化傻瓜标签模板
+        // 5 初始化 傻瓜页面代码生成模板
         initSillyHtmlTagTemplateMap();
-        // 4 初始化傻瓜服务
+        // 6 初始化 傻瓜服务
         initSillyService();
-        // 5 初始化傻瓜流程参数
+        // 7 初始化 傻瓜流程参数
         initSillyProcessProperty();
-        // 6 初始化傻瓜任务组处理类
+        // 8 初始化 傻瓜任务组处理类
         initSillyTaskGroupHandle();
 
         checkConfig();

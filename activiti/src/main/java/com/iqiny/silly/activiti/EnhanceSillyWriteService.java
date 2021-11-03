@@ -16,13 +16,12 @@ import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
-import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
-import com.iqiny.silly.core.config.property.SillyProcessVariableProperty;
-import com.iqiny.silly.core.config.property.SillyPropertyHandle;
+import com.iqiny.silly.core.config.property.*;
 import com.iqiny.silly.core.config.property.impl.DefaultVariableSaveHandle;
 import com.iqiny.silly.core.resume.SillyResume;
 import com.iqiny.silly.core.service.base.AbstractSillyWriteService;
 import org.activiti.engine.task.Task;
+import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.BeanUtils;
 
 import java.util.*;
@@ -54,10 +53,14 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
 
         copyMaster.setStartDate(new Date());
         copyMaster.setStartUserId(currentUserUtil.currentUserId());
-        final List<String> taskUserIds = sillyEngineService.getTaskUserIds(task);
-        final String joinNextUserIds = StringUtils.join(taskUserIds);
-        copyMaster.setHandleUserName(userIdsToName(joinNextUserIds));
-        boolean saveFlag = updateById(copyMaster);
+        updateHandleUserName(copyMaster);
+    }
+
+    public void updateHandleUserName(M master) {
+        String processId = master.getProcessId();
+        List<Task> taskList = sillyEngineService.findTaskByProcessInstanceId(processId);
+        master.setHandleUserName(this.userIdsToName(this.nextProcess(taskList)));
+        boolean saveFlag = updateById(master);
         if (!saveFlag) {
             throw new SillyException("主信息更新发生异常！");
         }
@@ -115,7 +118,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         }
 
         final Set<String> nextUserIds = nextProcess(nextTaskList);
-        final String joinNextUserIds = StringUtils.join(nextUserIds);
+        final String joinNextUserIds = StringUtils.myJoin(nextUserIds);
         // 履历内容
         String handleInfo = sillyResumeService.makeResumeHandleInfo(handleType, joinNextUserIds, taskName, node.getNodeInfo());
 
@@ -233,7 +236,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
             for (Task task : taskList) {
                 taskNames.add(task.getName());
             }
-            master.setTaskName(StringUtils.join(taskNames, SillyConstant.ARRAY_SPLIT_STR));
+            master.setTaskName(StringUtils.myJoin(taskNames, SillyConstant.ARRAY_SPLIT_STR));
             updateFlag = true;
         }
         if (StringUtils.isEmpty(master.getHandleUserName())) {
@@ -265,7 +268,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         for (String userId : split) {
             userNames.add(currentUserUtil.userIdToName(userId));
         }
-        return StringUtils.join(userNames, SillyConstant.ARRAY_SPLIT_STR);
+        return StringUtils.myJoin(userNames, SillyConstant.ARRAY_SPLIT_STR);
     }
 
     protected String userIdsToName(Set<String> userIds) {
@@ -277,17 +280,16 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         for (String userId : userIds) {
             userNames.add(currentUserUtil.userIdToName(userId));
         }
-        return StringUtils.join(userNames, SillyConstant.ARRAY_SPLIT_STR);
+        return StringUtils.myJoin(userNames, SillyConstant.ARRAY_SPLIT_STR);
     }
 
     protected Set<String> nextProcess(List<Task> taskList) {
         Set<String> userIds = new LinkedHashSet<>();
         for (Task task1 : taskList) {
             final List<String> taskUserIds = sillyEngineService.getTaskUserIds(task1);
-            if (taskUserIds == null || taskUserIds.isEmpty()) {
-                throw new SillyException("下一步任务处置人不可为空！");
+            if (taskUserIds != null && !taskUserIds.isEmpty()) {
+                userIds.addAll(taskUserIds);
             }
-            userIds.addAll(taskUserIds);
         }
         return userIds;
     }
@@ -302,7 +304,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         sillyEngineService.changeUser(taskId, userId);
         // 获取任务处置人员
         final List<String> userIds = sillyEngineService.getTaskUserIds(task);
-        final String joinUserIds = StringUtils.join(userIds, SillyConstant.ARRAY_SPLIT_STR);
+        final String joinUserIds = StringUtils.myJoin(userIds, SillyConstant.ARRAY_SPLIT_STR);
         // 记录履历
         String handleInfo = this.sillyResumeService.makeResumeHandleInfo(SillyConstant.SillyResumeType.PROCESS_TYPE_FLOW, joinUserIds, task.getName(), reason);
         doSaveProcessResume(masterId, handleInfo, SillyConstant.SillyResumeType.PROCESS_TYPE_FLOW, task.getTaskDefinitionKey(), task.getName(), joinUserIds, null);
@@ -381,13 +383,54 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         return saveData(true, taskId, saveMap);
     }
 
+    public String processKeyMapKey() {
+        return "processKey";
+    }
+
+    public String nodeKeyMapKey() {
+        return "nodeKey";
+    }
+
     protected M saveData(boolean submit, String taskId, Map<String, Object> saveMap) {
-        Task task = sillyEngineService.findTaskById(taskId);
-        SillyAssert.notNull(task, "任务未找到" + taskId);
-        SillyProcessNodeProperty<?> nodeProperty = getNodeProperty(task);
-        String masterId = sillyEngineService.getBusinessKey(task.getProcessInstanceId());
+        String masterId = null;
+        String processKey = null;
+        String nodeKey = null;
+        if (StringUtils.isEmpty(taskId)) {
+            // 从Map 中获取 processKey ， nodeKey
+            SillyPropertyHandle propertyHandle = getSillyPropertyHandle(saveMap);
+            String processKeyMapKey = propertyHandle.getStringValue(processKeyMapKey());
+            String nodeKeyMapKey = propertyHandle.getStringValue(nodeKeyMapKey());
+            String lastProcessKey = propertyHandle.getStringValue(processProperty().getLastProcessKey());
+            String firstNodeKey = propertyHandle.getStringValue(processProperty().getFirstNodeKey());
+            processKey = MapUtils.getString(saveMap, processKeyMapKey, lastProcessKey);
+            nodeKey = MapUtils.getString(saveMap, nodeKeyMapKey, firstNodeKey);
+            saveMap.remove(processKeyMapKey);
+            saveMap.remove(nodeKeyMapKey);
+        } else {
+            Task task = sillyEngineService.findTaskById(taskId);
+            SillyAssert.notNull(task, "任务未找到" + taskId);
+            masterId = sillyEngineService.getBusinessKey(task.getProcessInstanceId());
+            SillyAssert.notEmpty(masterId, "根据任务获取 masterId 失败 " + taskId);
+            M master = sillyReadService.getMaster(masterId);
+            SillyAssert.notNull(master, "根据 masterId 获取数据失败 " + masterId);
+            processKey = master.processKey();
+            nodeKey = task.getTaskDefinitionKey();
+        }
+
+        return saveData(submit, taskId, masterId, processKey, nodeKey, saveMap);
+    }
+
+    protected M saveData(boolean submit, String taskId, String masterId, String processKey, String nodeKey, Map<String, Object> saveMap) {
+        SillyProcessMasterProperty<?> masterProperty = getMasterProperty(processKey);
+        SillyProcessNodeProperty<?> nodeProperty = getNodeProperty(processKey, nodeKey);
+
+        SillyAssert.notNull(masterProperty, "masterProperty 获取失败");
+        SillyAssert.notNull(nodeProperty, "nodeProperty 获取失败");
+
         List<V> vs = mapToVariables(saveMap, nodeProperty);
         M m = makeMasterByVariables(vs);
+        m.setProcessKey(masterProperty.getProcessKey());
+        m.setProcessVersion(masterProperty.getProcessVersion());
         m.setId(masterId);
         N n = makeNodeByVariables(vs);
         n.setVariableList(vs);
@@ -415,8 +458,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
     public List<V> mapToVariables(Map<String, Object> map, SillyProcessNodeProperty<?> nodeProperty) {
         SillyAssert.notNull(nodeProperty, "节点配置不可为空");
 
-        SillyPropertyHandle sillyPropertyHandle = getSillyConfig().getSillyPropertyHandle();
-        sillyPropertyHandle.setValues(new HashMap<>(map));
+        SillyPropertyHandle sillyPropertyHandle = getSillyPropertyHandle(map);
 
         List<V> list = new ArrayList<>();
         Map<String, ? extends SillyProcessVariableProperty> variableMap = nodeProperty.getVariable();
@@ -424,7 +466,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
             SillyProcessVariableProperty variableProperty = variableMap.get(vKey);
             String variableText = object2String(map.remove(vKey), sillyPropertyHandle.getStringValue(variableProperty.getDefaultText()));
             if (StringUtils.isEmpty(variableText)) {
-                if (sillyPropertyHandle.getBooleanValue(variableProperty.getRequestEl())) {
+                if (variableProperty.isRequest() && sillyPropertyHandle.getBooleanValue(variableProperty.getRequestEl())) {
                     throw new SillyException("此参数值不可为空" + vKey);
                 }
                 continue;
@@ -464,12 +506,26 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         String variableText = defaultStr;
         if (variableObj != null) {
             if (variableObj instanceof Collection) {
-                Collection c = (Collection) variableObj;
-                variableText = StringUtils.join(c);
+                Collection<Object> c = (Collection<Object>) variableObj;
+                if (c.isEmpty()) {
+                    return variableText;
+                }
+
+                Object next = c.iterator().next();
+                if (next instanceof String) {
+                    variableText = StringUtils.myJoin((Collection<String>) variableObj);
+                } else {
+                    variableText = JSON.toJSONString(variableObj);
+                }
             } else {
-                variableText = variableObj.toString();
+                if (variableObj instanceof String) {
+                    variableText = (String) variableObj;
+                } else {
+                    variableText = JSON.toJSONString(variableObj);
+                }
             }
         }
+
         return variableText;
     }
 
@@ -491,7 +547,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         }
 
         String masterJson = JSON.toJSONString(masterMap);
-        return (M) JSON.parseObject(masterJson, sillyFactory.newMaster().getClass());
+        return JSON.parseObject(masterJson, masterClass());
     }
 
     public N makeNodeByVariables(List<V> vList) {
@@ -506,7 +562,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         }
 
         String nodeJson = JSON.toJSONString(nodeMap);
-        return (N) JSON.parseObject(nodeJson, sillyFactory.newNode().getClass());
+        return JSON.parseObject(nodeJson, nodeClass());
     }
 
 }

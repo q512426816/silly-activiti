@@ -39,13 +39,6 @@ import java.util.Map;
 public abstract class BaseMySillyWriteService<M extends BaseMySillyMaster<M>, N extends BaseMySillyNode<N, V>, V extends BaseMySillyVariable<V>>
         extends EnhanceSillyWriteService<M, N, V> {
 
-    protected SillyReadService<M, N, V> sillyReadService;
-
-    @Override
-    protected void otherInit() {
-        sillyReadService = getSillyConfig().getSillyReadService(usedCategory());
-    }
-
     @Override
     public boolean insert(M master) {
         master.preInsert();
@@ -107,32 +100,28 @@ public abstract class BaseMySillyWriteService<M extends BaseMySillyMaster<M>, N 
         return saveVariableBatch(list, 100);
     }
 
-    protected Class<?> currentModelClass() {
-        Type[] actualTypeArgument = ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments();
-        return ReflectionKit.getSuperClassGenericType((Class<?>) actualTypeArgument[1], 1);
+    protected String variableSqlStatement(String method) {
+        return SqlHelper.table(this.variableClass()).getSqlStatement(method);
     }
 
-    protected String sqlStatement(SqlMethod sqlMethod) {
-        return SqlHelper.table(this.currentModelClass()).getSqlStatement(sqlMethod.getMethod());
+    protected SqlSession variableSqlSessionBatch() {
+        return SqlHelper.sqlSessionBatch(this.variableClass());
     }
 
-    protected SqlSession sqlSessionBatch() {
-        return SqlHelper.sqlSessionBatch(this.currentModelClass());
-    }
-
+    @Override
     @Transactional(
             rollbackFor = {Exception.class}
     )
     public boolean saveVariableBatch(Collection<V> entityList, int batchSize) {
-        String sqlStatement = this.sqlStatement(SqlMethod.INSERT_ONE);
-        SqlSession batchSqlSession = this.sqlSessionBatch();
+        String sqlStatement = this.variableSqlStatement(SqlMethod.INSERT_ONE.getMethod());
+        SqlSession batchSqlSession = this.variableSqlSessionBatch();
         Throwable var5 = null;
 
         try {
             int i = 0;
 
-            for(Iterator var7 = entityList.iterator(); var7.hasNext(); ++i) {
-                V anEntityList = (V)var7.next();
+            for (Iterator var7 = entityList.iterator(); var7.hasNext(); ++i) {
+                V anEntityList = (V) var7.next();
                 batchSqlSession.insert(sqlStatement, anEntityList);
                 if (i >= 1 && i % batchSize == 0) {
                     batchSqlSession.flushStatements();
@@ -188,67 +177,37 @@ public abstract class BaseMySillyWriteService<M extends BaseMySillyMaster<M>, N 
         return super.submitData(taskId, saveMap);
     }
 
+    protected M saveFirstData(boolean submit, Map<String, Object> saveMap) {
+        return saveData(submit, null, saveMap);
+    }
+
+    public String submitKey() {
+        return "submit";
+    }
+
+    public String taskIdKey() {
+        return "taskId";
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public M saveData(boolean submit, String taskId, Map<String, Object> saveMap) {
-        return super.saveData(submit, taskId, saveMap);
-    }
-
-
-    /**
-     * 根据节点配置属性 进行数据保存/提交
-     *
-     * @param submit
-     * @param processProperty
-     * @param saveMap
-     */
-    protected M saveFirstData(boolean submit, SillyProcessProperty<?> processProperty, Map<String, Object> saveMap) {
-        SillyProcessNodeProperty<?> nodeProperty = getLastNodeProcessProperty();
-        List<V> vs = this.mapToVariables(saveMap, nodeProperty);
-        M m = this.makeMasterByVariables(vs);
-        m.setProcessKey(processProperty.getLastProcessKey());
-        m.setProcessVersion(processProperty.getLastProcessVersion());
-
-        N n = this.makeNodeByVariables(vs);
-        if (StringUtils.isEmpty(n.getNodeKey())) {
-            n.setNodeKey(processProperty.getFirstNodeKey());
-        }
-        n.setVariableList(vs);
-        n.setParallelFlag(nodeProperty.isParallel() ? SillyConstant.YesOrNo.YES : SillyConstant.YesOrNo.NO);
-
-        if (submit) {
-            this.submit(m, n);
-        } else {
-            this.save(m, n);
-        }
-
-        return m;
-    }
-
-    @Transactional(rollbackFor = Exception.class)
     public M saveTaskMap(Map<String, Object> saveMap) {
-        String taskId = MapUtils.getString(saveMap, "taskId");
-        Boolean submit = MapUtils.getBoolean(saveMap, "submit");
+        String taskId = MapUtils.getString(saveMap, taskIdKey());
+        Boolean submit = MapUtils.getBoolean(saveMap, submitKey(), false);
         SillyAssert.notEmpty(taskId, "任务ID不可为空");
-        SillyAssert.notNull(submit, "提交标记不可为空");
-        saveMap.remove("taskId");
-        saveMap.remove("submit");
+        saveMap.remove(taskIdKey());
+        saveMap.remove(submitKey());
         return saveData(submit, taskId, saveMap);
     }
 
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public M saveOrNewMap(Map<String, Object> saveMap) {
-        String taskId = MapUtils.getString(saveMap, "taskId");
-        Boolean submit = MapUtils.getBoolean(saveMap, "submit");
-        SillyAssert.notNull(submit, "提交标记不可为空");
-        saveMap.remove("taskId");
-        saveMap.remove("submit");
-
-        if (StringUtils.isEmpty(taskId)) {
-            return saveFirstData(submit, processProperty(), saveMap);
-        } else {
-            return saveData(submit, taskId, saveMap);
-        }
+        String taskId = MapUtils.getString(saveMap, taskIdKey());
+        Boolean submit = MapUtils.getBoolean(saveMap, submitKey(), false);
+        saveMap.remove(taskIdKey());
+        saveMap.remove(submitKey());
+        return saveData(submit, taskId, saveMap);
     }
 
 }

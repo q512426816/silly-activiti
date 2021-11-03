@@ -37,6 +37,7 @@ public abstract class BaseMySillyMaster<T extends Model<T>> extends BaseMyBaseEn
         return processKey;
     }
 
+    @Override
     public void setProcessKey(String processKey) {
         this.processKey = processKey;
     }
@@ -45,6 +46,7 @@ public abstract class BaseMySillyMaster<T extends Model<T>> extends BaseMyBaseEn
         return processVersion;
     }
 
+    @Override
     public void setProcessVersion(String processVersion) {
         this.processVersion = processVersion;
     }

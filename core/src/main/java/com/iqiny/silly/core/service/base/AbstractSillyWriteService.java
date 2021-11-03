@@ -17,6 +17,7 @@ import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.convertor.SillyAutoConvertor;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
+import com.iqiny.silly.core.service.SillyReadService;
 import com.iqiny.silly.core.service.SillyWriteService;
 
 import java.util.*;
@@ -31,6 +32,13 @@ import java.util.*;
 public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable, T>
         extends AbstractSillyService<M, N, V, T> implements SillyWriteService<M, N, V> {
 
+    protected SillyReadService<M, N, V> sillyReadService;
+
+    @Override
+    protected void otherInit() {
+        sillyReadService = getSillyConfig().getSillyReadService(usedCategory());
+    }
+    
     /**
      * 提交数据 流程流转
      *
@@ -237,9 +245,6 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         // 流程启动  返回任务ID
         String processInstanceId = sillyEngineService.start(master, varMap);
         final List<T> tasks = sillyEngineService.findTaskByProcessInstanceId(processInstanceId);
-        if (tasks.size() != 1) {
-            throw new SillyException("任务启动第一位节点任务不可为多个！");
-        }
         final T t = tasks.get(0);
         node.setTaskId(sillyEngineService.getTaskId(t));
 

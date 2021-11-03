@@ -12,7 +12,9 @@ import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 数据写入的基本服务操作接口
@@ -21,6 +23,21 @@ import java.util.List;
  * @since 1.0
  */
 public interface SillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> extends SillyService {
+
+
+    /**
+     * 保存/新增数据
+     * @param saveMap
+     * @return
+     */
+    M saveOrNewMap(Map<String, Object> saveMap);
+
+    /**
+     * 保存数据
+     * @param saveMap
+     * @return
+     */
+    M saveTaskMap(Map<String, Object> saveMap);
 
     /**
      * 新增主表数据
@@ -81,5 +98,7 @@ public interface SillyWriteService<M extends SillyMaster, N extends SillyNode<V>
      * @return 是否成功
      */
     boolean update(V variable, V where);
+
+    boolean saveVariableBatch(Collection<V> variables, int batchSize);
 
 }

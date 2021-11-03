@@ -17,6 +17,7 @@ import java.util.List;
 
 public interface SillyProcessVariableProperty<C extends SillyHtmlTagConfig> {
 
+
     /**
      * 变量描述
      */

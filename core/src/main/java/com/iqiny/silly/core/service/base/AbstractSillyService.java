@@ -11,6 +11,7 @@ package com.iqiny.silly.core.service.base;
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.SillyAssert;
+import com.iqiny.silly.common.util.SillyReflectUtil;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.base.core.SillyMaster;
@@ -28,6 +29,8 @@ import com.iqiny.silly.core.service.SillyEngineService;
 import com.iqiny.silly.core.service.SillyService;
 import org.apache.commons.collections.BeanMap;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.*;
 
 /**
@@ -52,6 +55,10 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
     protected Map<String, SillyVariableSaveHandle> sillySaveHandleMap;
 
     protected SillyTaskGroupHandle sillyTaskGroupHandle;
+
+    private Class<M> masterClass;
+    private Class<N> nodeClass;
+    private Class<V> variableClass;
 
     @Override
     public void init() {
@@ -109,6 +116,7 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
 
     /**
      * 批量保存处置类处理
+     *
      * @param node
      * @param variables
      * @return
@@ -140,18 +148,36 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         this.sillyTaskGroupHandle = sillyTaskGroupHandle;
     }
 
+    protected SillyPropertyHandle getSillyPropertyHandle(Map<String, Object> values) {
+        SillyPropertyHandle sillyPropertyHandle = getSillyConfig().getSillyPropertyHandle();
+        sillyPropertyHandle.setValues(new HashMap<>(values));
+        return sillyPropertyHandle;
+    }
+
+    protected SillyPropertyHandle getSillyPropertyHandle() {
+        SillyPropertyHandle sillyPropertyHandle = getSillyConfig().getSillyPropertyHandle();
+        sillyPropertyHandle.setValues(new HashMap<>());
+        return sillyPropertyHandle;
+    }
+
     public SillyProcessProperty<?> processProperty() {
         return getSillyConfig().getSillyProcessProperty(usedCategory());
     }
 
     public SillyProcessNodeProperty<?> getNodeProperty(String processKey, String nodeKey) {
-        SillyProcessProperty<?> property = processProperty();
-        SillyAssert.notNull(property, "配置未找到 category：" + usedCategory());
-        SillyProcessMasterProperty<?> masterProperty = property.getMaster().get(processKey);
+        SillyProcessMasterProperty<?> masterProperty = getMasterProperty(processKey);
         SillyAssert.notNull(masterProperty, "配置未找到 processKey：" + processKey);
         SillyProcessNodeProperty<?> nodeProperty = masterProperty.getNode().get(nodeKey);
         SillyAssert.notNull(nodeProperty, "配置未找到 nodeKey：" + nodeKey);
         return nodeProperty;
+    }
+
+    public SillyProcessMasterProperty<?> getMasterProperty(String processKey) {
+        SillyProcessProperty<?> property = processProperty();
+        SillyAssert.notNull(property, "配置未找到 category：" + usedCategory());
+        SillyProcessMasterProperty<?> masterProperty = property.getMaster().get(processKey);
+        SillyAssert.notNull(masterProperty, "配置未找到 processKey：" + processKey);
+        return masterProperty;
     }
 
     /**
@@ -163,12 +189,13 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
     public SillyProcessNodeProperty<?> getLastNodeProperty(String nodeKey) {
         SillyProcessProperty<?> property = processProperty();
         SillyAssert.notNull(property, "配置未找到 category：" + this.usedCategory());
+        SillyPropertyHandle propertyHandle = getSillyPropertyHandle();
         String processKey = property.getLastProcessKey();
         if (StringUtils.isEmpty(nodeKey)) {
             nodeKey = property.getFirstNodeKey();
         }
 
-        return getNodeProperty(processKey, nodeKey);
+        return getNodeProperty(propertyHandle.getStringValue(processKey), propertyHandle.getStringValue(nodeKey));
     }
 
     /**
@@ -188,5 +215,31 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
     public String getLastProcessKey() {
         return processProperty().getLastProcessKey();
     }
+
+
+    protected Class<V> variableClass() {
+        if (variableClass == null) {
+            Type[] actualTypeArgument = ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments();
+            variableClass = (Class<V>) SillyReflectUtil.getSuperClassGenericType((Class<?>) actualTypeArgument[1], 1);
+        }
+        return variableClass;
+    }
+
+    protected Class<N> nodeClass() {
+        if (nodeClass == null) {
+            Type[] actualTypeArgument = ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments();
+            nodeClass = (Class<N>) SillyReflectUtil.getSuperClassGenericType((Class<?>) actualTypeArgument[1], 0);
+        }
+        return nodeClass;
+    }
+
+    protected Class<M> masterClass() {
+        if (masterClass == null) {
+            Type[] actualTypeArgument = ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments();
+            masterClass = (Class<M>) SillyReflectUtil.getSuperClassGenericType((Class<?>) actualTypeArgument[0], 0);
+        }
+        return masterClass;
+    }
+
 
 }
