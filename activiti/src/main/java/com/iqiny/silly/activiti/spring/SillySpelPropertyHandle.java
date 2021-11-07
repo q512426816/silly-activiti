@@ -12,9 +12,11 @@ import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.config.property.SillyPropertyHandle;
+import org.springframework.context.ApplicationContext;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
@@ -29,18 +31,19 @@ public class SillySpelPropertyHandle implements SillyPropertyHandle {
     public static final String EL_START = "${";
     public static final String EL_END = "}";
 
-    private EvaluationContext context;
+    private StandardEvaluationContext context;
     private Map<String, Object> values;
 
     public EvaluationContext getContext() {
         if (context == null) {
             context = new StandardEvaluationContext();
-            ((StandardEvaluationContext) context).setVariables(getValues());
+            context.setBeanResolver(SillyBeanResolver.get());
+            context.setVariables(getValues());
         }
         return context;
     }
 
-    public SillySpelPropertyHandle setContext(EvaluationContext context) {
+    public SillySpelPropertyHandle setContext(StandardEvaluationContext context) {
         this.context = context;
         return this;
     }

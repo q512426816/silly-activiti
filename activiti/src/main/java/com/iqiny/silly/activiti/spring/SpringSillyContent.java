@@ -63,6 +63,10 @@ public class SpringSillyContent implements ApplicationContextAware, Initializing
         return returnSet;
     }
 
+    public static Object getBean(String beanName) {
+        return applicationContext.getBean(beanName);
+    }
+
     public static <T> T getBean(Class<T> clazz) {
         return applicationContext.getBean(clazz);
     }

@@ -136,8 +136,9 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         if (sillySaveHandleMap == null) {
             throw new SillyException("Silly数据保存处理器未设置！");
         }
-
-        return sillySaveHandleMap.get(saveHandleName);
+        SillyVariableSaveHandle sillyVariableSaveHandle = sillySaveHandleMap.get(saveHandleName);
+        SillyAssert.notNull(sillyVariableSaveHandle, "saveHandleName：" + saveHandleName + " 未进行配置");
+        return sillyVariableSaveHandle;
     }
 
     public SillyTaskGroupHandle getSillyTaskGroupHandle() {
