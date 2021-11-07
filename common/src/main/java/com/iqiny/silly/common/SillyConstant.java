@@ -8,6 +8,10 @@
  */
 package com.iqiny.silly.common;
 
+import com.iqiny.silly.common.util.SillyDateUtils;
+
+import java.util.Date;
+
 public class SillyConstant {
 
     public static final String ARRAY_SPLIT_STR = ",";
@@ -132,4 +136,21 @@ public class SillyConstant {
         public static final String YES = "1";
         public static final String NO = "0";
     }
+
+    public static String dateFormat(Date date, String pattern) {
+        return SillyDateUtils.formatDate(date, pattern);
+    }
+
+    public static String currentDate(String pattern) {
+        return SillyDateUtils.formatDate(new Date(), pattern);
+    }
+
+    public static String currentDateTime() {
+        return SillyDateUtils.formatDateTime(new Date());
+    }
+
+    public static String currentDate() {
+        return SillyDateUtils.formatDate(new Date());
+    }
+
 }

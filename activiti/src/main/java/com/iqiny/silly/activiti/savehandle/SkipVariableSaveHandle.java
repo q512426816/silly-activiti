@@ -3,21 +3,22 @@
  *
  *  https://gitee.com/iqiny/silly
  *
- *  project name：silly-core 1.0.6-RELEASE
+ *  project name：silly-activiti 1.0.6-RELEASE
  *  project description：top silly project pom.xml file
  */
-package com.iqiny.silly.core.config.property.impl;
+package com.iqiny.silly.activiti.savehandle;
 
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
 
 /**
- * 默认变量保存处置类 （不进行任何处置）
+ * 跳过保存处理器
+ * 此变量不进行存储
  */
-public class DefaultVariableSaveHandle implements SillyVariableSaveHandle {
+public class SkipVariableSaveHandle implements SillyVariableSaveHandle {
 
-    public static final String NAME = "default";
+    public static final String NAME = "skip";
 
     @Override
     public String name() {
@@ -26,6 +27,6 @@ public class DefaultVariableSaveHandle implements SillyVariableSaveHandle {
 
     @Override
     public boolean handle(String category, SillyNode node, SillyVariable variable) {
-        return variable != null;
+        return false;
     }
 }

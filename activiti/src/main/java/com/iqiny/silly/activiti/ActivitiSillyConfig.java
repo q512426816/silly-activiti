@@ -12,6 +12,8 @@ import com.alibaba.fastjson.JSON;
 import com.iqiny.silly.activiti.convertor.SillyListConvertor;
 import com.iqiny.silly.activiti.savehandle.DataJoinVariableSaveHandle;
 import com.iqiny.silly.activiti.savehandle.OverwriteVariableSaveHandle;
+import com.iqiny.silly.activiti.savehandle.SaveVariableSaveHandle;
+import com.iqiny.silly.activiti.savehandle.SkipVariableSaveHandle;
 import com.iqiny.silly.activiti.spring.SillySpelPropertyHandle;
 import com.iqiny.silly.activiti.spring.SpringSillyContent;
 import com.iqiny.silly.common.util.SillyAssert;
@@ -22,7 +24,7 @@ import com.iqiny.silly.core.config.CurrentUserUtil;
 import com.iqiny.silly.core.config.html.SillyHtmlTagTemplate;
 import com.iqiny.silly.core.config.property.SillyProcessProperty;
 import com.iqiny.silly.core.config.property.SillyPropertyHandle;
-import com.iqiny.silly.core.config.property.SillyVariableSaveHandle;
+import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
 import com.iqiny.silly.core.config.property.impl.DefaultProcessProperty;
 import com.iqiny.silly.core.config.property.impl.DefaultVariableSaveHandle;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
@@ -99,6 +101,8 @@ public class ActivitiSillyConfig extends AbstractSillyConfig {
         addSillyVariableSaveHandle(new DefaultVariableSaveHandle());
         addSillyVariableSaveHandle(new OverwriteVariableSaveHandle());
         addSillyVariableSaveHandle(new DataJoinVariableSaveHandle());
+        addSillyVariableSaveHandle(new SaveVariableSaveHandle());
+        addSillyVariableSaveHandle(new SkipVariableSaveHandle());
         final Set<SillyVariableSaveHandle> beanSet = SpringSillyContent.getBeanSet(SillyVariableSaveHandle.class);
         for (SillyVariableSaveHandle saveHandle : beanSet) {
             addSillyVariableSaveHandle(saveHandle);

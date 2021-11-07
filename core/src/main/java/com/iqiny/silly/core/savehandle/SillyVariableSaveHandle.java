@@ -6,12 +6,11 @@
  *  project name：silly-core 1.0.6-RELEASE
  *  project description：top silly project pom.xml file
  */
-package com.iqiny.silly.core.config.property;
+package com.iqiny.silly.core.savehandle;
 
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
 
-import java.util.List;
 
 /**
  * 傻瓜变量数据保存处置类

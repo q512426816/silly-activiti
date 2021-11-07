@@ -12,7 +12,7 @@ import com.iqiny.silly.core.base.SillyInitializable;
 import com.iqiny.silly.core.group.SillyTaskCategoryGroup;
 
 /**
- * 集成 SPEL 表达式配置
+ * 表达式配置
  */
 public interface SillyPropertyHandle {
 

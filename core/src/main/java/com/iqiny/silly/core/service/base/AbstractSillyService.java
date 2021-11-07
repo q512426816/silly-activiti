@@ -25,9 +25,9 @@ import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.group.SillyTaskGroupHandle;
 import com.iqiny.silly.core.resume.SillyResume;
 import com.iqiny.silly.core.resume.SillyResumeService;
+import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
 import com.iqiny.silly.core.service.SillyEngineService;
 import com.iqiny.silly.core.service.SillyService;
-import org.apache.commons.collections.BeanMap;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

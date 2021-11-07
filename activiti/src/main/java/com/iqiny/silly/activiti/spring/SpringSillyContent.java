@@ -30,7 +30,11 @@ public class SpringSillyContent implements ApplicationContextAware, Initializing
 
     private final static Log log = LogFactory.getLog(SpringSillyContent.class);
 
-    protected static ApplicationContext applicationContext;
+    private static ApplicationContext applicationContext;
+
+    public static ApplicationContext getApplicationContext() {
+        return applicationContext;
+    }
 
     /**
      * 获取Bean 同时会在容器中寻找相应Bean 注册到Spring环境中
