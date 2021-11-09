@@ -121,14 +121,14 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
      * @param variables
      * @return
      */
-    protected boolean batchSaveHandle(N node, V variables) {
+    protected boolean batchSaveHandle(M master, N node, V variables, SillyPropertyHandle propertyHandle) {
         String saveHandleNames = variables.getSaveHandleName();
         SillyAssert.notEmpty(saveHandleNames, "批处理数据保存不可为空");
         String[] saveHandleNameArr = StringUtils.split(saveHandleNames, SillyConstant.ARRAY_SPLIT_STR);
         boolean lastFlag = true;
         for (String saveHandleName : saveHandleNameArr) {
-            String stringValue = getSillyPropertyHandle(node.getMasterId(), node.getVariableMap()).getStringValue(saveHandleName.trim());
-            lastFlag = getSillyVariableSaveHandle(stringValue).handle(usedCategory(), node, variables);
+            String stringValue = propertyHandle.getStringValue(saveHandleName.trim());
+            lastFlag = getSillyVariableSaveHandle(stringValue).handle(master, node, variables);
         }
         return lastFlag;
     }
@@ -154,7 +154,7 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
 
     protected SillyPropertyHandle getSillyPropertyHandle(String masterId, Map<String, Object> values) {
         SillyPropertyHandle sillyPropertyHandle = getSillyConfig().getSillyPropertyHandle();
-        if(StringUtils.isNotEmpty(masterId)){
+        if (StringUtils.isNotEmpty(masterId)) {
             sillyPropertyHandle.setRoot(getPropertyHandleRoot(masterId));
         }
         sillyPropertyHandle.setValues(new HashMap<>(values));

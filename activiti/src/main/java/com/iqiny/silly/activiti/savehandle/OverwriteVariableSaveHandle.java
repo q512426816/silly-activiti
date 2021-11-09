@@ -9,6 +9,7 @@
 package com.iqiny.silly.activiti.savehandle;
 
 import com.iqiny.silly.common.SillyConstant;
+import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.config.SillyConfig;
@@ -29,19 +30,19 @@ public class OverwriteVariableSaveHandle implements SillyVariableSaveHandle {
     }
 
     @Override
-    public boolean handle(String category, SillyNode node, SillyVariable variable) {
+    public boolean handle(SillyMaster master, SillyNode node, SillyVariable variable) {
         SillyConfig sillyConfig = SillyConfigUtil.getSillyConfig();
 
         // 直接更新同名数据 状态为 旧版本
         // （若有）更新之前的流程变量信息 为历史状态
-        final SillyVariable whereVariable = sillyConfig.getSillyFactory(category).newVariable();
+        final SillyVariable whereVariable = sillyConfig.getSillyFactory(master.category()).newVariable();
         whereVariable.setMasterId(node.getMasterId());
         whereVariable.setVariableName(variable.getVariableName());
-        final SillyVariable sillyVariable = sillyConfig.getSillyFactory(category).newVariable();
+        final SillyVariable sillyVariable = sillyConfig.getSillyFactory(master.category()).newVariable();
         sillyVariable.setMasterId(node.getMasterId());
         sillyVariable.setVariableName(variable.getVariableName());
         sillyVariable.setStatus(SillyConstant.ActivitiNode.STATUS_HISTORY);
-        sillyConfig.getSillyWriteService(category).update(sillyVariable, whereVariable);
+        sillyConfig.getSillyWriteService(master.category()).update(sillyVariable, whereVariable);
         return true;
     }
 }

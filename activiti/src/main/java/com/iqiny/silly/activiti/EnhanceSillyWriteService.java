@@ -456,23 +456,34 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         m.setProcessVersion(masterProperty.getProcessVersion());
         m.setId(masterId);
         N n = makeNodeByVariables(vs);
-        n.setVariableList(vs);
         n.setMasterId(masterId);
         n.setTaskId(taskId);
         n.setNodeKey(nodeProperty.getNodeKey());
         n.setNodeName(nodeProperty.getNodeName());
         n.setParallelFlag(nodeProperty.isParallel() ? SillyConstant.YesOrNo.YES : SillyConstant.YesOrNo.NO);
 
+        List<V> saveV = variableSaveHandle(m, n, vs, propertyHandle);
+        n.setVariableList(saveV);
+
         if (submit) {
             submit(m, n);
         } else {
             save(m, n);
         }
-
         // 更新 ROOT 数据
         updatePropertyHandleRoot(m.getId(), propertyHandle.getValues());
-
         return m;
+    }
+
+    protected List<V> variableSaveHandle(M m, N n, List<V> vs, SillyPropertyHandle propertyHandle) {
+        List<V> needSaveList = new ArrayList<>();
+        for (V v : vs) {
+            boolean needSaveFlag = batchSaveHandle(m, n, v, propertyHandle);
+            if (needSaveFlag) {
+                needSaveList.add(v);
+            }
+        }
+        return needSaveList;
     }
 
     @Override

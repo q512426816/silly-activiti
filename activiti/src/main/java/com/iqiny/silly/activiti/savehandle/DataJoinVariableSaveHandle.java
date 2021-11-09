@@ -9,6 +9,7 @@
 package com.iqiny.silly.activiti.savehandle;
 
 import com.iqiny.silly.common.SillyConstant;
+import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.config.SillyConfig;
@@ -32,14 +33,14 @@ public class DataJoinVariableSaveHandle implements SillyVariableSaveHandle {
     }
 
     @Override
-    public boolean handle(String category, SillyNode node, SillyVariable variable) {
+    public boolean handle(SillyMaster master, SillyNode node, SillyVariable variable) {
         SillyConfig sillyConfig = SillyConfigUtil.getSillyConfig();
 
-        final SillyVariable whereVariable = sillyConfig.getSillyFactory(category).newVariable();
+        final SillyVariable whereVariable = sillyConfig.getSillyFactory(master.category()).newVariable();
         whereVariable.setMasterId(node.getMasterId());
         whereVariable.setVariableName(variable.getVariableName());
         whereVariable.setStatus(SillyConstant.ActivitiNode.STATUS_CURRENT);
-        List<SillyVariable> variableList = sillyConfig.getSillyReadService(category).findVariableList(whereVariable);
+        List<SillyVariable> variableList = sillyConfig.getSillyReadService(master.category()).findVariableList(whereVariable);
       
         // 累计变量数据
         StringJoiner sj = new StringJoiner(SillyConstant.ARRAY_SPLIT_STR);

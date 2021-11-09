@@ -346,12 +346,6 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
                 throw new SillyException("流程参数名称不可为空！" + variable.getVariableText());
             }
 
-            // 数据保存处置
-            boolean saveFlag = batchSaveHandle(node, variable);
-            if (!saveFlag) {
-                continue;
-            }
-
             String variableType = variable.getVariableType();
             SillyVariableConvertor<?> handler = getSillyConvertor(variableType);
             // 仅对 string、list 类型的数据进行自动转换
