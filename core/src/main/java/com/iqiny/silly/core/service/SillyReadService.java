@@ -96,4 +96,12 @@ public interface SillyReadService<M extends SillyMaster, N extends SillyNode<V>,
      */
     Object queryHistoryPage(Map<String, Object> params);
 
+
+    /**
+     * variableList2Map
+     * @param variables
+     * @return
+     */
+    Map<String, Object> variableList2Map(List<V> variables);
+
 }

@@ -149,8 +149,13 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         this.sillyTaskGroupHandle = sillyTaskGroupHandle;
     }
 
-    protected SillyPropertyHandle getSillyPropertyHandle(Map<String, Object> values) {
+    protected abstract Object getPropertyHandleRoot(String masterId);
+
+    protected SillyPropertyHandle getSillyPropertyHandle(String masterId, Map<String, Object> values) {
         SillyPropertyHandle sillyPropertyHandle = getSillyConfig().getSillyPropertyHandle();
+        if(StringUtils.isNotEmpty(masterId)){
+            sillyPropertyHandle.setRoot(getPropertyHandleRoot(masterId));
+        }
         sillyPropertyHandle.setValues(new HashMap<>(values));
         return sillyPropertyHandle;
     }

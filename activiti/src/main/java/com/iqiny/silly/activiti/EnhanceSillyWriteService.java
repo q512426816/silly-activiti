@@ -23,6 +23,7 @@ import com.iqiny.silly.core.service.base.AbstractSillyWriteService;
 import org.activiti.engine.task.Task;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.config.CacheManagementConfigUtils;
 
 import java.util.*;
 
@@ -391,13 +392,19 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         return "nodeKey";
     }
 
+    public String masterIdMapKey() {
+        return "id";
+    }
+
     protected M saveData(boolean submit, String taskId, Map<String, Object> saveMap) {
-        String masterId = null;
+        String masterIdMapKey = masterIdMapKey();
+        String masterId = MapUtils.getString(saveMap, masterIdMapKey);
+        saveMap.remove(masterIdMapKey);
         String processKey = null;
         String nodeKey = null;
         if (StringUtils.isEmpty(taskId)) {
             // 从Map 中获取 processKey ， nodeKey
-            SillyPropertyHandle propertyHandle = getSillyPropertyHandle(saveMap);
+            SillyPropertyHandle propertyHandle = getSillyPropertyHandle(masterId, saveMap);
             String processKeyMapKey = propertyHandle.getStringValue(processKeyMapKey());
             String nodeKeyMapKey = propertyHandle.getStringValue(nodeKeyMapKey());
             String lastProcessKey = propertyHandle.getStringValue(processProperty().getLastProcessKey());
@@ -409,8 +416,10 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         } else {
             Task task = sillyEngineService.findTaskById(taskId);
             SillyAssert.notNull(task, "任务未找到" + taskId);
-            masterId = sillyEngineService.getBusinessKey(task.getProcessInstanceId());
-            SillyAssert.notEmpty(masterId, "根据任务获取 masterId 失败 " + taskId);
+            if (StringUtils.isEmpty(masterId)) {
+                masterId = sillyEngineService.getBusinessKey(task.getProcessInstanceId());
+                SillyAssert.notEmpty(masterId, "根据任务获取 masterId 失败 " + taskId);
+            }
             M master = sillyReadService.getMaster(masterId);
             SillyAssert.notNull(master, "根据 masterId 获取数据失败 " + masterId);
             processKey = master.processKey();
@@ -424,10 +433,11 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         SillyProcessMasterProperty<?> masterProperty = getMasterProperty(processKey);
         SillyProcessNodeProperty<?> nodeProperty = getNodeProperty(processKey, nodeKey);
 
-        SillyAssert.notNull(masterProperty, "masterProperty 获取失败");
-        SillyAssert.notNull(nodeProperty, "nodeProperty 获取失败");
+        SillyAssert.notNull(masterProperty, "masterProperty 获取失败" + processKey);
+        SillyAssert.notNull(nodeProperty, "nodeProperty 获取失败" + nodeKey);
 
-        List<V> vs = mapToVariables(saveMap, nodeProperty);
+        SillyPropertyHandle propertyHandle = getSillyPropertyHandle(masterId, saveMap);
+        List<V> vs = mapToVariables(propertyHandle, saveMap, nodeProperty);
         M m = makeMasterByVariables(vs);
         m.setProcessKey(masterProperty.getProcessKey());
         m.setProcessVersion(masterProperty.getProcessVersion());
@@ -446,8 +456,51 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
             save(m, n);
         }
 
+        // 更新 ROOT 数据
+        updatePropertyHandleRoot(m.getId(), propertyHandle.getValues());
+
         return m;
     }
+
+    @Override
+    protected Object getPropertyHandleRoot(String masterId) {
+        Object root = getPropertyHandleRootCache(masterId);
+        if (root == null) {
+            root = getPropertyHandleRootDB(masterId);
+        }
+        return root;
+    }
+
+    protected Object getPropertyHandleRootDB(String masterId) {
+        List<V> nodeList = sillyReadService.getVariableList(masterId, null);
+        return sillyReadService.variableList2Map(nodeList);
+    }
+
+    protected abstract Object getPropertyHandleRootCache(String masterId);
+
+    protected void updatePropertyHandleRoot(String masterId, Object updateValue) {
+        updatePropertyHandleRootCache(masterId, updateValue);
+    }
+
+    protected void updatePropertyHandleRootCache(String masterId, Object updateValue) {
+        if (updateValue == null) {
+            return;
+        }
+
+        Object propertyHandleRoot = getPropertyHandleRoot(masterId);
+        if (propertyHandleRoot == null) {
+            propertyHandleRoot = new LinkedHashMap<>();
+        }
+        if (propertyHandleRoot instanceof Map && updateValue instanceof Map) {
+            Map rootMap = (Map) propertyHandleRoot;
+            rootMap.putAll((Map) updateValue);
+            doUpdatePropertyHandleRootCache(masterId, rootMap);
+        } else {
+            throw new SillyException("不支持此数据类型的ROOT值更新" + propertyHandleRoot.getClass());
+        }
+    }
+
+    protected abstract void doUpdatePropertyHandleRootCache(String masterId, Map<String, Object> saveMap);
 
     /**
      * Map 根据配置对象转 Variable 对象集合
@@ -455,16 +508,18 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
      * @param map
      * @return
      */
-    public List<V> mapToVariables(Map<String, Object> map, SillyProcessNodeProperty<?> nodeProperty) {
+    public List<V> mapToVariables(SillyPropertyHandle sillyPropertyHandle, Map<String, Object> map, SillyProcessNodeProperty<?> nodeProperty) {
         SillyAssert.notNull(nodeProperty, "节点配置不可为空");
-
-        SillyPropertyHandle sillyPropertyHandle = getSillyPropertyHandle(map);
 
         List<V> list = new ArrayList<>();
         Map<String, ? extends SillyProcessVariableProperty> variableMap = nodeProperty.getVariable();
-        for (String vKey : variableMap.keySet()) {
+        Set<String> keySet = variableMap.keySet();
+        for (String vKey : keySet) {
             SillyProcessVariableProperty variableProperty = variableMap.get(vKey);
-            String variableText = object2String(map.remove(vKey), sillyPropertyHandle.getStringValue(variableProperty.getDefaultText()));
+            Object variableObj = map.remove(vKey);
+            Object defaultObject = sillyPropertyHandle.getValue(variableProperty.getDefaultText());
+            String defaultText = object2String(defaultObject, null);
+            String variableText = object2String(variableObj, defaultText);
             if (StringUtils.isEmpty(variableText)) {
                 if (variableProperty.isRequest() && sillyPropertyHandle.getBooleanValue(variableProperty.getRequestEl())) {
                     throw new SillyException("此参数值不可为空" + vKey);
@@ -472,17 +527,27 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
                 continue;
             }
 
+            if (variableProperty.isUpdatePropertyHandleValue()) {
+                sillyPropertyHandle.updateValue(vKey, variableText);
+            }
+
+            String variableName = sillyPropertyHandle.getStringValue(variableProperty.getVariableName());
+            String variableType = sillyPropertyHandle.getStringValue(variableProperty.getVariableType());
+            String belong = sillyPropertyHandle.getStringValue(variableProperty.getBelong());
+            String activitiHandler = sillyPropertyHandle.getStringValue(variableProperty.getActivitiHandler());
+            String saveHandleName = StringUtils.join(variableProperty.getSaveHandleNames(), SillyConstant.ARRAY_SPLIT_STR);
             paramToVariableList(list,
-                    sillyPropertyHandle.getStringValue(variableProperty.getVariableName()),
+                    variableName,
                     variableText,
-                    sillyPropertyHandle.getStringValue(variableProperty.getVariableType()),
-                    sillyPropertyHandle.getStringValue(variableProperty.getBelong()),
-                    sillyPropertyHandle.getStringValue(variableProperty.getActivitiHandler()),
-                    StringUtils.join(variableProperty.getSaveHandleNames(), SillyConstant.ARRAY_SPLIT_STR)
+                    variableType,
+                    belong,
+                    activitiHandler,
+                    saveHandleName
             );
         }
 
-        for (String key : map.keySet()) {
+        keySet = map.keySet();
+        for (String key : keySet) {
             if (nodeProperty.ignoreField(key)) {
                 continue;
             }
@@ -497,7 +562,6 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
 
             doVariableList(map.get(key), list, key, SillyConstant.ActivitiVariable.BELONG_VARIABLE, null);
         }
-
 
         return list;
     }

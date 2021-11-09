@@ -17,6 +17,16 @@ import com.iqiny.silly.core.group.SillyTaskCategoryGroup;
 public interface SillyPropertyHandle {
 
     /**
+     * 获取 ROOT
+     */
+    Object getRoot();
+
+    /**
+     * 设置ROOT
+     */
+    void setRoot(Object root);
+
+    /**
      * 获取配置数据值
      */
     Object getValue(String expression);
@@ -36,8 +46,13 @@ public interface SillyPropertyHandle {
 
     /**
      * 设置配置内容体
+     *
      * @param context
      */
     void setValues(Object context);
-    
+
+    Object getValues();
+
+    void updateValue(String key, Object value);
+
 }

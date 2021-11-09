@@ -10,10 +10,12 @@ package com.iqiny.silly.core.service.base;
 
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.exception.SillyException;
+import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.SillyReflectUtil;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
+import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.service.SillyReadService;
 
@@ -56,8 +58,8 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
     public Map<String, Object> getMasterMap(M master) {
         return beanToMap(master);
     }
-    
-    
+
+
     /**
      * 使用Introspector，对象转换为map集合
      *
@@ -144,13 +146,35 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
      */
     public Map<String, Object> findVariableByVariable(V variable) {
         final List<V> variables = findVariableList(variable);
-        Map<String, Object> map = new LinkedHashMap<>();
-        for (V auditVariable : variables) {
-            final SillyVariableConvertor<?> sillyHandler = getSillyConvertor(auditVariable.getVariableType());
-            sillyHandler.convert(map, auditVariable.getVariableName(), auditVariable.getVariableText());
-        }
-
-        return map;
+        return variableList2Map(variables);
     }
 
+
+    @Override
+    public Map<String, Object> variableList2Map(List<V> variables) {
+        Map<String, Object> variableMap = new LinkedHashMap<>();
+        Map<String, Map<String, Object>> parallelMap = new LinkedHashMap<>();
+        M master = null;
+        for (V variable : variables) {
+            if (master == null) {
+                String masterId = variable.getMasterId();
+                master = getMaster(masterId);
+                SillyAssert.notNull(master, "变量数据获取主表数据失败" + masterId);
+            }
+            final SillyVariableConvertor<?> sillyHandler = getSillyConvertor(variable.getVariableType());
+            SillyProcessNodeProperty<?> nodeProperty = getNodeProperty(master.processKey(), variable.getNodeKey());
+            if (nodeProperty.isParallel()) {
+                Map<String, Object> nodeMap = parallelMap.putIfAbsent(variable.getTaskId(), new LinkedHashMap<>());
+                sillyHandler.convert(nodeMap, variable.getVariableName(), variable.getVariableText());
+            }
+            sillyHandler.convert(variableMap, variable.getVariableName(), variable.getVariableText());
+        }
+
+        variableMap.put(parallelMapKey(), parallelMap);
+        return variableMap;
+    }
+
+    public String parallelMapKey() {
+        return "parallelMap";
+    }
 }

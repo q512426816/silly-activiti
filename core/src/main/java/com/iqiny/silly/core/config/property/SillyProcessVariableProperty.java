@@ -66,6 +66,11 @@ public interface SillyProcessVariableProperty<C extends SillyHtmlTagConfig> {
      */
     String getBelong();
 
+    /**
+     * 是否更新此字段信息到处理器上下文中
+     */
+    boolean isUpdatePropertyHandleValue();
+
     void setVariableName(String variableName);
 
     void setVariableType(String convertorString);
@@ -85,4 +90,7 @@ public interface SillyProcessVariableProperty<C extends SillyHtmlTagConfig> {
     void setHtmlTemplate(SillyHtmlTagTemplate htmlTemplate);
 
     String getHtml();
+
+
+
 }

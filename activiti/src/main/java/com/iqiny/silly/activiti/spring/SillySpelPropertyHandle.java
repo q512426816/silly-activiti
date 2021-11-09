@@ -33,10 +33,11 @@ public class SillySpelPropertyHandle implements SillyPropertyHandle {
 
     private StandardEvaluationContext context;
     private Map<String, Object> values;
+    private Object root;
 
-    public EvaluationContext getContext() {
+    public StandardEvaluationContext getContext() {
         if (context == null) {
-            context = new StandardEvaluationContext();
+            context = new StandardEvaluationContext(root);
             context.setBeanResolver(SillyBeanResolver.get());
             context.setVariables(getValues());
         }
@@ -48,6 +49,7 @@ public class SillySpelPropertyHandle implements SillyPropertyHandle {
         return this;
     }
 
+    @Override
     public Map<String, Object> getValues() {
         return values;
     }
@@ -70,17 +72,24 @@ public class SillySpelPropertyHandle implements SillyPropertyHandle {
     public Object getSpelValue(String expression) {
         int start = expression.indexOf(EL_START);
         int end = expression.lastIndexOf(EL_END);
-        String startString = expression.substring(0, start);
-        String endString = expression.substring(end + EL_END.length());
         String substring = expression.substring(start + EL_START.length(), end);
-
-        return startString + doGetSpelValue(substring) + endString;
+        return doGetSpelValue(substring);
     }
 
-    protected String doGetSpelValue(String expression) {
+    protected Object doGetSpelValue(String expression) {
         ExpressionParser parser = new SpelExpressionParser();
         Expression exp = parser.parseExpression(expression);
-        return exp.getValue(getContext(), String.class);
+        return exp.getValue(getContext());
+    }
+
+    @Override
+    public Object getRoot() {
+        return root;
+    }
+
+    @Override
+    public void setRoot(Object root) {
+        this.root = root;
     }
 
     @Override
@@ -104,6 +113,12 @@ public class SillySpelPropertyHandle implements SillyPropertyHandle {
         SillyAssert.notNull(values, "配置处理器上下文对象不可为null");
         SillyAssert.isTrue(values instanceof Map, "配置处理器类型不支持" + values.getClass());
         setValues((Map<String, Object>) values);
+    }
+
+    @Override
+    public void updateValue(String key, Object value) {
+        values.put(key, value);
+        getContext().setVariable(key, value);
     }
 
 }
