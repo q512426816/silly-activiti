@@ -396,6 +396,14 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         return "id";
     }
 
+    public String submitKey() {
+        return "submit";
+    }
+
+    public String taskIdKey() {
+        return "taskId";
+    }
+
     protected M saveData(boolean submit, String taskId, Map<String, Object> saveMap) {
         String masterIdMapKey = masterIdMapKey();
         String masterId = MapUtils.getString(saveMap, masterIdMapKey);
@@ -436,7 +444,12 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         SillyAssert.notNull(masterProperty, "masterProperty 获取失败" + processKey);
         SillyAssert.notNull(nodeProperty, "nodeProperty 获取失败" + nodeKey);
 
+        saveMap.put(submitKey(), submit);
+        saveMap.put(masterIdMapKey(), masterId);
         SillyPropertyHandle propertyHandle = getSillyPropertyHandle(masterId, saveMap);
+        saveMap.remove(submitKey());
+        saveMap.remove(masterIdMapKey());
+
         List<V> vs = mapToVariables(propertyHandle, saveMap, nodeProperty);
         M m = makeMasterByVariables(vs);
         m.setProcessKey(masterProperty.getProcessKey());

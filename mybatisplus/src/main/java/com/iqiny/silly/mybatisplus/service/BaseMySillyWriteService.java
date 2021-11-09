@@ -181,14 +181,6 @@ public abstract class BaseMySillyWriteService<M extends BaseMySillyMaster<M>, N 
         return saveData(submit, null, saveMap);
     }
 
-    public String submitKey() {
-        return "submit";
-    }
-
-    public String taskIdKey() {
-        return "taskId";
-    }
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public M saveTaskMap(Map<String, Object> saveMap) {

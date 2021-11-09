@@ -127,7 +127,8 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         String[] saveHandleNameArr = StringUtils.split(saveHandleNames, SillyConstant.ARRAY_SPLIT_STR);
         boolean lastFlag = true;
         for (String saveHandleName : saveHandleNameArr) {
-            lastFlag = getSillyVariableSaveHandle(saveHandleName.trim()).handle(usedCategory(), node, variables);
+            String stringValue = getSillyPropertyHandle(node.getMasterId(), node.getVariableMap()).getStringValue(saveHandleName.trim());
+            lastFlag = getSillyVariableSaveHandle(stringValue).handle(usedCategory(), node, variables);
         }
         return lastFlag;
     }
