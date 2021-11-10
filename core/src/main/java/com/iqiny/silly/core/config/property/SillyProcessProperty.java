@@ -41,13 +41,6 @@ public interface SillyProcessProperty<MP extends SillyProcessMasterProperty> {
     void setProcessDesc(String processDesc);
 
     /**
-     * 第一个节点Key
-     */
-    String getFirstNodeKey();
-
-    void setFirstNodeKey(String firstNodeKey);
-
-    /**
      * 流程KEY： 对应的配置参数
      */
     Map<String, MP> getMaster();

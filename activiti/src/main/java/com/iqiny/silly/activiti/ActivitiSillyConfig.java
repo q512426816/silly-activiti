@@ -9,6 +9,7 @@
 package com.iqiny.silly.activiti;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.parser.Feature;
 import com.iqiny.silly.activiti.convertor.SillyListConvertor;
 import com.iqiny.silly.activiti.savehandle.DataJoinVariableSaveHandle;
 import com.iqiny.silly.activiti.savehandle.OverwriteVariableSaveHandle;
@@ -187,7 +188,8 @@ public class ActivitiSillyConfig extends AbstractSillyConfig {
             StringWriter writer = new StringWriter();
             IOUtils.copy(inputStream, writer, StandardCharsets.UTF_8.name());
             String json = writer.toString();
-            SillyProcessProperty processProperty = JSON.parseObject(json, getProcessPropertyClazz());
+            // 按定义顺序生成
+            SillyProcessProperty processProperty = JSON.parseObject(json, getProcessPropertyClazz(), Feature.OrderedField);
             String fileName = resource.getFilename();
             String category = fileName.substring(0, fileName.lastIndexOf("."));
             addSillyProcessProperty(category, processProperty);

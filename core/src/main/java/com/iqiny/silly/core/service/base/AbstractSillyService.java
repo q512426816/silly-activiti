@@ -128,7 +128,9 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         boolean lastFlag = true;
         for (String saveHandleName : saveHandleNameArr) {
             String stringValue = propertyHandle.getStringValue(saveHandleName.trim());
-            lastFlag = getSillyVariableSaveHandle(stringValue).handle(master, node, variables);
+            if (StringUtils.isNotEmpty(stringValue)) {
+                lastFlag = getSillyVariableSaveHandle(stringValue).handle(master, node, variables);
+            }
         }
         return lastFlag;
     }
@@ -161,13 +163,7 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         return sillyPropertyHandle;
     }
 
-    protected SillyPropertyHandle getSillyPropertyHandle() {
-        SillyPropertyHandle sillyPropertyHandle = getSillyConfig().getSillyPropertyHandle();
-        sillyPropertyHandle.setValues(new HashMap<>());
-        return sillyPropertyHandle;
-    }
-
-    public SillyProcessProperty<?> processProperty() {
+    public SillyProcessProperty<? extends SillyProcessMasterProperty> processProperty() {
         return getSillyConfig().getSillyProcessProperty(usedCategory());
     }
 
@@ -190,19 +186,15 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
     /**
      * 获取最新版本下的节点数据
      *
-     * @param nodeKey
+     * @param processKey
      * @return
      */
-    public SillyProcessNodeProperty<?> getLastNodeProperty(String nodeKey) {
-        SillyProcessProperty<?> property = processProperty();
-        SillyAssert.notNull(property, "配置未找到 category：" + this.usedCategory());
-        SillyPropertyHandle propertyHandle = getSillyPropertyHandle();
-        String processKey = property.getLastProcessKey();
-        if (StringUtils.isEmpty(nodeKey)) {
-            nodeKey = property.getFirstNodeKey();
-        }
-
-        return getNodeProperty(propertyHandle.getStringValue(processKey), propertyHandle.getStringValue(nodeKey));
+    public SillyProcessNodeProperty<?> getLastNodeProperty(String processKey) {
+        SillyAssert.notEmpty(processKey, "查询第一个节点KEY，流程KEY不可为空");
+        Set<String> nodeKeySet = getMasterProperty(processKey).getNode().keySet();
+        // 取node 中第一个定义的为首节点
+        String nodeKey = nodeKeySet.iterator().next();
+        return getNodeProperty(processKey, nodeKey);
     }
 
     /**
@@ -211,7 +203,9 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
      * @return
      */
     public SillyProcessNodeProperty<?> getLastNodeProcessProperty() {
-        return getLastNodeProperty(null);
+        SillyProcessProperty<? extends SillyProcessMasterProperty> property = processProperty();
+        String processKey = property.getLastProcessKey();
+        return getLastNodeProperty(processKey);
     }
 
     /**

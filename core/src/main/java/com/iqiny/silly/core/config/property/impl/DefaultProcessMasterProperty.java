@@ -9,6 +9,9 @@
 package com.iqiny.silly.core.config.property.impl;
 
 
+import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.parser.Feature;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.iqiny.silly.core.config.property.SillyProcessMasterProperty;
 
 import java.util.LinkedHashMap;
@@ -32,6 +35,7 @@ public class DefaultProcessMasterProperty implements SillyProcessMasterProperty<
     /**
      * 属性名称： 对应的配置参数
      */
+    @JSONField(parseFeatures = Feature.OrderedField, serialzeFeatures = SerializerFeature.MapSortField)
     private final Map<String, DefaultProcessNodeProperty> node = new LinkedHashMap<>();
 
     @Override

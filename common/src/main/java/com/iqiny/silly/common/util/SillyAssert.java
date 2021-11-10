@@ -45,6 +45,12 @@ public class SillyAssert {
         }
     }
 
+    public static void isEmpty(String o, String msg) {
+        if (StringUtils.isNotEmpty(o)) {
+            throw SillyException.newInstance(msg);
+        }
+    }
+
     public static void notEmpty(Collection collection) {
         notEmpty(collection, "集合不可为空");
     }

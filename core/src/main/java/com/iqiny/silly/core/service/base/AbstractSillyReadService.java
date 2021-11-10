@@ -162,15 +162,20 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
                 SillyAssert.notNull(master, "变量数据获取主表数据失败" + masterId);
             }
             final SillyVariableConvertor<?> sillyHandler = getSillyConvertor(variable.getVariableType());
-            SillyProcessNodeProperty<?> nodeProperty = getNodeProperty(master.processKey(), variable.getNodeKey());
-            if (nodeProperty.isParallel()) {
-                Map<String, Object> nodeMap = parallelMap.putIfAbsent(variable.getTaskId(), new LinkedHashMap<>());
-                sillyHandler.convert(nodeMap, variable.getVariableName(), variable.getVariableText());
+            try {
+                SillyProcessNodeProperty<?> nodeProperty = getNodeProperty(master.processKey(), variable.getNodeKey());
+                if (nodeProperty.isParallel()) {
+                    Map<String, Object> nodeMap = parallelMap.putIfAbsent(variable.getTaskId(), new LinkedHashMap<>());
+                    sillyHandler.convert(nodeMap, variable.getVariableName(), variable.getVariableText());
+                }
+            } catch (SillyException ignore) {
             }
             sillyHandler.convert(variableMap, variable.getVariableName(), variable.getVariableText());
         }
 
-        variableMap.put(parallelMapKey(), parallelMap);
+        if (!parallelMap.isEmpty()) {
+            variableMap.put(parallelMapKey(), parallelMap);
+        }
         return variableMap;
     }
 

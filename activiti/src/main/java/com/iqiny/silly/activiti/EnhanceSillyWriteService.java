@@ -416,8 +416,8 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
             String processKeyMapKey = propertyHandle.getStringValue(processKeyMapKey());
             String nodeKeyMapKey = propertyHandle.getStringValue(nodeKeyMapKey());
             String lastProcessKey = propertyHandle.getStringValue(processProperty().getLastProcessKey());
-            String firstNodeKey = propertyHandle.getStringValue(processProperty().getFirstNodeKey());
             processKey = MapUtils.getString(saveMap, processKeyMapKey, lastProcessKey);
+            String firstNodeKey = propertyHandle.getStringValue(getLastNodeProperty(processKey).getNodeKey());
             nodeKey = MapUtils.getString(saveMap, nodeKeyMapKey, firstNodeKey);
             saveMap.remove(processKeyMapKey);
             saveMap.remove(nodeKeyMapKey);
@@ -450,7 +450,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         saveMap.remove(submitKey());
         saveMap.remove(masterIdMapKey());
 
-        List<V> vs = mapToVariables(propertyHandle, saveMap, nodeProperty);
+        List<V> vs = mapToVariables(submit, propertyHandle, saveMap, nodeProperty);
         M m = makeMasterByVariables(vs);
         m.setProcessKey(masterProperty.getProcessKey());
         m.setProcessVersion(masterProperty.getProcessVersion());
@@ -532,21 +532,26 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
      * @param map
      * @return
      */
-    public List<V> mapToVariables(SillyPropertyHandle sillyPropertyHandle, Map<String, Object> map, SillyProcessNodeProperty<?> nodeProperty) {
+    public List<V> mapToVariables(boolean submit, SillyPropertyHandle sillyPropertyHandle, Map<String, Object> map, SillyProcessNodeProperty<?> nodeProperty) {
         SillyAssert.notNull(nodeProperty, "节点配置不可为空");
 
         List<V> list = new ArrayList<>();
         Map<String, ? extends SillyProcessVariableProperty> variableMap = nodeProperty.getVariable();
         Set<String> keySet = variableMap.keySet();
+
+        StringJoiner checkSj = new StringJoiner("\r\n");
         for (String vKey : keySet) {
             SillyProcessVariableProperty variableProperty = variableMap.get(vKey);
             Object variableObj = map.remove(vKey);
-            Object defaultObject = sillyPropertyHandle.getValue(variableProperty.getDefaultText());
-            String defaultText = object2String(defaultObject, null);
-            String variableText = object2String(variableObj, defaultText);
+            String variableText = object2String(variableObj, null);
             if (StringUtils.isEmpty(variableText)) {
+                Object defaultObject = sillyPropertyHandle.getValue(variableProperty.getDefaultText());
+                variableText = object2String(defaultObject, null);
+            }
+            // 提交才进行参数必须项校验
+            if (submit && StringUtils.isEmpty(variableText)) {
                 if (variableProperty.isRequest() && sillyPropertyHandle.getBooleanValue(variableProperty.getRequestEl())) {
-                    throw new SillyException("此参数值不可为空" + vKey);
+                    checkSj.add(" 参数【" + variableProperty.getDesc() + "】 不可为空 【" + vKey + "】");
                 }
                 continue;
             }
@@ -554,7 +559,6 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
             if (variableProperty.isUpdatePropertyHandleValue()) {
                 sillyPropertyHandle.updateValue(vKey, variableText);
             }
-
             String variableName = sillyPropertyHandle.getStringValue(variableProperty.getVariableName());
             String variableType = sillyPropertyHandle.getStringValue(variableProperty.getVariableType());
             String belong = sillyPropertyHandle.getStringValue(variableProperty.getBelong());
@@ -578,39 +582,43 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
 
             if (!nodeProperty.isAllowOtherVariable()) {
                 if (nodeProperty.isOtherVariableThrowException()) {
-                    throw new SillyException("不允许保存此额外变量数据" + key);
-                } else {
-                    continue;
+                    checkSj.add(" 不允许保存此额外变量数据【" + key + "】");
                 }
+                continue;
             }
 
             doVariableList(map.get(key), list, key, SillyConstant.ActivitiVariable.BELONG_VARIABLE, null);
         }
+
+        String checkInfo = checkSj.toString();
+        SillyAssert.isEmpty(checkInfo, checkInfo);
 
         return list;
     }
 
     protected String object2String(Object variableObj, String defaultStr) {
         String variableText = defaultStr;
-        if (variableObj != null) {
-            if (variableObj instanceof Collection) {
-                Collection<Object> c = (Collection<Object>) variableObj;
-                if (c.isEmpty()) {
-                    return variableText;
-                }
+        if (variableObj == null) {
+            return variableText;
+        }
 
-                Object next = c.iterator().next();
-                if (next instanceof String) {
-                    variableText = StringUtils.myJoin((Collection<String>) variableObj);
-                } else {
-                    variableText = JSON.toJSONString(variableObj);
-                }
+        if (variableObj instanceof Collection) {
+            Collection<Object> c = (Collection<Object>) variableObj;
+            if (c.isEmpty()) {
+                return variableText;
+            }
+
+            Object next = c.iterator().next();
+            if (next instanceof String) {
+                variableText = StringUtils.myJoin((Collection<String>) variableObj);
             } else {
-                if (variableObj instanceof String) {
-                    variableText = (String) variableObj;
-                } else {
-                    variableText = JSON.toJSONString(variableObj);
-                }
+                variableText = JSON.toJSONString(variableObj);
+            }
+        } else {
+            if (variableObj instanceof String) {
+                variableText = (String) variableObj;
+            } else {
+                variableText = JSON.toJSONString(variableObj);
             }
         }
 
