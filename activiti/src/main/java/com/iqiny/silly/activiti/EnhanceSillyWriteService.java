@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSON;
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.SillyAssert;
+import com.iqiny.silly.common.util.SillyMapUtils;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
@@ -32,35 +33,26 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         extends AbstractSillyWriteService<M, N, V, Task> {
 
     @Override
-    protected void afterStartProcess(M master, N node, Task task) {
+    protected void afterStartProcess(M master) {
         final M copyMaster = sillyFactory.newMaster();
         BeanUtils.copyProperties(master, copyMaster);
         if (StringUtils.isEmpty(master.getStatus())) {
             copyMaster.setStatus(master.startStatus());
         }
-        if (StringUtils.isEmpty(master.getTaskName())) {
-            copyMaster.setTaskName(task.getName());
-        }
-
-        if (StringUtils.isEmpty(node.getTaskId())) {
-            node.setTaskId(task.getId());
-        }
-        if (StringUtils.isEmpty(node.getNodeKey())) {
-            node.setNodeKey(task.getTaskDefinitionKey());
-        }
-        if (StringUtils.isEmpty(node.getNodeName())) {
-            node.setNodeName(task.getName());
-        }
 
         copyMaster.setStartDate(new Date());
         copyMaster.setStartUserId(currentUserUtil.currentUserId());
-        updateHandleUserName(copyMaster);
+        updateHandleUserNameAndTaskName(copyMaster);
     }
 
-    public void updateHandleUserName(M master) {
-        String processId = master.getProcessId();
-        List<Task> taskList = sillyEngineService.findTaskByProcessInstanceId(processId);
+    public void updateHandleUserNameAndTaskName(M master) {
+        List<Task> taskList = sillyEngineService.findTaskByProcessInstanceId(master.getProcessId());
+        updateHandleUserNameAndTaskName(master, taskList);
+    }
+
+    public void updateHandleUserNameAndTaskName(M master, List<Task> taskList) {
         master.setHandleUserName(this.userIdsToName(this.nextProcess(taskList)));
+        master.setTaskName(makeTaskName(taskList));
         boolean saveFlag = updateById(master);
         if (!saveFlag) {
             throw new SillyException("主信息更新发生异常！");
@@ -233,11 +225,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
 
         boolean updateFlag = false;
         if (StringUtils.isEmpty(master.getTaskName())) {
-            Set<String> taskNames = new LinkedHashSet<>();
-            for (Task task : taskList) {
-                taskNames.add(task.getName());
-            }
-            master.setTaskName(StringUtils.myJoin(taskNames, SillyConstant.ARRAY_SPLIT_STR));
+            master.setTaskName(makeTaskName(taskList));
             updateFlag = true;
         }
         if (StringUtils.isEmpty(master.getHandleUserName())) {
@@ -257,6 +245,14 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
             throw new SillyException("更新主表数据发生异常！");
         }
 
+    }
+
+    protected String makeTaskName(List<Task> taskList){
+        Set<String> taskNames = new LinkedHashSet<>();
+        for (Task task : taskList) {
+            taskNames.add(task.getName());
+        }
+        return StringUtils.myJoin(taskNames, SillyConstant.ARRAY_SPLIT_STR);
     }
 
     protected String userIdsToName(String userIds) {
@@ -400,6 +396,10 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         return "submit";
     }
 
+    public String startProcessKey() {
+        return "startProcess";
+    }
+
     public String taskIdKey() {
         return "taskId";
     }
@@ -444,11 +444,16 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         SillyAssert.notNull(masterProperty, "masterProperty 获取失败" + processKey);
         SillyAssert.notNull(nodeProperty, "nodeProperty 获取失败" + nodeKey);
 
+        // 是否启动流程 （taskId存在 必定不启动流程，submit = true 启动流程）
+        boolean isStartProcess = StringUtils.isEmpty(taskId) && SillyMapUtils.getBooleanValue(saveMap, startProcessKey(), submit);
+
         saveMap.put(submitKey(), submit);
         saveMap.put(masterIdMapKey(), masterId);
+        saveMap.put(startProcessKey(), isStartProcess);
         SillyPropertyHandle propertyHandle = getSillyPropertyHandle(masterId, saveMap);
         saveMap.remove(submitKey());
         saveMap.remove(masterIdMapKey());
+        saveMap.remove(startProcessKey());
 
         List<V> vs = mapToVariables(submit, propertyHandle, saveMap, nodeProperty);
         M m = makeMasterByVariables(vs);
@@ -462,16 +467,21 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         n.setNodeName(nodeProperty.getNodeName());
         n.setParallelFlag(nodeProperty.isParallel() ? SillyConstant.YesOrNo.YES : SillyConstant.YesOrNo.NO);
 
+        // 取全部的信息来获取流程引擎使用的信息
+        Map<String, Object> varMap = makeActVariableMap(vs);
+        // 设置需要进行保存的变量数据
         List<V> saveV = variableSaveHandle(m, n, vs, propertyHandle);
         n.setVariableList(saveV);
-
-        if (submit) {
-            submit(m, n);
-        } else {
-            save(m, n);
-        }
+        // 保存数据
+        save(m, n, isStartProcess, varMap);
         // 更新 ROOT 数据
         updatePropertyHandleRoot(m.getId(), propertyHandle.getValues());
+
+        if (submit) {
+            // 提交流程
+            doSubmit(m, n, varMap);
+        }
+
         return m;
     }
 

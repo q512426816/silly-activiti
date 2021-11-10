@@ -247,13 +247,17 @@ public abstract class BaseSillyActivitiEngineService implements SillyEngineServi
 
     @Override
     public List<Task> findTaskByMasterId(String masterId) {
-        final ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceBusinessKey(masterId).singleResult();
-        if (processInstance == null) {
-            return new ArrayList<>();
+        final List<HistoricProcessInstance> processInstances = findProcessInstanceByMasterId(masterId);
+        List<Task> taskList = new ArrayList<>();
+        for (HistoricProcessInstance processInstance : processInstances) {
+            taskList.addAll(findTaskByProcessInstanceId(processInstance.getId()));
         }
-        return findTaskByProcessInstanceId(processInstance.getProcessInstanceId());
+        return taskList;
     }
 
+    public List<HistoricProcessInstance> findProcessInstanceByMasterId(String masterId) {
+        return historyService.createHistoricProcessInstanceQuery().processInstanceBusinessKey(masterId).list();
+    }
 
     @Override
     public void changeUser(String taskId, String userId) {

@@ -12,6 +12,7 @@ import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.StringUtils;
+import com.iqiny.silly.core.base.SillyMasterTask;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
@@ -38,7 +39,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
     protected void otherInit() {
         sillyReadService = getSillyConfig().getSillyReadService(usedCategory());
     }
-    
+
     /**
      * 提交数据 流程流转
      *
@@ -50,6 +51,10 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         // 保存数据
         save(master, node, varMap);
 
+        doSubmit(master, node, varMap);
+    }
+
+    protected void doSubmit(M master, N node, Map<String, Object> varMap) {
         final String nowTaskId = node.getTaskId();
         SillyAssert.notEmpty(nowTaskId, "提交时，当前任务ID不存在");
         // 当前任务
@@ -60,6 +65,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
 
         afterSubmit(master, node, nowTask, taskList);
     }
+
 
     /**
      * 提交方法之后的回调
@@ -137,13 +143,20 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         if (master != null) {
             saveMaster(master);
             node.setMasterId(master.getId());
-            if (startProcess) {
-                startProcess(master, node, varMap);
+            if (startProcess && startProcess(master, varMap)) {
+                SillyMasterTask task = sillyEngineService.getOneTask(usedCategory(), currentUserUtil.currentUserId(), master.getId());
+                if (task != null) {
+                    node.setTaskId(task.getTaskId());
+                    if (StringUtils.isEmpty(node.getNodeKey())) {
+                        node.setNodeKey(task.getNodeKey());
+                    }
+                }
             }
         }
 
         saveNodeInfo(node);
     }
+
 
     /**
      * 根据业务ID启动流程， 仅启动流程
@@ -167,7 +180,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         // 获取流程变量
         final Map<String, Object> varMap = makeActVariableMap(node);
         // 启动流程
-        startProcess(master, node, varMap);
+        startProcess(master, varMap);
 
         afterOnlyStartProcess(master, node);
     }
@@ -194,7 +207,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         // 获取流程变量
         final Map<String, Object> varMap = makeActVariableMap(node.getVariableList());
         // 启动新流程
-        doStartProcess(master, node, varMap);
+        doStartProcess(master, varMap);
 
         afterReStartProcess(master, node);
     }
@@ -226,32 +239,29 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
      *
      * @param master
      * @param varMap
-     * @return
+     * @return 是否启动
      */
-    protected void startProcess(M master, N node, Map<String, Object> varMap) {
+    protected boolean startProcess(M master, Map<String, Object> varMap) {
         // 验证主表是否存在流程实例，若存在则不重复启动流程实例
         if (StringUtils.isNotEmpty(master.getProcessId())) {
-            return;
+            return false;
         }
 
         final List<T> taskList = sillyEngineService.findTaskByMasterId(master.getId());
         if (taskList != null && !taskList.isEmpty()) {
-            return;
+            return false;
         }
-        doStartProcess(master, node, varMap);
+        return doStartProcess(master, varMap);
     }
 
-    protected void doStartProcess(M master, N node, Map<String, Object> varMap) {
+    protected boolean doStartProcess(M master, Map<String, Object> varMap) {
         // 流程启动  返回任务ID
         String processInstanceId = sillyEngineService.start(master, varMap);
-        final List<T> tasks = sillyEngineService.findTaskByProcessInstanceId(processInstanceId);
-        final T t = tasks.get(0);
-        node.setTaskId(sillyEngineService.getTaskId(t));
-
         master.setProcessId(processInstanceId);
 
-        afterStartProcess(master, node, t);
+        afterStartProcess(master);
 
+        return StringUtils.isNotEmpty(processInstanceId);
     }
 
     protected void saveMaster(M master) {
@@ -269,7 +279,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         }
     }
 
-    protected abstract void afterStartProcess(M master, N node, T t);
+    protected abstract void afterStartProcess(M master);
 
     /**
      * 保存流程节点数据
@@ -384,7 +394,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         if (!saveList.isEmpty()) {
             boolean flag = batchInsert(saveList);
             if (!flag) {
-                throw new SillyException("保存流程子表信息发生异常！");
+                throw new SillyException("保存流程节点表信息发生异常！");
             }
         }
     }
@@ -420,7 +430,12 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         }
         Map<String, Object> varMap = new LinkedHashMap<>();
         for (V variable : variableList) {
-            final SillyVariableConvertor<?> handler = getSillyConvertor(variable.getActivitiHandler());
+            String activitiHandler = variable.getActivitiHandler();
+            if (StringUtils.isEmpty(activitiHandler)) {
+                continue;
+            }
+
+            final SillyVariableConvertor<?> handler = getSillyConvertor(activitiHandler);
             if (handler != null) {
                 String vn = variable.getVariableName();
                 String vt = variable.getVariableText();

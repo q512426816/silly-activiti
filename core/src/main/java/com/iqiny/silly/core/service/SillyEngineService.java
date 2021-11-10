@@ -146,12 +146,34 @@ public interface SillyEngineService<T> extends SillyInitializable {
     List<SillyMasterTask> getHistoryMasterTask(String category, String userId);
 
     /**
-     * 根据业务表ID 获取任务列表
+     * 获取此分类下的单业务数据 用户的任务信息
      *
-     * @param id
+     * @param category
+     * @param userId
+     * @param masterId
      * @return
      */
-    List<T> findTaskByMasterId(String id);
+    List<SillyMasterTask> getMyDoingMasterTaskId(String category, String userId, String masterId);
+
+    /**
+     * 获取某个用户下某业务的一个任务
+     *
+     * @param masterId
+     * @return
+     */
+    default SillyMasterTask getOneTask(String category, String userId, String masterId) {
+        List<SillyMasterTask> list = getMyDoingMasterTaskId(category, userId, masterId);
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    /**
+     * 根据业务表ID 获取任务列表
+     *
+     * @param masterId
+     * @return
+     */
+    List<T> findTaskByMasterId(String masterId);
+
 
     /**
      * 调整任务执行人
