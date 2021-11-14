@@ -37,7 +37,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
 
     @Override
     protected void otherInit() {
-        sillyReadService = getSillyConfig().getSillyReadService(usedCategory());
+        sillyReadService = getSillyConfig().getSillyReadService();
     }
 
     /**
@@ -159,7 +159,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
      * @return
      */
     protected SillyMasterTask setNodeMyTaskId(String masterId, N node) {
-        SillyMasterTask task = sillyEngineService.getOneTask(usedCategory(), currentUserUtil.currentUserId(), masterId);
+        SillyMasterTask task = sillyEngineService.getOneTask(usedCategory(), sillyCurrentUserUtil.currentUserId(), masterId);
         if (task != null) {
             node.setTaskId(task.getTaskId());
             if (StringUtils.isEmpty(node.getNodeKey())) {
@@ -349,7 +349,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
     private void doInsertNode(N node) {
         node.setStatus(SillyConstant.ActivitiNode.STATUS_CURRENT);
         node.setNodeDate(new Date());
-        node.setNodeUserId(currentUserUtil.currentUserId());
+        node.setNodeUserId(sillyCurrentUserUtil.currentUserId());
         boolean flag = insert(node);
         if (!flag) {
             throw new SillyException("保存流程主表信息发生异常！");

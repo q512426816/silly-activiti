@@ -17,7 +17,6 @@ import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.util.SillyMapUtils;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyMasterTask;
-import com.iqiny.silly.core.read.MySillyMasterTask;
 import com.iqiny.silly.core.read.SillyMasterTaskUtil;
 import com.iqiny.silly.mybatisplus.BaseMySillyMaster;
 import com.iqiny.silly.mybatisplus.BaseMySillyNode;
@@ -93,10 +92,10 @@ public abstract class BaseMySillyReadService<M extends BaseMySillyMaster<M>, N e
      */
     @Override
     public IPage<Map<String, Object>> queryDoingPage(Map<String, Object> params) {
-        final List<SillyMasterTask> masterTasks = sillyEngineService.getDoingMasterTask(usedCategory(), currentUserUtil.currentUserId());
+        final List<SillyMasterTask> masterTasks = sillyEngineService.getDoingMasterTask(usedCategory(), sillyCurrentUserUtil.currentUserId());
         final SillyMasterTaskUtil<? extends SillyMasterTask> masterTaskUtil = SillyMasterTaskUtil.create(masterTasks);
         List<String> masterIdList = masterTaskUtil.getMasterIds();
-        List<String> businessDoingMasterIds = businessDoingMasterIds(params, currentUserUtil.currentUserId());
+        List<String> businessDoingMasterIds = businessDoingMasterIds(params, sillyCurrentUserUtil.currentUserId());
         if (businessDoingMasterIds != null && !businessDoingMasterIds.isEmpty()) {
             masterIdList.addAll(businessDoingMasterIds);
         }
@@ -116,7 +115,7 @@ public abstract class BaseMySillyReadService<M extends BaseMySillyMaster<M>, N e
      */
     @Override
     public IPage<Map<String, Object>> queryHistoryPage(Map<String, Object> params) {
-        final List<SillyMasterTask> masterTasks = sillyEngineService.getHistoryMasterTask(usedCategory(), currentUserUtil.currentUserId());
+        final List<SillyMasterTask> masterTasks = sillyEngineService.getHistoryMasterTask(usedCategory(), sillyCurrentUserUtil.currentUserId());
         final SillyMasterTaskUtil<? extends SillyMasterTask> masterTaskUtil = SillyMasterTaskUtil.create(masterTasks);
         final Set<String> masterIds = findMasterIdByMap(masterTaskUtil.getMasterIds(), params);
         return doQuery(params, masterIds, masterTaskUtil);
@@ -342,4 +341,5 @@ public abstract class BaseMySillyReadService<M extends BaseMySillyMaster<M>, N e
         qw.orderByAsc("CREATE_DATE");
         return sillyFactory.newNode().selectOne(qw);
     }
+
 }

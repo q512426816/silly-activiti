@@ -9,13 +9,15 @@
 package com.iqiny.silly.core.resume;
 
 import com.iqiny.silly.core.base.SillyInitializable;
+import com.iqiny.silly.core.base.SillyMultipleCategory;
+import com.iqiny.silly.core.service.SillyService;
 
 import java.util.List;
 
 /**
  * 流程履历服务接口
  */
-public interface SillyResumeService<R extends SillyResume> extends SillyInitializable {
+public interface SillyResumeService<R extends SillyResume> extends SillyService, SillyMultipleCategory {
 
     /**
      * 生成处置履历内容

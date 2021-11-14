@@ -8,6 +8,7 @@
  */
 package com.iqiny.silly.core.service;
 
+import com.iqiny.silly.core.base.SillyCategory;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
@@ -21,7 +22,7 @@ import java.util.Map;
  * @author QINY
  * @since 1.0
  */
-public interface SillyReadService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> extends SillyService {
+public interface SillyReadService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> extends SillyService, SillyCategory {
 
     /**
      * 获取主表数据

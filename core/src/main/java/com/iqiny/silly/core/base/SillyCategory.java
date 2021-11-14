@@ -9,17 +9,18 @@
 package com.iqiny.silly.core.base;
 
 /**
- * 可初始化的对象
- *
- * @author QINY
- * @since 1.0
+ * 支持单个业务分类
  */
-public interface SillyInitializable {
+public interface SillyCategory {
 
     /**
-     * 初始化方法
+     * 默认通用的类型
      */
-    void init();
-
+    String DEFAULT_CATEGORY = "SILLY_DEFAULT_CATEGORY";
+    
+    /**
+     * 正在使用的类型
+     */
+    String usedCategory();
 
 }

@@ -8,9 +8,6 @@
  */
 package com.iqiny.silly.core.config.property;
 
-import com.iqiny.silly.core.base.SillyInitializable;
-import com.iqiny.silly.core.group.SillyTaskCategoryGroup;
-
 /**
  * 表达式配置
  */

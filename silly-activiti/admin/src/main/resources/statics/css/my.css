@@ -1,9 +1,0 @@
-@media only screen and (max-width: 768px) {
-    .el-menu--collapse {
-        display: none;
-    }
-
-    .hide-xs-down {
-        display: none;
-    }
-}

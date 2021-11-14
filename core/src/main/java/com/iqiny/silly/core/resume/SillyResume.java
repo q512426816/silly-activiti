@@ -8,7 +8,7 @@
  */
 package com.iqiny.silly.core.resume;
 
-import com.iqiny.silly.core.base.SillyEntity;
+import com.iqiny.silly.core.base.core.SillyEntity;
 
 import java.util.Date;
 

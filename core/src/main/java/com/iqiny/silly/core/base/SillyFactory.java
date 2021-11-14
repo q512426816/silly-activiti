@@ -8,6 +8,7 @@
  */
 package com.iqiny.silly.core.base;
 
+import com.iqiny.silly.core.base.core.SillyEntity;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;

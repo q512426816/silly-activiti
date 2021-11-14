@@ -8,6 +8,7 @@
  */
 package com.iqiny.silly.core.service;
 
+import com.iqiny.silly.core.base.SillyCategory;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
@@ -22,11 +23,12 @@ import java.util.Map;
  * @author QINY
  * @since 1.0
  */
-public interface SillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> extends SillyService {
+public interface SillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> extends SillyService, SillyCategory {
 
 
     /**
      * 保存/新增数据
+     *
      * @param saveMap
      * @return
      */
@@ -34,6 +36,7 @@ public interface SillyWriteService<M extends SillyMaster, N extends SillyNode<V>
 
     /**
      * 保存数据
+     *
      * @param saveMap
      * @return
      */

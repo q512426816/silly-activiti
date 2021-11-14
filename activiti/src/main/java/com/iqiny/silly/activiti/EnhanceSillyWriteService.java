@@ -24,7 +24,6 @@ import com.iqiny.silly.core.service.base.AbstractSillyWriteService;
 import org.activiti.engine.task.Task;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.cache.config.CacheManagementConfigUtils;
 
 import java.util.*;
 
@@ -41,7 +40,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         }
 
         copyMaster.setStartDate(new Date());
-        copyMaster.setStartUserId(currentUserUtil.currentUserId());
+        copyMaster.setStartUserId(sillyCurrentUserUtil.currentUserId());
         updateHandleUserNameAndTaskName(copyMaster);
     }
 
@@ -158,7 +157,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
      */
     protected void complete(Map<String, Object> variableMap, Task task) {
         // 完成此步骤流程
-        sillyEngineService.complete(task, currentUserUtil.currentUserId(), variableMap);
+        sillyEngineService.complete(task, sillyCurrentUserUtil.currentUserId(), variableMap);
     }
 
     /**
@@ -196,7 +195,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         if (StringUtils.isEmpty(master.getStatus())) {
             master.setStatus(master.endStatus());
             master.setCloseDate(new Date());
-            master.setCloseUserId(currentUserUtil.currentUserId());
+            master.setCloseUserId(sillyCurrentUserUtil.currentUserId());
             master.setHandleUserName("");
             updateFlag = true;
         }
@@ -264,7 +263,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         final String[] split = userIds.split(SillyConstant.ARRAY_SPLIT_STR);
         Set<String> userNames = new LinkedHashSet<>();
         for (String userId : split) {
-            userNames.add(currentUserUtil.userIdToName(userId));
+            userNames.add(sillyCurrentUserUtil.userIdToName(userId));
         }
         return StringUtils.myJoin(userNames, SillyConstant.ARRAY_SPLIT_STR);
     }
@@ -276,7 +275,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
 
         Set<String> userNames = new LinkedHashSet<>();
         for (String userId : userIds) {
-            userNames.add(currentUserUtil.userIdToName(userId));
+            userNames.add(sillyCurrentUserUtil.userIdToName(userId));
         }
         return StringUtils.myJoin(userNames, SillyConstant.ARRAY_SPLIT_STR);
     }
@@ -497,22 +496,6 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         return needSaveList;
     }
 
-    @Override
-    protected Object getPropertyHandleRoot(String masterId) {
-        Object root = getPropertyHandleRootCache(masterId);
-        if (root == null) {
-            root = getPropertyHandleRootDB(masterId);
-        }
-        return root;
-    }
-
-    protected Object getPropertyHandleRootDB(String masterId) {
-        List<V> nodeList = sillyReadService.getVariableList(masterId, null);
-        return sillyReadService.variableList2Map(nodeList);
-    }
-
-    protected abstract Object getPropertyHandleRootCache(String masterId);
-
     protected void updatePropertyHandleRoot(String masterId, Object updateValue) {
         updatePropertyHandleRootCache(masterId, updateValue);
     }
@@ -522,20 +505,8 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
             return;
         }
 
-        Object propertyHandleRoot = getPropertyHandleRoot(masterId);
-        if (propertyHandleRoot == null) {
-            propertyHandleRoot = new LinkedHashMap<>();
-        }
-        if (propertyHandleRoot instanceof Map && updateValue instanceof Map) {
-            Map rootMap = (Map) propertyHandleRoot;
-            rootMap.putAll((Map) updateValue);
-            doUpdatePropertyHandleRootCache(masterId, rootMap);
-        } else {
-            throw new SillyException("不支持此数据类型的ROOT值更新" + propertyHandleRoot.getClass());
-        }
+        sillyCache.updatePropertyHandleRootCache(usedCategory(), masterId, updateValue);
     }
-
-    protected abstract void doUpdatePropertyHandleRootCache(String masterId, Map<String, Object> saveMap);
 
     /**
      * Map 根据配置对象转 Variable 对象集合

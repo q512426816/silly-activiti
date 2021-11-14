@@ -8,8 +8,6 @@
  */
 package com.iqiny.silly.core.base.core;
 
-import com.iqiny.silly.core.base.SillyEntity;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Map;

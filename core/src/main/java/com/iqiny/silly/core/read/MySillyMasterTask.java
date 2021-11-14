@@ -11,7 +11,6 @@ package com.iqiny.silly.core.read;
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyMasterTask;
-import com.iqiny.silly.core.config.SillyConfig;
 import com.iqiny.silly.core.config.SillyConfigUtil;
 import org.apache.commons.collections.MapUtils;
 
@@ -125,11 +124,11 @@ public class MySillyMasterTask implements SillyMasterTask {
     }
 
     public String getAssignee() {
-        return MapUtils.getString(getParams(), "assignee");
+        return MapUtils.getString(getParams(), TASK_TYPE_ASSIGNEE);
     }
 
     public void setAssignee(String assignee) {
-        getParams().put("assignee", assignee);
+        getParams().put(TASK_TYPE_ASSIGNEE, assignee);
     }
 
     public String getGroupId() {
@@ -144,7 +143,7 @@ public class MySillyMasterTask implements SillyMasterTask {
         if (StringUtils.isEmpty(MapUtils.getString(getParams(), "changeFlag"))) {
             String userId = getUserId();
             String assignee = getAssignee();
-            String currUserId = SillyConfigUtil.getSillyConfig(category).getCurrentUserUtil().currentUserId();
+            String currUserId = SillyConfigUtil.getSillyConfig(category).getSillyCurrentUserUtil().currentUserId();
             if (Objects.equals(currUserId, userId) || Objects.equals(currUserId, assignee)) {
                 setChangeFlag(SillyConstant.YesOrNo.YES);
             } else {

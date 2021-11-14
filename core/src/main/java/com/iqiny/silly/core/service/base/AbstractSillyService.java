@@ -13,12 +13,14 @@ import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.SillyReflectUtil;
 import com.iqiny.silly.common.util.StringUtils;
+import com.iqiny.silly.core.base.SillyCategory;
 import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
-import com.iqiny.silly.core.config.CurrentUserUtil;
-import com.iqiny.silly.core.config.SillyConfig;
+import com.iqiny.silly.core.cache.SillyCache;
+import com.iqiny.silly.core.config.SillyCurrentUserUtil;
+import com.iqiny.silly.core.config.SillyCategoryConfig;
 import com.iqiny.silly.core.config.SillyConfigUtil;
 import com.iqiny.silly.core.config.property.*;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
@@ -40,13 +42,13 @@ import java.util.*;
  * @param <N> 节点
  * @param <V> 变量
  */
-public abstract class AbstractSillyService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable, T> implements SillyService {
+public abstract class AbstractSillyService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable, T> implements SillyService, SillyCategory {
 
     protected SillyFactory<M, N, V, ? extends SillyResume> sillyFactory;
 
     protected SillyEngineService<T> sillyEngineService;
 
-    protected CurrentUserUtil currentUserUtil;
+    protected SillyCurrentUserUtil sillyCurrentUserUtil;
 
     protected SillyResumeService sillyResumeService;
 
@@ -56,21 +58,24 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
 
     protected SillyTaskGroupHandle sillyTaskGroupHandle;
 
+    protected SillyCache sillyCache;
+
     private Class<M> masterClass;
     private Class<N> nodeClass;
     private Class<V> variableClass;
 
     @Override
     public void init() {
-        SillyConfig sillyConfig = getSillyConfig();
-        SillyAssert.notNull(sillyConfig);
-        setSillyFactory(sillyConfig.getSillyFactory(usedCategory()));
-        setSillyEngineService(sillyConfig.getSillyEngineService());
-        setCurrentUserUtil(sillyConfig.getCurrentUserUtil());
-        setSillyConvertorMap(sillyConfig.getSillyConvertorMap());
-        setSillySaveHandleMap(sillyConfig.getSillyVariableSaveHandleMap());
-        setSillyResumeService(sillyConfig.getSillyResumeService());
-        setSillyTaskGroupHandle(getSillyConfig().getSillyTaskGroupHandle());
+        SillyCategoryConfig sillyCategoryConfig = getSillyConfig();
+        SillyAssert.notNull(sillyCategoryConfig);
+        setSillyFactory(sillyCategoryConfig.getSillyFactory());
+        setSillyEngineService(sillyCategoryConfig.getSillyEngineService());
+        setCurrentUserUtil(sillyCategoryConfig.getSillyCurrentUserUtil());
+        setSillyConvertorMap(sillyCategoryConfig.getSillyConvertorMap());
+        setSillySaveHandleMap(sillyCategoryConfig.getSillyVariableSaveHandleMap());
+        setSillyResumeService(sillyCategoryConfig.getSillyResumeService());
+        setSillyTaskGroupHandle(sillyCategoryConfig.getSillyTaskGroupHandle());
+        setSillyCache(sillyCategoryConfig.getSillyCache());
 
         otherInit();
     }
@@ -78,8 +83,12 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
     protected abstract void otherInit();
 
     @Override
-    public SillyConfig getSillyConfig() {
-        return SillyConfigUtil.getSillyConfig(usedCategory());
+    public SillyCategoryConfig getSillyConfig(String category) {
+        return SillyConfigUtil.getSillyConfig(category);
+    }
+
+    public SillyCategoryConfig getSillyConfig() {
+        return getSillyConfig(usedCategory());
     }
 
     public void setSillyFactory(SillyFactory<M, N, V, ? extends SillyResume> sillyFactory) {
@@ -90,8 +99,8 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         this.sillyEngineService = sillyEngineService;
     }
 
-    public void setCurrentUserUtil(CurrentUserUtil currentUserUtil) {
-        this.currentUserUtil = currentUserUtil;
+    public void setCurrentUserUtil(SillyCurrentUserUtil sillyCurrentUserUtil) {
+        this.sillyCurrentUserUtil = sillyCurrentUserUtil;
     }
 
     public void setSillyConvertorMap(Map<String, SillyVariableConvertor> sillyConvertorMap) {
@@ -152,10 +161,26 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         this.sillyTaskGroupHandle = sillyTaskGroupHandle;
     }
 
-    protected abstract Object getPropertyHandleRoot(String masterId);
+    protected Object getPropertyHandleRoot(String masterId) {
+        Object root = getPropertyHandleRootCache(masterId);
+        if (root == null) {
+            root = getPropertyHandleRootDB(masterId);
+        }
+        return root;
+    }
+
+
+    protected Object getPropertyHandleRootDB(String masterId) {
+        List<V> nodeList = getSillyConfig().getSillyReadService().getVariableList(masterId, null);
+        return getSillyConfig().getSillyReadService().variableList2Map(nodeList);
+    }
+
+    protected Object getPropertyHandleRootCache(String masterId) {
+        return sillyCache.getPropertyHandleRootCache(usedCategory(), masterId);
+    }
 
     protected SillyPropertyHandle getSillyPropertyHandle(String masterId, Map<String, Object> values) {
-        SillyPropertyHandle sillyPropertyHandle = getSillyConfig().getSillyPropertyHandle();
+        SillyPropertyHandle sillyPropertyHandle = getSillyConfig().newSillyPropertyHandle();
         if (StringUtils.isNotEmpty(masterId)) {
             sillyPropertyHandle.setRoot(getPropertyHandleRoot(masterId));
         }
@@ -164,7 +189,7 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
     }
 
     public SillyProcessProperty<? extends SillyProcessMasterProperty> processProperty() {
-        return getSillyConfig().getSillyProcessProperty(usedCategory());
+        return getSillyConfig().getSillyProcessProperty();
     }
 
     public SillyProcessNodeProperty<?> getNodeProperty(String processKey, String nodeKey) {
@@ -210,8 +235,6 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
 
     /**
      * 获取最新流程 KEY
-     *
-     * @return
      */
     public String getLastProcessKey() {
         return processProperty().getLastProcessKey();
@@ -242,5 +265,11 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         return masterClass;
     }
 
+    public SillyCache getSillyCache() {
+        return sillyCache;
+    }
 
+    public void setSillyCache(SillyCache sillyCache) {
+        this.sillyCache = sillyCache;
+    }
 }

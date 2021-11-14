@@ -8,66 +8,60 @@
  */
 package com.iqiny.silly.core.group;
 
+import com.iqiny.silly.core.base.SillyCategory;
+
 import java.util.List;
 
-public interface SillyTaskCategoryGroup {
+public interface SillyTaskCategoryGroup extends SillyCategory {
 
     /**
      * groupid:  CATEGORY + SPLIT_STR + 自定义数据
      */
     String SPLIT_STR = "__CEY__";
 
-    String category();
-
+    /**
+     * 分组名称
+     */
     String name();
 
     /**
      * 自己的数据名开头
-     *
-     * @return
      */
     String prefixName();
 
     /**
      * 根据组ID 判断此组ID 是否在此类中的生成
-     *
-     * @param groupId
-     * @return
      */
     boolean belongGroup(String groupId);
 
     /**
      * 根据用户ID + 数据Key 判断此用户是否拥有此 GROUP_ID 权限
-     *
-     * @param userId
-     * @return
      */
     boolean hasGroup(String userId, String key);
 
     /**
      * 获取此 GROUP_ID
-     *
-     * @return
      */
     List<String> getGroupIds(String userId);
 
     /**
      * 获取此 分组名称
-     *
-     * @return
      */
     String getGroupName();
 
     /**
      * 获取此 分组名称
-     *
-     * @return
      */
     String getGroupName(String groupId);
 
-
+    /**
+     * KEY 转 GROUP_ID
+     */
     String keyCovGroupId(String key);
 
+    /**
+     * GROUP_ID 转 KEY
+     */
     String groupIdCovKey(String groupId);
 
 }

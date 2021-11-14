@@ -46,7 +46,7 @@ public abstract class BaseSillyTaskGroupHandle implements SillyTaskGroupHandle {
 
     @Override
     public void addCategorySillyTaskGroup(SillyTaskCategoryGroup categoryGroup) {
-        List<SillyTaskCategoryGroup> list = CATEGORY_GROUP_MAP.computeIfAbsent(categoryGroup.category(), k -> new ArrayList<>());
+        List<SillyTaskCategoryGroup> list = CATEGORY_GROUP_MAP.computeIfAbsent(categoryGroup.usedCategory(), k -> new ArrayList<>());
         list.add(categoryGroup);
     }
 

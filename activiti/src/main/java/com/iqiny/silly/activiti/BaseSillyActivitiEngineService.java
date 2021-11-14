@@ -12,9 +12,9 @@ import com.iqiny.silly.activiti.spring.SpringSillyContent;
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.StringUtils;
+import com.iqiny.silly.core.base.SillyCategory;
 import com.iqiny.silly.core.base.core.SillyMaster;
-import com.iqiny.silly.core.config.CurrentUserUtil;
-import com.iqiny.silly.core.config.SillyConfig;
+import com.iqiny.silly.core.config.SillyCategoryConfig;
 import com.iqiny.silly.core.config.SillyConfigUtil;
 import com.iqiny.silly.core.service.SillyEngineService;
 import org.activiti.engine.HistoryService;
@@ -36,8 +36,7 @@ import java.util.*;
  */
 public abstract class BaseSillyActivitiEngineService implements SillyEngineService<Task> {
 
-    protected SillyConfig sillyConfig;
-    protected CurrentUserUtil currentUserUtil;
+    protected Set<String> supportCategories = new HashSet<>();
 
     protected RuntimeService runtimeService;
     protected HistoryService historyService;
@@ -45,18 +44,28 @@ public abstract class BaseSillyActivitiEngineService implements SillyEngineServi
     protected RepositoryService repositoryService;
 
     @Override
+    public SillyCategoryConfig getSillyConfig(String category) {
+        return SillyConfigUtil.getSillyConfig(category);
+    }
+
+    @Override
+    public Set<String> supportCategories() {
+        supportCategories.add(SillyCategory.DEFAULT_CATEGORY);
+        return supportCategories;
+    }
+
+    @Override
+    public boolean isSupport(String category) {
+        supportCategories.add(category);
+        return true;
+    }
+
+    @Override
     public void init() {
-        this.sillyConfig = SillyConfigUtil.getSillyConfig(usedCategory());
-        this.currentUserUtil = this.sillyConfig.getCurrentUserUtil();
         this.runtimeService = SpringSillyContent.getBean(RuntimeService.class);
         this.historyService = SpringSillyContent.getBean(HistoryService.class);
         this.taskService = SpringSillyContent.getBean(TaskService.class);
         this.repositoryService = SpringSillyContent.getBean(RepositoryService.class);
-    }
-
-    @Override
-    public String usedCategory() {
-        return DEFAULT_CATEGORY;
     }
 
     @Override

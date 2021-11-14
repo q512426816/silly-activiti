@@ -9,7 +9,7 @@
 package com.iqiny.silly.core.config;
 
 import com.iqiny.silly.common.util.SillyAssert;
-import com.iqiny.silly.core.base.SillyInitializable;
+import com.iqiny.silly.core.base.SillyCategory;
 
 import java.util.Map;
 import java.util.Set;
@@ -17,49 +17,58 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 傻瓜配置工具类
+ *
+ * @author iqiny
  */
-public class SillyConfigUtil {
+public abstract class SillyConfigUtil {
 
-    /**
-     * 默认的配置对象，若找不到对应分类的配置对象则使用此配置对象
-     */
-    private static SillyConfig defaultSillyConfig;
     /**
      * 不同分类下的配置对象
      */
-    private static final Map<String, SillyConfig> SILLY_CONFIG_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, SillyCategoryConfig> SILLY_CONFIG_MAP = new ConcurrentHashMap<>();
 
-    public static void addSillyConfig(String category, SillyConfig sillyConfig) {
-        SillyAssert.notNull(category);
-
-        if (SillyInitializable.DEFAULT_CATEGORY.equals(category)) {
-            defaultSillyConfig = sillyConfig;
-        }
-        final SillyConfig put = SILLY_CONFIG_MAP.put(category, sillyConfig);
-        SillyAssert.isNull(put, "冲突的SillyConfig category:" + category);
+    public static void addSillyConfig(String category, SillyCategoryConfig sillyCategoryConfig) {
+        addSillyConfig(false, category, sillyCategoryConfig);
     }
 
-    public static void addSillyConfig(Set<String> categories, SillyConfig sillyConfig) {
+    public static void addSillyConfig(boolean refreshFlag, SillyCategoryConfig sillyCategoryConfig) {
+        addSillyConfig(refreshFlag, sillyCategoryConfig.usedCategory(), sillyCategoryConfig);
+    }
+
+    public static void addSillyConfig(boolean refreshFlag, String category, SillyCategoryConfig sillyCategoryConfig) {
+        SillyAssert.notNull(category);
+        final SillyCategoryConfig put = SILLY_CONFIG_MAP.put(category, sillyCategoryConfig);
+        if (!refreshFlag) {
+            SillyAssert.isNull(put, "冲突的SillyConfig category:" + category);
+        }
+    }
+
+    public static void addSillyConfig(Set<String> categories, SillyCategoryConfig sillyCategoryConfig) {
         SillyAssert.notNull(categories);
 
         for (String category : categories) {
-            addSillyConfig(category, sillyConfig);
+            addSillyConfig(category, sillyCategoryConfig);
         }
     }
 
-    public static void addSillyConfig(SillyConfig sillyConfig) {
-        addSillyConfig(sillyConfig.supportCategories(), sillyConfig);
+    public static void addSillyConfig(SillyCategoryConfig sillyCategoryConfig) {
+        addSillyConfig(sillyCategoryConfig.usedCategory(), sillyCategoryConfig);
     }
 
-    public static SillyConfig getSillyConfig(String category) {
-        if (category == null) {
-            category = SillyInitializable.DEFAULT_CATEGORY;
-        }
-        final SillyConfig sillyConfig = SILLY_CONFIG_MAP.get(category);
-        return sillyConfig == null ? defaultSillyConfig : sillyConfig;
+    public static void refreshSillyConfig(SillyCategoryConfig sillyCategoryConfig) {
+        addSillyConfig(true, sillyCategoryConfig.usedCategory(), sillyCategoryConfig);
     }
 
-    public static SillyConfig getSillyConfig() {
-        return getSillyConfig(SillyInitializable.DEFAULT_CATEGORY);
+
+    public static SillyCategoryConfig getSillyConfig(String category) {
+        return SILLY_CONFIG_MAP.get(category);
+    }
+
+
+    /**
+     * 获取全部的业务分类值
+     */
+    public static Set<String> allCategorySet() {
+        return BaseSillyConfigContent.SillyConfigHashMap.allCategorySet();
     }
 }

@@ -10,6 +10,7 @@ package com.iqiny.silly.core.service;
 
 import com.iqiny.silly.core.base.SillyInitializable;
 import com.iqiny.silly.core.base.SillyMasterTask;
+import com.iqiny.silly.core.base.SillyMultipleCategory;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.read.MySillyMasterTask;
 
@@ -19,7 +20,7 @@ import java.util.Map;
 /**
  * 傻瓜流程引擎服务 （流程控制服务，一般都结合第三方框架实现，比如 Activiti）
  */
-public interface SillyEngineService<T> extends SillyInitializable {
+public interface SillyEngineService<T> extends SillyService, SillyMultipleCategory {
 
     /**
      * 启动流程

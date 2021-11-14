@@ -9,10 +9,10 @@
 package com.iqiny.silly.starter;
 
 
-import com.iqiny.silly.activiti.scan.ScanSillyConfig;
+import com.iqiny.silly.activiti.scan.AutoScanSillyConfigContent;
 import com.iqiny.silly.activiti.spring.SpringSillyContent;
 import com.iqiny.silly.common.util.StringUtils;
-import com.iqiny.silly.core.config.SillyConfig;
+import com.iqiny.silly.core.config.SillyConfigContent;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -41,14 +41,14 @@ public class SillyAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public SillyConfig defaultSillyConfig() {
-        final ScanSillyConfig scanSillyConfig = new ScanSillyConfig();
-        scanSillyConfig.setEntityScanPackage(env.getProperty(SCAN_PACKAGE_PROPERTY));
+    public SillyConfigContent sillyConfigContent() {
+        final AutoScanSillyConfigContent autoScanSillyConfigContent = new AutoScanSillyConfigContent();
+        autoScanSillyConfigContent.setEntityScanPackage(env.getProperty(SCAN_PACKAGE_PROPERTY));
         String processPattern = env.getProperty(SCAN_PROCESS_PATTERN);
         if (StringUtils.isNotEmpty(processPattern)) {
-            scanSillyConfig.setProcessPattern(processPattern);
+            autoScanSillyConfigContent.setProcessPattern(processPattern);
         }
-        return scanSillyConfig;
+        return autoScanSillyConfigContent;
     }
 
 }

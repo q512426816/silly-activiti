@@ -13,6 +13,9 @@ import com.iqiny.silly.core.base.core.SillyVariable;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 变量转换工具
+ */
 public interface SillyVariableConvertor<T> {
 
     /**

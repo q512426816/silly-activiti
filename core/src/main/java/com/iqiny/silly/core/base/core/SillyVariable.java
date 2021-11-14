@@ -8,8 +8,6 @@
  */
 package com.iqiny.silly.core.base.core;
 
-import com.iqiny.silly.core.base.SillyEntity;
-
 /**
  * 傻瓜工作流 流程变量接口 （每个数据key：value对应一个Variable）
  *
