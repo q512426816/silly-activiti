@@ -144,17 +144,30 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
             saveMaster(master);
             node.setMasterId(master.getId());
             if (startProcess && startProcess(master, varMap)) {
-                SillyMasterTask task = sillyEngineService.getOneTask(usedCategory(), currentUserUtil.currentUserId(), master.getId());
-                if (task != null) {
-                    node.setTaskId(task.getTaskId());
-                    if (StringUtils.isEmpty(node.getNodeKey())) {
-                        node.setNodeKey(task.getNodeKey());
-                    }
-                }
+                setNodeMyTaskId(master.getId(), node);
             }
         }
 
         saveNodeInfo(node);
+    }
+
+    /**
+     * 设置节点的 我的任务ID
+     *
+     * @param masterId
+     * @param node
+     * @return
+     */
+    protected SillyMasterTask setNodeMyTaskId(String masterId, N node) {
+        SillyMasterTask task = sillyEngineService.getOneTask(usedCategory(), currentUserUtil.currentUserId(), masterId);
+        if (task != null) {
+            node.setTaskId(task.getTaskId());
+            if (StringUtils.isEmpty(node.getNodeKey())) {
+                node.setNodeKey(task.getNodeKey());
+            }
+        }
+
+        return task;
     }
 
 
@@ -180,7 +193,9 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         // 获取流程变量
         final Map<String, Object> varMap = makeActVariableMap(node);
         // 启动流程
-        startProcess(master, varMap);
+        if (startProcess(master, varMap)) {
+            setNodeMyTaskId(master.getId(), node);
+        }
 
         afterOnlyStartProcess(master, node);
     }
@@ -208,6 +223,8 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         final Map<String, Object> varMap = makeActVariableMap(node.getVariableList());
         // 启动新流程
         doStartProcess(master, varMap);
+        // 设置节点任务ID
+        setNodeMyTaskId(master.getId(), node);
 
         afterReStartProcess(master, node);
     }

@@ -91,6 +91,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
     @Override
     protected void saveProcessResume(N node, Task oldTask, String nextTaskId) {
         final Task task = sillyEngineService.findTaskById(nextTaskId);
+        SillyAssert.notNull(task, "任务信息获取失败" + nextTaskId);
         saveProcessResume(node, oldTask, Collections.singletonList(task));
     }
 
@@ -247,7 +248,7 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
 
     }
 
-    protected String makeTaskName(List<Task> taskList){
+    protected String makeTaskName(List<Task> taskList) {
         Set<String> taskNames = new LinkedHashSet<>();
         for (Task task : taskList) {
             taskNames.add(task.getName());
