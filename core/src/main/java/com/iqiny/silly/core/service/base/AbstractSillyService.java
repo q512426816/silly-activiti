@@ -31,8 +31,6 @@ import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
 import com.iqiny.silly.core.service.SillyEngineService;
 import com.iqiny.silly.core.service.SillyService;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.*;
 
 /**
@@ -64,6 +62,31 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
     private Class<N> nodeClass;
     private Class<V> variableClass;
 
+
+    public String processKeyMapKey() {
+        return "processKey";
+    }
+
+    public String nodeKeyMapKey() {
+        return "nodeKey";
+    }
+
+    public String masterIdMapKey() {
+        return "id";
+    }
+
+    public String submitKey() {
+        return "submit";
+    }
+
+    public String startProcessKey() {
+        return "startProcess";
+    }
+
+    public String taskIdKey() {
+        return "taskId";
+    }
+
     @Override
     public void init() {
         SillyCategoryConfig sillyCategoryConfig = getSillyConfig();
@@ -76,8 +99,15 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         setSillyResumeService(sillyCategoryConfig.getSillyResumeService());
         setSillyTaskGroupHandle(sillyCategoryConfig.getSillyTaskGroupHandle());
         setSillyCache(sillyCategoryConfig.getSillyCache());
+        setEntityClazz(sillyCategoryConfig.getSillyFactory());
 
         otherInit();
+    }
+
+    private void setEntityClazz(SillyFactory sillyFactory) {
+        masterClass = (Class<M>) sillyFactory.newMaster().getClass();
+        nodeClass = (Class<N>) sillyFactory.newNode().getClass();
+        variableClass = (Class<V>) sillyFactory.newVariable().getClass();
     }
 
     protected abstract void otherInit();
@@ -242,26 +272,14 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
 
 
     protected Class<V> variableClass() {
-        if (variableClass == null) {
-            Type[] actualTypeArgument = ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments();
-            variableClass = (Class<V>) SillyReflectUtil.getSuperClassGenericType((Class<?>) actualTypeArgument[1], 1);
-        }
         return variableClass;
     }
 
     protected Class<N> nodeClass() {
-        if (nodeClass == null) {
-            Type[] actualTypeArgument = ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments();
-            nodeClass = (Class<N>) SillyReflectUtil.getSuperClassGenericType((Class<?>) actualTypeArgument[1], 0);
-        }
         return nodeClass;
     }
 
     protected Class<M> masterClass() {
-        if (masterClass == null) {
-            Type[] actualTypeArgument = ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments();
-            masterClass = (Class<M>) SillyReflectUtil.getSuperClassGenericType((Class<?>) actualTypeArgument[0], 0);
-        }
         return masterClass;
     }
 

@@ -160,13 +160,12 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
      */
     protected SillyMasterTask setNodeMyTaskId(String masterId, N node) {
         SillyMasterTask task = sillyEngineService.getOneTask(usedCategory(), sillyCurrentUserUtil.currentUserId(), masterId);
-        if (task != null) {
-            node.setTaskId(task.getTaskId());
-            if (StringUtils.isEmpty(node.getNodeKey())) {
-                node.setNodeKey(task.getNodeKey());
-            }
+        SillyAssert.notNull(task, "未找到您需要处置的任务" + usedCategory());
+        
+        node.setTaskId(task.getTaskId());
+        if (StringUtils.isEmpty(node.getNodeKey())) {
+            node.setNodeKey(task.getNodeKey());
         }
-
         return task;
     }
 

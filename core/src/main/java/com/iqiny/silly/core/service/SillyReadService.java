@@ -57,6 +57,13 @@ public interface SillyReadService<M extends SillyMaster, N extends SillyNode<V>,
     List<V> findVariableList(V where);
 
     /**
+     * 获取当前任务下的变量数据
+     *
+     * @param taskId
+     */
+    Map<String, Object> findVariableByTaskId(String taskId);
+
+    /**
      * 查询主表数据 Map
      *
      * @param masterId 主表ID
@@ -68,7 +75,6 @@ public interface SillyReadService<M extends SillyMaster, N extends SillyNode<V>,
      * 获取节点集合数据
      *
      * @param masterId
-     * @return
      */
     List<N> getAllNodeList(String masterId);
 
@@ -77,7 +83,6 @@ public interface SillyReadService<M extends SillyMaster, N extends SillyNode<V>,
      *
      * @param masterId
      * @param nodeKey
-     * @return
      */
     N getNode(String masterId, String nodeKey);
 
@@ -85,7 +90,6 @@ public interface SillyReadService<M extends SillyMaster, N extends SillyNode<V>,
      * 获取进行中的任务列表分页数据
      *
      * @param params
-     * @return
      */
     Object queryDoingPage(Map<String, Object> params);
 
@@ -93,13 +97,35 @@ public interface SillyReadService<M extends SillyMaster, N extends SillyNode<V>,
      * 获取历史任务分页数据
      *
      * @param params
-     * @return
      */
     Object queryHistoryPage(Map<String, Object> params);
+
+    /**
+     * 获取分页数据（不经过流程引擎）
+     *
+     * @param params
+     */
+    Object queryPage(Map<String, Object> params);
+
+    /**
+     * 获取分页数据（经过流程引擎, 获取对应任务信息）
+     *
+     * @param params
+     */
+    Object sourcePage(Map<String, Object> params);
+
+    /**
+     * 查询一条数据
+     *
+     * @param id
+     * @return
+     */
+    Object queryOne(String id);
 
 
     /**
      * variableList2Map
+     *
      * @param variables
      * @return
      */

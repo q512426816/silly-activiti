@@ -50,6 +50,7 @@ public class DataJoinVariableSaveHandle implements SillyVariableSaveHandle {
 
         sj.add(variable.getVariableText());
         variable.setVariableText(sj.toString());
+
         return true;
     }
 }

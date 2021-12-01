@@ -24,12 +24,39 @@ import com.iqiny.silly.core.service.base.AbstractSillyWriteService;
 import org.activiti.engine.task.Task;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
 @SuppressWarnings("unchecked")
 public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable>
         extends AbstractSillyWriteService<M, N, V, Task> {
+
+    @Transactional(rollbackFor = Exception.class)
+    public M saveFirstData(boolean submit, Map<String, Object> saveMap) {
+        return saveData(submit, null, saveMap);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public M saveTaskMap(Map<String, Object> saveMap) {
+        String taskId = MapUtils.getString(saveMap, taskIdKey());
+        Boolean submit = MapUtils.getBoolean(saveMap, submitKey(), false);
+        SillyAssert.notEmpty(taskId, "任务ID不可为空");
+        saveMap.remove(taskIdKey());
+        saveMap.remove(submitKey());
+        return saveData(submit, taskId, saveMap);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public M saveOrNewMap(Map<String, Object> saveMap) {
+        String taskId = MapUtils.getString(saveMap, taskIdKey());
+        Boolean submit = MapUtils.getBoolean(saveMap, submitKey(), false);
+        saveMap.remove(taskIdKey());
+        saveMap.remove(submitKey());
+        return saveData(submit, taskId, saveMap);
+    }
 
     @Override
     protected void afterStartProcess(M master) {
@@ -69,10 +96,6 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
 
     /**
      * 任务完成之后的回调
-     *
-     * @param master
-     * @param node
-     * @return
      */
     protected List<Task> afterCompleteTask(M master, N node, Task oldTask) {
         final String actProcessId = oldTask.getProcessInstanceId();
@@ -138,9 +161,6 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
 
     /**
      * 通过主表ID 获取流程履历业务ID
-     *
-     * @param masterId
-     * @return
      */
     protected String processResumeBusinessId(String masterId) {
         // 默认使用本身作为流程履历业务ID
@@ -150,10 +170,6 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
 
     /**
      * 完成流程任务  (主表状态只控制 新建（保存）/提交（提交）/完成（结束）  更多状态请使用 activiti事件控制)
-     *
-     * @param variableMap
-     * @param task
-     * @return
      */
     protected void complete(Map<String, Object> variableMap, Task task) {
         // 完成此步骤流程
@@ -162,8 +178,6 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
 
     /**
      * 强制结束流程
-     *
-     * @param processInstanceId
      */
     @Override
     protected void forceEndProcess(String processInstanceId) {
@@ -172,9 +186,6 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
 
     /**
      * 获取任务执行耗时
-     *
-     * @param task
-     * @return
      */
     protected Long taskDueTime(Task task) {
         return sillyEngineService.getTaskDueTime(task);
@@ -182,9 +193,6 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
 
     /**
      * 流程结束之后的回调
-     *
-     * @param master
-     * @param node
      */
     protected void afterCloseProcess(M master, N node) {
         final String masterId = master.getId();
@@ -212,10 +220,6 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
 
     /**
      * 流程完成之后的回调
-     *
-     * @param master
-     * @param node
-     * @param taskList
      */
     protected void afterCompleteProcess(M master, N node, List<Task> taskList) {
         String masterId = master.getId();
@@ -294,7 +298,8 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
     /**
      * 人员流转
      */
-    protected void changeUser(String taskId, String userId, String reason) {
+    @Transactional(rollbackFor = Exception.class)
+    public void changeUser(String taskId, String userId, String reason) {
         final Task task = sillyEngineService.findTaskById(taskId);
         final String masterId = sillyEngineService.getBusinessKey(task.getProcessInstanceId());
         // 变更人员
@@ -372,36 +377,14 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         list.add(v);
     }
 
-    protected M saveData(String taskId, Map<String, Object> saveMap) {
+    @Transactional(rollbackFor = Exception.class)
+    public M saveData(String taskId, Map<String, Object> saveMap) {
         return saveData(false, taskId, saveMap);
     }
 
-    protected M submitData(String taskId, Map<String, Object> saveMap) {
+    @Transactional(rollbackFor = Exception.class)
+    public M submitData(String taskId, Map<String, Object> saveMap) {
         return saveData(true, taskId, saveMap);
-    }
-
-    public String processKeyMapKey() {
-        return "processKey";
-    }
-
-    public String nodeKeyMapKey() {
-        return "nodeKey";
-    }
-
-    public String masterIdMapKey() {
-        return "id";
-    }
-
-    public String submitKey() {
-        return "submit";
-    }
-
-    public String startProcessKey() {
-        return "startProcess";
-    }
-
-    public String taskIdKey() {
-        return "taskId";
     }
 
     protected M saveData(boolean submit, String taskId, Map<String, Object> saveMap) {
@@ -510,9 +493,6 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
 
     /**
      * Map 根据配置对象转 Variable 对象集合
-     *
-     * @param map
-     * @return
      */
     public List<V> mapToVariables(boolean submit, SillyPropertyHandle sillyPropertyHandle, Map<String, Object> map, SillyProcessNodeProperty<?> nodeProperty) {
         SillyAssert.notNull(nodeProperty, "节点配置不可为空");

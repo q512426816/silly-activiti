@@ -11,19 +11,18 @@ package com.iqiny.silly.core.service.base;
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.SillyAssert;
+import com.iqiny.silly.common.util.SillyMapUtils;
+import com.iqiny.silly.common.util.StringUtils;
+import com.iqiny.silly.core.base.SillyMasterTask;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
+import com.iqiny.silly.core.read.SillyMasterTaskUtil;
 import com.iqiny.silly.core.service.SillyReadService;
+import org.apache.commons.collections.MapUtils;
 
-import java.beans.BeanInfo;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Method;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -36,6 +35,24 @@ import java.util.*;
 @SuppressWarnings("unchecked")
 public abstract class AbstractSillyReadService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable, T>
         extends AbstractSillyService<M, N, V, T> implements SillyReadService<M, N, V> {
+
+    public static final String DEFAULT_QUERY_IDS_PARAM_NAME = "partitionMasterIds";
+
+    public String queryIdsParamName() {
+        return DEFAULT_QUERY_IDS_PARAM_NAME;
+    }
+
+    public String variableQueryStart() {
+        return "variableQuery[";
+    }
+
+    public String variableQueryEnd() {
+        return "]";
+    }
+
+    public String variableQueryKey() {
+        return "variableQuery";
+    }
 
     @Override
     protected void otherInit() {
@@ -51,52 +68,7 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
     @Override
     public Map<String, Object> getMasterMap(String masterId) {
         final M master = getMaster(masterId);
-        return getMasterMap(master);
-    }
-
-    public Map<String, Object> getMasterMap(M master) {
-        return beanToMap(master);
-    }
-
-
-    /**
-     * 使用Introspector，对象转换为map集合
-     *
-     * @param beanObj javabean对象
-     * @return map集合
-     */
-    private Map<String, Object> beanToMap(Object beanObj, String... ignor) {
-        if (null == beanObj) {
-            return null;
-        }
-        List<String> ignorList = new ArrayList<>();
-        if (ignor != null) {
-            ignorList = Arrays.asList(ignor);
-        }
-        HashMap<String, Object> map = new HashMap<>();
-        try {
-            BeanInfo beanInfo = Introspector.getBeanInfo(beanObj.getClass());
-            PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-            for (PropertyDescriptor property : propertyDescriptors) {
-                String key = property.getName();
-                if (ignorList.contains(key)) {
-                    continue;
-                }
-                if (key.compareToIgnoreCase("class") == 0) {
-                    continue;
-                }
-                Method getter = property.getReadMethod();
-                Object value = getter != null ? getter.invoke(beanObj) : null;
-                if (value instanceof Date) {
-                    value = df.format(value);
-                }
-                map.put(key, value);
-            }
-            return map;
-        } catch (Exception ex) {
-            throw new SillyException(ex.getMessage());
-        }
+        return SillyMapUtils.beanToMap(master);
     }
 
     /**
@@ -105,6 +77,7 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
      * @param taskId
      * @return
      */
+    @Override
     public Map<String, Object> findVariableByTaskId(String taskId) {
         final V variable = sillyFactory.newVariable();
         variable.setTaskId(taskId);
@@ -152,7 +125,7 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
     @Override
     public Map<String, Object> variableList2Map(List<V> variables) {
         Map<String, Object> variableMap = new LinkedHashMap<>();
-        Map<String, Map<String, Object>> parallelMap = new LinkedHashMap<>();
+        Map<String, Map<String, Map<String, Object>>> parallelMap = new LinkedHashMap<>();
         M master = null;
         for (V variable : variables) {
             if (master == null) {
@@ -164,8 +137,9 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
             try {
                 SillyProcessNodeProperty<?> nodeProperty = getNodeProperty(master.processKey(), variable.getNodeKey());
                 if (nodeProperty.isParallel()) {
-                    Map<String, Object> nodeMap = parallelMap.putIfAbsent(variable.getTaskId(), new LinkedHashMap<>());
-                    sillyHandler.convert(nodeMap, variable.getVariableName(), variable.getVariableText());
+                    Map<String, Map<String, Object>> nodeMap = parallelMap.putIfAbsent(variable.getNodeKey(), new LinkedHashMap<>());
+                    Map<String, Object> taskMap = nodeMap.putIfAbsent(variable.getTaskId(), new LinkedHashMap<>());
+                    sillyHandler.convert(taskMap, variable.getVariableName(), variable.getVariableText());
                 }
             } catch (SillyException ignore) {
             }
@@ -181,4 +155,150 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
     public String parallelMapKey() {
         return "parallelMap";
     }
+
+    protected Set<String> findMasterIdByMap(Map<String, Object> params) {
+        return findMasterIdByMap(null, params);
+    }
+
+    protected Set<String> findMasterIdByMap(List<String> masterIdList, Map<String, Object> params) {
+        // 已加载数据标识
+        boolean loadData = (masterIdList != null);
+        // 变量表查询返回的主表ID集合
+        Set<String> masterIds = new LinkedHashSet<>();
+        if (masterIdList != null) {
+            masterIds.addAll(masterIdList);
+        }
+        if (params == null) {
+            params = new HashMap<>();
+        }
+
+        final Set<String> keys = params.keySet();
+        for (String key : keys) {
+            // 默认获取以 variableQuery[ 开头， ] 结尾的参数 查询 变量表数据
+            if (StringUtils.isEmpty(key)) {
+                continue;
+            }
+
+            final Object value = params.get(key);
+            if (value != null) {
+                final List<V> vs = findVariableListByKV(key, value);
+                if (vs != null) {
+                    Set<String> oneMasterIds = new LinkedHashSet<>();
+                    for (V v : vs) {
+                        oneMasterIds.add(v.getMasterId());
+                    }
+                    if (loadData) {
+                        masterIds.retainAll(oneMasterIds);
+                    } else {
+                        // 仅第一次查询返回值加入，后续参数返回数据都将进行删除操作
+                        masterIds.addAll(oneMasterIds);
+                        loadData = true;
+                    }
+                    if (masterIds.isEmpty()) {
+                        // 结束循环
+                        break;
+                    }
+                }
+            }
+        }
+
+        return loadData ? masterIds : null;
+    }
+
+    protected abstract List<V> findVariableListByKV(String key, Object value);
+
+    protected List<String> findBusinessDoingMasterIds(Map<String, Object> params, String userId) {
+        return null;
+    }
+
+
+    @Override
+    public Object queryDoingPage(Map<String, Object> params) {
+        final List<SillyMasterTask> masterTasks = sillyEngineService.getDoingMasterTask(usedCategory(), sillyCurrentUserUtil.currentUserId());
+        final SillyMasterTaskUtil<? extends SillyMasterTask> masterTaskUtil = SillyMasterTaskUtil.create(masterTasks);
+        List<String> masterIdList = masterTaskUtil.getMasterIds();
+        List<String> businessDoingMasterIds = findBusinessDoingMasterIds(params, sillyCurrentUserUtil.currentUserId());
+        if (businessDoingMasterIds != null && !businessDoingMasterIds.isEmpty()) {
+            masterIdList.addAll(businessDoingMasterIds);
+        }
+        final Set<String> masterIds = findMasterIdByMap(masterIdList, params);
+        return doQueryPage(params, masterIds, masterTaskUtil);
+    }
+
+    @Override
+    public Object queryHistoryPage(Map<String, Object> params) {
+        final List<SillyMasterTask> masterTasks = sillyEngineService.getHistoryMasterTask(usedCategory(), sillyCurrentUserUtil.currentUserId());
+        final SillyMasterTaskUtil<? extends SillyMasterTask> masterTaskUtil = SillyMasterTaskUtil.create(masterTasks);
+        List<String> masterIdList = masterTaskUtil.getMasterIds();
+        final Set<String> masterIds = findMasterIdByMap(masterIdList, params);
+        return doQueryPage(params, masterIds, masterTaskUtil);
+    }
+
+    @Override
+    public Object queryPage(Map<String, Object> params) {
+        final Set<String> masterIds = findMasterIdByMap(params);
+        // masterIds == null 时表示没有变量表查询操作，!=null 表示有变量表操作
+        return doQueryPage(params, masterIds);
+    }
+
+    @Override
+    public Object sourcePage(Map<String, Object> params) {
+        List<SillyMasterTask> masterTasks = this.sillyEngineService.getDoingMasterTask(this.usedCategory(), this.sillyCurrentUserUtil.currentUserId());
+        SillyMasterTaskUtil<? extends SillyMasterTask> masterTaskUtil = SillyMasterTaskUtil.create(masterTasks);
+        Set<String> masterIds = this.findMasterIdByMap(null, params);
+        if (masterIds != null && masterIds.isEmpty()) {
+            masterIds = null;
+        }
+        return this.doQueryPage(params, masterIds, masterTaskUtil);
+    }
+
+    /**
+     * 子类重写此方法设置分页数据信息
+     *
+     * @param records
+     */
+    protected void setRecordInfo(List<Map<String, Object>> records, SillyMasterTaskUtil<? extends SillyMasterTask> masterTaskUtil) {
+        for (Map<String, Object> record : records) {
+            setOneRecordInfo(record, masterTaskUtil);
+        }
+    }
+
+    /**
+     * 子类重写此方法设置分页数据信息
+     *
+     * @param record
+     */
+    protected void setOneRecordInfo(Map<String, Object> record, SillyMasterTaskUtil<? extends SillyMasterTask> masterTaskUtil) {
+        if (masterTaskUtil != null) {
+            final String masterId = SillyMapUtils.getString(record, "id");
+            SillyMasterTask one = masterTaskUtil.getOneTask(masterId);
+            if (one == null) {
+                SillyMapUtils.put(record, "taskId", null);
+            } else {
+                SillyMapUtils.put(record, "taskId", one.getTaskId());
+                SillyMapUtils.put(record, "taskObj", one);
+                SillyMapUtils.put(record, "taskList", masterTaskUtil.getTaskSet(masterId));
+            }
+            otherSetTaskRecord(record, masterTaskUtil);
+        }
+        setOneRecordInfo(record);
+    }
+
+    protected void setOneRecordInfo(Map<String, Object> record) {
+    }
+
+    protected void convertorRecordValue(String convertorName, Map<String, Object> record, String field) {
+        getSillyConvertor(convertorName).convert(record, field, MapUtils.getString(record, field));
+    }
+
+
+    protected void otherSetTaskRecord(Map<String, Object> record, SillyMasterTaskUtil<? extends SillyMasterTask> masterTaskUtil) {
+    }
+
+
+    protected Object doQueryPage(Map<String, Object> params, Set<String> masterIds) {
+        return doQueryPage(params, masterIds, null);
+    }
+
+    protected abstract Object doQueryPage(Map<String, Object> params, Set<String> masterIds, SillyMasterTaskUtil<? extends SillyMasterTask> masterTaskUtil);
 }
