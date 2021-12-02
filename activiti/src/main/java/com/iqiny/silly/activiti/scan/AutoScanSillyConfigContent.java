@@ -12,10 +12,12 @@ import com.iqiny.silly.activiti.SpringSillyConfigContent;
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.SillyReflectUtil;
 import com.iqiny.silly.common.util.StringUtils;
+import com.iqiny.silly.core.base.SillyCategory;
 import com.iqiny.silly.core.base.core.SillyEntity;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
+import com.iqiny.silly.core.common.SillyCoreUtil;
 import com.iqiny.silly.core.resume.SillyResume;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,10 +31,7 @@ import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.springframework.util.StringUtils.tokenizeToStringArray;
 
@@ -46,17 +45,29 @@ public class AutoScanSillyConfigContent extends SpringSillyConfigContent {
 
     protected String entityScanPackage;
 
-    protected Class<SillyMaster> masterSuperType = SillyMaster.class;
-    protected Class<SillyNode> nodeSuperType = SillyNode.class;
-    protected Class<SillyVariable> variableSuperType = SillyVariable.class;
-    protected Class<SillyResume> resumeSuperType = SillyResume.class;
+    protected Class<? extends SillyMaster> masterSuperType = SillyMaster.class;
+    protected Class<? extends SillyNode> nodeSuperType = SillyNode.class;
+    protected Class<? extends SillyVariable> variableSuperType = SillyVariable.class;
+    protected Class<? extends SillyResume> resumeSuperType = SillyResume.class;
 
-    protected Map<String, ScanSillyFactory> scanSillyFactoryMap = new LinkedHashMap<>();
+    protected final List<Class<? extends SillyMaster>> masterClazzList = new ArrayList<>();
+    protected final List<Class<? extends SillyNode>> nodeClazzList = new ArrayList<>();
+    protected final List<Class<? extends SillyVariable>> variableClazzList = new ArrayList<>();
+    protected final List<Class<? extends SillyResume>> resumeClazzList = new ArrayList<>();
+
+    @Override
+    protected void initFiled() {
+        masterClazzList.clear();
+        nodeClazzList.clear();
+        variableClazzList.clear();
+        resumeClazzList.clear();
+
+        super.initFiled();
+    }
 
 
     @Override
-    protected void preInit() {
-        super.preInit();
+    protected void initBaseSillyFactoryList() {
 
         if (StringUtils.isNotEmpty(entityScanPackage)) {
             Set<Class<? extends SillyEntity>> types = new LinkedHashSet<>();
@@ -70,16 +81,19 @@ public class AutoScanSillyConfigContent extends SpringSillyConfigContent {
                 log.warn("包扫描异常！" + entityScanPackage + "类型：" + types + e.getMessage());
             }
         }
-    }
 
-
-    @Override
-    protected void initBaseSillyFactoryMap() {
-        super.initBaseSillyFactoryMap();
-
-        Set<String> categorys = scanSillyFactoryMap.keySet();
+        Set<String> categorys = allCategorySet();
         for (String category : categorys) {
-            addSillyFactory(scanSillyFactoryMap.get(category));
+            ScanSillyFactory sillyFactory = new ScanSillyFactory(category);
+            Class<? extends SillyMaster> masterClass = SillyCoreUtil.availableOne(category, masterClazzList);
+            sillyFactory.setMasterClazz(masterClass);
+            Class<? extends SillyNode> nodeClass = SillyCoreUtil.availableOne(category, nodeClazzList);
+            sillyFactory.setNodeClazz(nodeClass);
+            Class<? extends SillyVariable> variableClazz = SillyCoreUtil.availableOne(category, variableClazzList);
+            sillyFactory.setVariableClazz(variableClazz);
+            Class<? extends SillyResume> resumeClazz = SillyCoreUtil.availableOne(category, resumeClazzList);
+            sillyFactory.setResumeClazz(resumeClazz);
+            addSillyFactory(sillyFactory);
         }
     }
 
@@ -111,14 +125,19 @@ public class AutoScanSillyConfigContent extends SpringSillyConfigContent {
                     Class<?> clazz = Resources.classForName(classMetadata.getClassName());
                     for (Class<? extends SillyEntity> assignableType : assignableTypes) {
                         if (assignableType.isAssignableFrom(clazz)) {
-                            SillyEntity sillyEntity = (SillyEntity) SillyReflectUtil.newInstance(clazz);
-                            final String category = sillyEntity.category();
-                            ScanSillyFactory sillyFactory = scanSillyFactoryMap.get(category);
-                            if (sillyFactory == null) {
-                                sillyFactory = new ScanSillyFactory(category);
-                                scanSillyFactoryMap.put(category, sillyFactory);
+                            if (masterSuperType.isAssignableFrom(clazz)) {
+                                masterClazzList.add((Class<SillyMaster>) clazz);
+                            } else if (nodeSuperType.isAssignableFrom(clazz)) {
+                                nodeClazzList.add((Class<SillyNode>) clazz);
+                            } else if (variableSuperType.isAssignableFrom(clazz)) {
+                                variableClazzList.add((Class<SillyVariable>) clazz);
+                            } else if (resumeSuperType.isAssignableFrom(clazz)) {
+                                resumeClazzList.add((Class<SillyResume>) clazz);
                             }
-                            sillyFactory.setEntityClazz(clazz);
+
+                            if (SillyCategory.class.isAssignableFrom(clazz)) {
+                                addCategorySet(((SillyCategory) SillyReflectUtil.newInstance(clazz)).usedCategory());
+                            }
                         }
                     }
 
@@ -126,20 +145,6 @@ public class AutoScanSillyConfigContent extends SpringSillyConfigContent {
                     log.warn(resource + ",加载失败:" + e.getMessage());
                 }
             }
-        }
-
-        // 设置 特殊种类的操作
-        refreshSpecialSillyFactory();
-    }
-
-    protected void refreshSpecialSillyFactory() {
-        final ScanSillyFactory supportAll = scanSillyFactoryMap.get(SillyEntity.SUPPORT_ALL);
-        if (supportAll == null) {
-            return;
-        }
-        
-        for (String key : scanSillyFactoryMap.keySet()) {
-            scanSillyFactoryMap.get(key).setDefaultClazz(supportAll);
         }
     }
 

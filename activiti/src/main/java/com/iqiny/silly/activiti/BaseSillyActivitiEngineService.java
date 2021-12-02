@@ -36,8 +36,6 @@ import java.util.*;
  */
 public abstract class BaseSillyActivitiEngineService implements SillyEngineService<Task> {
 
-    protected Set<String> supportCategories = new HashSet<>();
-
     protected RuntimeService runtimeService;
     protected HistoryService historyService;
     protected TaskService taskService;
@@ -48,17 +46,6 @@ public abstract class BaseSillyActivitiEngineService implements SillyEngineServi
         return SillyConfigUtil.getSillyConfig(category);
     }
 
-    @Override
-    public Set<String> supportCategories() {
-        supportCategories.add(SillyCategory.DEFAULT_CATEGORY);
-        return supportCategories;
-    }
-
-    @Override
-    public boolean isSupport(String category) {
-        supportCategories.add(category);
-        return true;
-    }
 
     @Override
     public void init() {

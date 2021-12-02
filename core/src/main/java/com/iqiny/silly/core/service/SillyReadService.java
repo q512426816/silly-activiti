@@ -22,7 +22,7 @@ import java.util.Map;
  * @author QINY
  * @since 1.0
  */
-public interface SillyReadService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> extends SillyService, SillyCategory {
+public interface SillyReadService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> extends SillyService {
 
     /**
      * 获取主表数据

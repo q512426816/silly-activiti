@@ -8,12 +8,10 @@
  */
 package com.iqiny.silly.core.cache;
 
-import com.iqiny.silly.core.base.SillyMultipleCategory;
-
 /**
  * 傻瓜缓存对象
  */
-public interface SillyCache extends SillyMultipleCategory {
+public interface SillyCache {
 
     /**
      * 获取值

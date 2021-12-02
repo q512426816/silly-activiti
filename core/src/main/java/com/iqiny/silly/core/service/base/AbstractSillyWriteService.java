@@ -16,6 +16,7 @@ import com.iqiny.silly.core.base.SillyMasterTask;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
+import com.iqiny.silly.core.config.property.SillyPropertyHandle;
 import com.iqiny.silly.core.convertor.SillyAutoConvertor;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.service.SillyReadService;
@@ -40,6 +41,27 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         sillyReadService = getSillyConfig().getSillyReadService();
     }
 
+    /**
+     * 批量保存处置类处理
+     *
+     * @param node
+     * @param variables
+     * @return
+     */
+    protected boolean batchSaveHandle(M master, N node, V variables, SillyPropertyHandle propertyHandle) {
+        String saveHandleNames = variables.getSaveHandleName();
+        SillyAssert.notEmpty(saveHandleNames, "批处理数据保存不可为空");
+        String[] saveHandleNameArr = StringUtils.split(saveHandleNames, SillyConstant.ARRAY_SPLIT_STR);
+        boolean lastFlag = true;
+        for (String saveHandleName : saveHandleNameArr) {
+            String stringValue = propertyHandle.getStringValue(saveHandleName.trim());
+            if (StringUtils.isNotEmpty(stringValue)) {
+                lastFlag = getSillyVariableSaveHandle(stringValue).handle(master, node, variables);
+            }
+        }
+        return lastFlag;
+    }
+    
     /**
      * 提交数据 流程流转
      *

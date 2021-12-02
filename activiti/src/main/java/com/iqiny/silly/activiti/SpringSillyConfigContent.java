@@ -61,7 +61,18 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
 
     protected Class<? extends SillyPropertyHandle> propertyHandleClazz = SillySpelPropertyHandle.class;
 
+    protected String[] categorys;
+
     public SpringSillyConfigContent() {
+    }
+
+    @Override
+    protected void loadCategorySet() {
+        if (categorys != null) {
+            for (String category : categorys) {
+                addCategorySet(category);
+            }
+        }
     }
 
     @Override
@@ -70,20 +81,12 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
     }
 
     @Override
-    protected void initBaseSillyFactoryMap() {
+    protected void initBaseSillyFactoryList() {
 
     }
 
     @Override
-    protected void hookInitSillyFactoryMap() {
-        final Set<SillyFactory> beanSet = SpringSillyContent.getBeanSet(SillyFactory.class);
-        for (SillyFactory sillyFactory : beanSet) {
-            addSillyFactory(sillyFactory);
-        }
-    }
-
-    @Override
-    protected void hookInitSillyConvertorMap() {
+    protected void hookInitSillyConvertorList() {
         addSillyVariableConvertor(new SillyListConvertor());
         final Set<SillyVariableConvertor> beanSet = SpringSillyContent.getBeanSet(SillyVariableConvertor.class);
         for (SillyVariableConvertor convertor : beanSet) {
@@ -92,7 +95,7 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
     }
 
     @Override
-    protected void hookInitSillyVariableSaveHandleMap() {
+    protected void hookInitSillyVariableSaveHandleList() {
         addSillyVariableSaveHandle(new DefaultVariableSaveHandle());
         addSillyVariableSaveHandle(new OverwriteVariableSaveHandle());
         addSillyVariableSaveHandle(new DataJoinVariableSaveHandle());
@@ -105,10 +108,10 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
     }
 
     @Override
-    protected void hookInitSillyHtmlTagTemplateMap() {
+    protected void hookInitSillyHtmlTagTemplateList() {
         final Set<SillyHtmlTagTemplate> beanSet = SpringSillyContent.getBeanSet(SillyHtmlTagTemplate.class);
         for (SillyHtmlTagTemplate htmlTagTemplate : beanSet) {
-            addSillyHtmlTagTemplateMap(htmlTagTemplate);
+            addSillyHtmlTagTemplate(htmlTagTemplate);
         }
     }
 
@@ -145,7 +148,7 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
     }
 
     @Override
-    protected void hookSillyProcessPropertyMap() {
+    protected void hookSillyProcessPropertyList() {
         refreshProcessResource();
     }
 
@@ -159,7 +162,7 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
     }
 
     @Override
-    protected void hookSillyCacheMap() {
+    protected void hookSillyCacheList() {
         final Set<SillyCache> sillyCaches = SpringSillyContent.getBeanSet(SillyCache.class);
         for (SillyCache sillyCache : sillyCaches) {
             addSillyCache(sillyCache);
@@ -167,7 +170,7 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
     }
 
     @Override
-    protected void hookSillyCurrentUserUtilMap() {
+    protected void hookSillyCurrentUserUtilList() {
         final Set<SillyCurrentUserUtil> sillyCurrentUserUtils = SpringSillyContent.getBeanSet(SillyCurrentUserUtil.class);
         for (SillyCurrentUserUtil currentUserUtil : sillyCurrentUserUtils) {
             addSillyCurrentUserUtil(currentUserUtil);
@@ -214,10 +217,10 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
             StringWriter writer = new StringWriter();
             IOUtils.copy(inputStream, writer, StandardCharsets.UTF_8.name());
             String json = writer.toString();
-            // 按定义顺序生成
-            SillyProcessProperty processProperty = JSON.parseObject(json, getProcessPropertyClazz(), Feature.OrderedField);
             String fileName = resource.getFilename();
             String category = fileName.substring(0, fileName.lastIndexOf("."));
+            // 按定义顺序生成
+            SillyProcessProperty processProperty = JSON.parseObject(json, getProcessPropertyClazz(category), Feature.OrderedField);
             addSillyProcessProperty(category, processProperty);
             log.info("成功更新流程配置文件:" + category);
         } catch (IOException e) {
@@ -228,11 +231,13 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
     @Override
     protected void initComplete() {
         log.info(this.getClass().getName() + " 初始化完成");
-        log.info("转换器：" + sillyConvertorMap.size() + "个，对象工厂：" + sillyFactoryMap.size() + "个，" +
-                "读取服务：" + sillyReadServiceMap.size() + "个，写入服务：" + sillyWriteServiceMap.size() + "个，" +
-                "流程属性：" + sillyProcessPropertyMap.size() + "个");
+        log.info("转换器：" + sillyConvertorList.size() + "个，对象工厂：" + sillyFactoryList.size() + "个，" +
+                "读取服务：" + sillyReadServiceList.size() + "个，写入服务：" + sillyWriteServiceList.size() + "个，" +
+                "流程属性：" + sillyProcessPropertyList.size() + "个");
         log.info("成功注册" + sillyTaskGroupHandle.allSillyTaskGroup().size() + " 个任务组对象");
         log.info("成功注册" + sillyTaskGroupHandle.allCategoryGroup().size() + " 个类型任务组对象");
+        log.info("已成功加载分类数量：" + allCategorySet().size() + " 种");
+        log.info("已成功加载分类：" + allCategorySet() + "");
     }
 
     @Override
@@ -244,8 +249,7 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
         this.processPattern = processPattern;
     }
 
-    @Override
-    public Class<? extends SillyProcessProperty> getProcessPropertyClazz() {
+    public Class<? extends SillyProcessProperty> getProcessPropertyClazz(String category) {
         return processPropertyClazz;
     }
 
@@ -254,7 +258,7 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
     }
 
     @Override
-    public Class<? extends SillyPropertyHandle> getPropertyHandleClazz() {
+    public Class<? extends SillyPropertyHandle> getPropertyHandleClazz(String category) {
         return propertyHandleClazz;
     }
 

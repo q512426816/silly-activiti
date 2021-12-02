@@ -23,7 +23,7 @@ public class SillyReflectUtil {
         try {
             return clazz.getConstructor().newInstance();
         } catch (Exception e) {
-            throw SillyException.newInstance(e.getMessage(), e);
+            throw SillyException.newInstance("实例化对象失败！" + e.getMessage(), e);
         }
     }
 

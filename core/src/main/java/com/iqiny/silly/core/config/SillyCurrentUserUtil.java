@@ -14,7 +14,7 @@ import com.iqiny.silly.core.base.SillyMultipleCategory;
 /**
  * 当前人获取工具
  */
-public interface SillyCurrentUserUtil extends SillyInitializable, SillyMultipleCategory {
+public interface SillyCurrentUserUtil {
 
     String currentUserId();
 

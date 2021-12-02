@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * 流程履历服务接口
  */
-public interface SillyResumeService<R extends SillyResume> extends SillyService, SillyMultipleCategory {
+public interface SillyResumeService<R extends SillyResume> extends SillyService {
 
     /**
      * 生成处置履历内容

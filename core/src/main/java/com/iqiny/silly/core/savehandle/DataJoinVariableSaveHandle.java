@@ -34,7 +34,7 @@ public class DataJoinVariableSaveHandle implements SillyVariableSaveHandle {
 
     @Override
     public boolean handle(SillyMaster master, SillyNode node, SillyVariable variable) {
-        SillyCategoryConfig sillyCategoryConfig = SillyConfigUtil.getSillyConfig(master.category());
+        SillyCategoryConfig sillyCategoryConfig = SillyConfigUtil.getSillyConfig(master.usedCategory());
 
         final SillyVariable whereVariable = sillyCategoryConfig.getSillyFactory().newVariable();
         whereVariable.setMasterId(node.getMasterId());

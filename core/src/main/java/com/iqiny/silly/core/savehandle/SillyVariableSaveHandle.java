@@ -20,7 +20,6 @@ public interface SillyVariableSaveHandle {
 
     /**
      * 保存处置类的名称 （全局唯一）
-     * @return
      */
     String name();
 

@@ -16,12 +16,10 @@ import com.iqiny.silly.core.base.SillyCategory;
 import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.base.SillyMultipleCategory;
 import com.iqiny.silly.core.cache.SillyCache;
+import com.iqiny.silly.core.common.SillyCoreUtil;
 import com.iqiny.silly.core.config.html.SillyHtmlTagConfig;
 import com.iqiny.silly.core.config.html.SillyHtmlTagTemplate;
-import com.iqiny.silly.core.config.property.SillyProcessMasterProperty;
-import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
-import com.iqiny.silly.core.config.property.SillyProcessProperty;
-import com.iqiny.silly.core.config.property.SillyProcessVariableProperty;
+import com.iqiny.silly.core.config.property.*;
 import com.iqiny.silly.core.convertor.SillyStringConvertor;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.group.SillyTaskGroupHandle;
@@ -46,6 +44,20 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
     private boolean initialized = false;
     private boolean refresh = false;
 
+    /**
+     * 全部已识别的业务分类
+     */
+    protected final Set<String> categorySet = new LinkedHashSet<>();
+
+    public Set<String> allCategorySet() {
+        if (categorySet.isEmpty()) {
+            loadCategorySet();
+        }
+        return categorySet;
+    }
+
+    protected abstract void loadCategorySet();
+
     protected Class<? extends SillyCategoryConfig> sillyCategoryConfigClazz = DefaultSillyCategoryConfig.class;
 
     /**
@@ -54,54 +66,54 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
     protected List<SillyCategoryConfig> sillyCategoryConfigList = new ArrayList<>();
 
     /**
-     * 当前人获取工具
+     * Category 当前人获取工具
      */
-    protected final Map<String, SillyCurrentUserUtil> sillyCurrentUserUtilMap = new SillyConfigHashMap<>();
+    protected final List<SillyCurrentUserUtil> sillyCurrentUserUtilList = new ArrayList<>();
 
     /**
-     * 流程引擎服务，流程控制服务
+     * Category 流程引擎服务，流程控制服务
      */
-    protected final Map<String, SillyEngineService> sillyEngineServiceMap = new SillyConfigHashMap<>();
+    protected final List<SillyEngineService> sillyEngineServiceList = new ArrayList<>();
 
     /**
-     * 流程履历记录服务
+     * Category 流程履历记录服务
      */
-    protected final Map<String, SillyResumeService> sillyResumeServiceMap = new SillyConfigHashMap<>();
+    protected final List<SillyResumeService> sillyResumeServiceList = new ArrayList<>();
 
     /**
-     * 流程变量 类型转换器
+     * Category 傻瓜工厂工厂
      */
-    protected final Map<String, SillyVariableConvertor> sillyConvertorMap = new HashMap<>();
+    protected final List<SillyFactory> sillyFactoryList = new ArrayList<>();
 
     /**
-     * 流程变量 类型转换器
+     * Category 傻瓜读取服务类
      */
-    protected final Map<String, SillyVariableSaveHandle> sillyVariableSaveHandleMap = new HashMap<>();
+    protected final List<SillyReadService> sillyReadServiceList = new ArrayList<>();
 
     /**
-     * 傻瓜工厂工厂
+     * Category 傻瓜写入服务类
      */
-    protected final Map<String, SillyFactory> sillyFactoryMap = new SillyConfigHashMap<>();
+    protected final List<SillyWriteService> sillyWriteServiceList = new ArrayList<>();
 
     /**
-     * 傻瓜读取服务类
+     * Category 傻瓜流程参数属性配置
      */
-    protected final Map<String, SillyReadService> sillyReadServiceMap = new SillyConfigHashMap<>();
+    protected final List<SillyProcessProperty> sillyProcessPropertyList = new ArrayList<>();
 
     /**
-     * 傻瓜写入服务类
+     * Category 傻瓜缓存属性配置
      */
-    protected final Map<String, SillyWriteService> sillyWriteServiceMap = new SillyConfigHashMap<>();
+    protected final List<SillyCache> sillyCacheList = new ArrayList<>();
 
     /**
-     * 傻瓜流程参数属性配置
+     * Name 流程变量 类型转换器
      */
-    protected final Map<String, SillyProcessProperty> sillyProcessPropertyMap = new SillyConfigHashMap<>();
+    protected final List<SillyVariableConvertor> sillyConvertorList = new ArrayList<>();
 
     /**
-     * 傻瓜缓存属性配置
+     * Name 流程变量 类型转换器
      */
-    protected final Map<String, SillyCache> sillyCacheMap = new SillyConfigHashMap<>();
+    protected final List<SillyVariableSaveHandle> sillyVariableSaveHandleList = new ArrayList<>();
 
     /**
      * 傻瓜任务组处理类
@@ -109,12 +121,13 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
     protected SillyTaskGroupHandle sillyTaskGroupHandle;
 
     /**
-     * 傻瓜HTML 标签模板配置
+     * Type 傻瓜HTML 标签模板配置
      */
-    protected final Map<String, SillyHtmlTagTemplate> sillyHtmlTagTemplateMap = new HashMap<>();
+    protected final List<SillyHtmlTagTemplate> sillyHtmlTagTemplateList = new ArrayList<>();
 
-    @Override
-    public Class<? extends SillyCategoryConfig> getSillyCategoryConfigClazz() {
+    protected final Map<String, Map<String, SillyHtmlTagTemplate>> sillyCategoryHtmlTagTemplateMap = new HashMap<>();
+
+    public Class<? extends SillyCategoryConfig> getSillyCategoryConfigClazz(String category) {
         return sillyCategoryConfigClazz;
     }
 
@@ -128,30 +141,35 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
             return;
         }
 
+        // 0 预初始化
         preInit();
         // 1 初始化 基本属性
         initFiled();
-        initCurrentUserUtilMap();
-        // 2 初始化 傻瓜工厂
+        // 2 初始化 业务分类
+        initCategorySet();
+        // 3 初始化 当前人工具
+        initCurrentUserUtilList();
+        // 4 初始化 傻瓜工厂
         initSillyFactory();
-        // 3 初始化 傻瓜转换器
-        initSillyConvertorMap();
-        // 4 初始化 傻瓜数据保存器
-        initSillyVariableSaveHandleMap();
-        // 5 初始化 傻瓜页面代码生成模板
-        initSillyHtmlTagTemplateMap();
-        // 6 初始化 傻瓜服务
+        // 5 初始化 傻瓜转换器
+        initSillyConvertorList();
+        // 6 初始化 傻瓜数据保存器
+        initSillyVariableSaveHandleList();
+        // 7 初始化 傻瓜页面代码生成模板
+        initSillyHtmlTagTemplateList();
+        // 8 初始化 傻瓜服务
         initSillyService();
-        // 7 初始化 傻瓜流程参数
+        // 9 初始化 傻瓜流程参数
         initSillyProcessProperty();
-        // 8 初始化 傻瓜任务组处理类
+        // 10 初始化 傻瓜任务组处理类
         initSillyTaskGroupHandle();
-        // 9 初始化 傻瓜缓存配置
-        initSillyCacheMap();
+        // 11 初始化 傻瓜缓存配置
+        initSillyCacheList();
 
+        // 12 校验配置
         checkConfig();
 
-        // 将配置资源转换为业务配置
+        // 13 将配置资源转换为业务配置
         sillyCategoryConfigList = convertSillyConfig();
         for (SillyCategoryConfig sillyCategoryConfig : sillyCategoryConfigList) {
             if (this.refresh) {
@@ -164,6 +182,7 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
         this.initialized = true;
         this.refresh = false;
 
+        // 14 初始化完成回调
         initComplete();
     }
 
@@ -178,6 +197,21 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
      * 初始化配置属性
      */
     protected void initFiled() {
+        categorySet.clear();
+        sillyCategoryConfigList.clear();
+        sillyCurrentUserUtilList.clear();
+        sillyEngineServiceList.clear();
+        sillyResumeServiceList.clear();
+        sillyFactoryList.clear();
+        sillyReadServiceList.clear();
+        sillyWriteServiceList.clear();
+        sillyProcessPropertyList.clear();
+        sillyCacheList.clear();
+        sillyConvertorList.clear();
+        sillyVariableSaveHandleList.clear();
+        sillyTaskGroupHandle = null;
+        sillyHtmlTagTemplateList.clear();
+        sillyCategoryHtmlTagTemplateMap.clear();
     }
 
     /**
@@ -194,65 +228,67 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
 
     }
 
+    protected void initCategorySet() {
+        loadCategorySet();
+    }
+
+    protected void addCategorySet(String category) {
+        categorySet.add(category);
+    }
+
     private void initSillyFactory() {
-        initBaseSillyFactoryMap();
-        hookInitSillyFactoryMap();
+        initBaseSillyFactoryList();
     }
 
 
     protected void addSillyFactory(SillyFactory sillyFactory) {
-        sillyFactoryMap.put(sillyFactory.category(), sillyFactory);
+        sillyFactoryList.add(sillyFactory);
     }
 
     /**
      * 初始化基本傻瓜工厂，可能会被相同种类的工厂覆盖
      */
-    protected abstract void initBaseSillyFactoryMap();
+    protected abstract void initBaseSillyFactoryList();
 
-    /**
-     * 初始 傻瓜工厂 回调方法
-     */
-    protected abstract void hookInitSillyFactoryMap();
-
-    protected void initSillyConvertorMap() {
+    protected void initSillyConvertorList() {
         addSillyVariableConvertor(new SillyStringConvertor());
-        hookInitSillyConvertorMap();
+        hookInitSillyConvertorList();
     }
 
-    protected void initSillyVariableSaveHandleMap() {
-        hookInitSillyVariableSaveHandleMap();
+    protected void initSillyVariableSaveHandleList() {
+        hookInitSillyVariableSaveHandleList();
     }
 
     protected void addSillyVariableConvertor(SillyVariableConvertor convertor) {
-        sillyConvertorMap.put(convertor.name(), convertor);
+        sillyConvertorList.add(convertor);
     }
 
     protected void addSillyVariableSaveHandle(SillyVariableSaveHandle saveHandle) {
-        sillyVariableSaveHandleMap.put(saveHandle.name(), saveHandle);
+        sillyVariableSaveHandleList.add(saveHandle);
     }
 
     /**
      * 初始完成 傻瓜转换器 回调方法
      */
-    protected abstract void hookInitSillyConvertorMap();
+    protected abstract void hookInitSillyConvertorList();
 
 
-    protected abstract void hookInitSillyVariableSaveHandleMap();
+    protected abstract void hookInitSillyVariableSaveHandleList();
 
 
-    protected void initSillyHtmlTagTemplateMap() {
-        hookInitSillyHtmlTagTemplateMap();
+    protected void initSillyHtmlTagTemplateList() {
+        hookInitSillyHtmlTagTemplateList();
     }
 
-    protected void addSillyHtmlTagTemplateMap(SillyHtmlTagTemplate htmlTagTemplate) {
-        sillyHtmlTagTemplateMap.put(htmlTagTemplate.getHtmlType(), htmlTagTemplate);
+    protected void addSillyHtmlTagTemplate(SillyHtmlTagTemplate htmlTagTemplate) {
+        sillyHtmlTagTemplateList.add(htmlTagTemplate);
     }
 
 
     /**
      * 初始完成 傻瓜转换器 回调方法
      */
-    protected abstract void hookInitSillyHtmlTagTemplateMap();
+    protected abstract void hookInitSillyHtmlTagTemplateList();
 
     protected void initSillyService() {
         initEngineSillyService();
@@ -270,42 +306,33 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
     protected abstract void initWriteSillyService();
 
     protected void addSillyEngineService(SillyEngineService engineService) {
-        Set<String> categories = engineService.supportCategories();
-        for (String category : categories) {
-            sillyEngineServiceMap.put(category, engineService);
-        }
+        sillyEngineServiceList.add(engineService);
     }
 
     protected void addSillyResumeService(SillyResumeService resumeService) {
-        Set<String> categories = resumeService.supportCategories();
-        for (String category : categories) {
-            sillyResumeServiceMap.put(category, resumeService);
-        }
+        sillyResumeServiceList.add(resumeService);
     }
 
     protected void addSillyReadService(SillyReadService readService) {
-        sillyReadServiceMap.put(readService.usedCategory(), readService);
+        sillyReadServiceList.add(readService);
     }
 
     protected void addSillyWriteService(SillyWriteService writeService) {
-        sillyWriteServiceMap.put(writeService.usedCategory(), writeService);
+        sillyWriteServiceList.add(writeService);
     }
 
     private void initSillyProcessProperty() {
-        hookSillyProcessPropertyMap();
+        hookSillyProcessPropertyList();
     }
 
     protected void addSillyProcessProperty(String category, SillyProcessProperty sillyProcessProperty) {
         initSillyProcessProperty(category, sillyProcessProperty);
-        if (StringUtils.isEmpty(category)) {
-            category = sillyProcessProperty.getCategory();
-        }
-        SillyAssert.notEmpty(category, "category不可为空");
-        sillyProcessPropertyMap.put(category, sillyProcessProperty);
+        SillyAssert.notEmpty(sillyProcessProperty.getCategory(), "category不可为空");
+        sillyProcessPropertyList.add(sillyProcessProperty);
     }
 
 
-    protected abstract void hookSillyProcessPropertyMap();
+    protected abstract void hookSillyProcessPropertyList();
 
     protected void initSillyProcessProperty(String category, SillyProcessProperty property) {
         if (StringUtils.isEmpty(property.getCategory())) {
@@ -339,7 +366,7 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
                     }
 
                     if (StringUtils.isNotEmpty(variableProperty.getHtmlType())) {
-                        setVariablePropertyHtmlConfig(variableProperty);
+                        setVariablePropertyHtmlConfig(category, variableProperty);
                     }
                 }
 
@@ -347,8 +374,8 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
         }
     }
 
-    protected void setVariablePropertyHtmlConfig(SillyProcessVariableProperty variableProperty) {
-        SillyHtmlTagTemplate htmlTemplate = getHtmlTemplate(variableProperty.getHtmlType());
+    protected void setVariablePropertyHtmlConfig(String category, SillyProcessVariableProperty variableProperty) {
+        SillyHtmlTagTemplate htmlTemplate = getHtmlTemplate(category, variableProperty.getHtmlType());
         SillyAssert.notNull(htmlTemplate, "htmlConfig 未找到 " + variableProperty.getHtmlType());
         variableProperty.setHtmlTemplate(htmlTemplate);
 
@@ -377,87 +404,103 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
 
     protected abstract SillyTaskGroupHandle loadSillyTaskGroupHandle();
 
-    protected void initSillyCacheMap() {
-        hookSillyCacheMap();
+    protected void initSillyCacheList() {
+        hookSillyCacheList();
     }
 
-    protected abstract void hookSillyCacheMap();
+    protected abstract void hookSillyCacheList();
 
     protected void addSillyCache(SillyCache sillyCache) {
-        Set<String> categories = sillyCache.supportCategories();
-        for (String category : categories) {
-            sillyCacheMap.put(category, sillyCache);
-        }
+        sillyCacheList.add(sillyCache);
     }
 
 
-    protected void initCurrentUserUtilMap() {
-        hookSillyCurrentUserUtilMap();
+    protected void initCurrentUserUtilList() {
+        hookSillyCurrentUserUtilList();
     }
 
-    protected abstract void hookSillyCurrentUserUtilMap();
+    protected abstract void hookSillyCurrentUserUtilList();
 
     protected void addSillyCurrentUserUtil(SillyCurrentUserUtil currentUserUtil) {
-        Set<String> categories = currentUserUtil.supportCategories();
-        for (String category : categories) {
-            sillyCurrentUserUtilMap.put(category, currentUserUtil);
-        }
+        sillyCurrentUserUtilList.add(currentUserUtil);
     }
 
     public SillyCurrentUserUtil getCurrentUserUtil(String category) {
-        return sillyCurrentUserUtilMap.get(category);
+        return SillyCoreUtil.availableOne(category, sillyCurrentUserUtilList);
     }
 
     public SillyEngineService getSillyEngineService(String category) {
-        return sillyEngineServiceMap.get(category);
+        return SillyCoreUtil.availableOne(category, sillyEngineServiceList);
     }
 
-    public Map<String, SillyVariableConvertor> getSillyConvertorMap() {
-        return sillyConvertorMap;
+    public Map<String, SillyVariableConvertor> getSillyConvertorMap(String category) {
+        Map<String, SillyVariableConvertor> map = new HashMap<>();
+        SillyCoreUtil.availableThen(category, sillyConvertorList, (v) -> {
+            map.put(v.name(), v);
+        });
+        return map;
     }
 
-    public Map<String, SillyVariableSaveHandle> getSillyVariableSaveHandleMap() {
-        return sillyVariableSaveHandleMap;
+    public Map<String, SillyVariableSaveHandle> getSillyVariableSaveHandleMap(String category) {
+        Map<String, SillyVariableSaveHandle> map = new HashMap<>();
+        SillyCoreUtil.availableThen(category, sillyVariableSaveHandleList, (v) -> {
+            map.put(v.name(), v);
+        });
+        return map;
     }
 
     public SillyResumeService getSillyResumeService(String category) {
-        return sillyResumeServiceMap.get(category);
+        return SillyCoreUtil.availableOne(category, sillyResumeServiceList);
     }
 
 
     public SillyFactory getSillyFactory(String category) {
-        return sillyFactoryMap.get(category);
+        return SillyCoreUtil.availableOne(category, sillyFactoryList);
     }
 
     public SillyReadService getSillyReadService(String category) {
-        return sillyReadServiceMap.get(category);
+        return SillyCoreUtil.availableOne(category, sillyReadServiceList);
     }
 
     public SillyWriteService getSillyWriteService(String category) {
-        return sillyWriteServiceMap.get(category);
+        return SillyCoreUtil.availableOne(category, sillyWriteServiceList);
     }
 
     public SillyProcessProperty getSillyProcessProperty(String category) {
-        return sillyProcessPropertyMap.get(category);
+        return SillyCoreUtil.consistentOne(category, sillyProcessPropertyList);
     }
 
-    public SillyTaskGroupHandle getSillyTaskGroupHandle() {
-        return sillyTaskGroupHandle;
+    public SillyTaskGroupHandle getSillyTaskGroupHandle(String category) {
+        boolean available = SillyCoreUtil.available(category, sillyTaskGroupHandle);
+        return available ? sillyTaskGroupHandle : null;
+    }
+
+    public Map<String, SillyHtmlTagTemplate> getSillyHtmlTagTemplateMap(String category) {
+        Map<String, SillyHtmlTagTemplate> map = sillyCategoryHtmlTagTemplateMap.get(category);
+        if (map != null) {
+            return map;
+        }
+
+        sillyCategoryHtmlTagTemplateMap.put(category, new HashMap<>());
+        SillyCoreUtil.availableThen(category, sillyHtmlTagTemplateList, (v) -> {
+            sillyCategoryHtmlTagTemplateMap.get(category).put(v.getHtmlType(), v);
+        });
+        return sillyCategoryHtmlTagTemplateMap.get(category);
     }
 
     public SillyCache getSillyCache(String category) {
-        return sillyCacheMap.get(category);
+        return SillyCoreUtil.availableOne(category, sillyCacheList);
     }
 
-    public SillyHtmlTagTemplate getHtmlTemplate(String htmlType) {
+    public SillyHtmlTagTemplate getHtmlTemplate(String category, String htmlType) {
+        Map<String, SillyHtmlTagTemplate> sillyHtmlTagTemplateMap = getSillyHtmlTagTemplateMap(category);
         return sillyHtmlTagTemplateMap.get(htmlType);
     }
 
     @Override
     public List<SillyCategoryConfig> convertSillyConfig() {
         List<SillyCategoryConfig> converList = new ArrayList<>();
-        Set<String> categorySet = SillyConfigHashMap.categorySet;
-        for (String category : categorySet) {
+        for (String category : allCategorySet()) {
             if (category.equals(SillyCategory.DEFAULT_CATEGORY)) {
                 continue;
             }
@@ -469,13 +512,13 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
     }
 
     public SillyCategoryConfig convertSillyConfig(String category) {
-        SillyCategoryConfig sillyCategoryConfig = SillyReflectUtil.newInstance(getSillyCategoryConfigClazz());
+        SillyCategoryConfig sillyCategoryConfig = SillyReflectUtil.newInstance(getSillyCategoryConfigClazz(category));
         sillyCategoryConfig
                 .setCategory(category)
-                .setPropertyHandleClazz(getPropertyHandleClazz())
-                .setSillyTaskGroupHandle(getSillyTaskGroupHandle())
-                .setSillyConvertorMap(getSillyConvertorMap())
-                .setSillyVariableSaveHandleMap(getSillyVariableSaveHandleMap())
+                .setPropertyHandleClazz(getPropertyHandleClazz(category))
+                .setSillyTaskGroupHandle(getSillyTaskGroupHandle(category))
+                .setSillyConvertorMap(getSillyConvertorMap(category))
+                .setSillyVariableSaveHandleMap(getSillyVariableSaveHandleMap(category))
                 .setSillyCurrentUserUtil(getCurrentUserUtil(category))
                 .setSillyEngineService(getSillyEngineService(category))
                 .setSillyFactory(getSillyFactory(category))
@@ -484,50 +527,10 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
                 .setSillyReadService(getSillyReadService(category))
                 .setSillyWriteService(getSillyWriteService(category))
                 .setSillyCache(getSillyCache(category))
-                .setHtmlTemplateMap(sillyHtmlTagTemplateMap);
+                .setHtmlTemplateMap(getSillyHtmlTagTemplateMap(category));
         return sillyCategoryConfig;
     }
 
-    static class SillyConfigHashMap<K, V> extends HashMap<K, V> {
+    protected abstract Class<? extends SillyPropertyHandle> getPropertyHandleClazz(String category);
 
-        /**
-         * 全部已识别的业务分类
-         */
-        private static final Set<String> categorySet = new LinkedHashSet<>();
-
-        public static Set<String> allCategorySet() {
-            return categorySet;
-        }
-
-        @Override
-        public V get(Object key) {
-            V v = super.get(key);
-            if (v == null) {
-                // 获取通用类型
-                v = super.get(SillyCategory.DEFAULT_CATEGORY);
-                if (v instanceof SillyMultipleCategory) {
-                    // 判断是否支持此类型
-                    boolean support = ((SillyMultipleCategory) v).isSupport((String) key);
-                    if (support) {
-                        put((K) key, v);
-                    } else {
-                        log.info(v.getClass().getName() + " 不支持此类型" + key);
-                    }
-                }
-            }
-            return v;
-        }
-
-        @Override
-        public V put(K key, V value) {
-            V put = super.put(key, value);
-            if (key instanceof String) {
-                categorySet.add((String) key);
-            }
-            if (put != null) {
-                log.warn("存在重复KEY被覆盖！" + key);
-            }
-            return put;
-        }
-    }
 }

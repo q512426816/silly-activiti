@@ -11,6 +11,7 @@ package com.iqiny.silly.core.config.property.impl;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.iqiny.silly.core.base.SillyCategory;
 import com.iqiny.silly.core.config.property.SillyProcessProperty;
 
 import java.util.LinkedHashMap;
@@ -19,7 +20,7 @@ import java.util.Map;
 /**
  * 傻瓜流程信息属性配置
  */
-public class DefaultProcessProperty implements SillyProcessProperty<DefaultProcessMasterProperty> {
+public class DefaultProcessProperty implements SillyProcessProperty<DefaultProcessMasterProperty>, SillyCategory {
 
     /**
      * 流程业务分类
@@ -89,4 +90,8 @@ public class DefaultProcessProperty implements SillyProcessProperty<DefaultProce
         return master;
     }
 
+    @Override
+    public String usedCategory() {
+        return category;
+    }
 }

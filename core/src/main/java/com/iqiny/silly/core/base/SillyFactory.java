@@ -23,7 +23,7 @@ import com.iqiny.silly.core.resume.SillyResume;
  * @author QINY
  * @since 1.0
  */
-public interface SillyFactory<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable, R extends SillyResume> extends SillyEntity {
+public interface SillyFactory<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable, R extends SillyResume> extends SillyCategory {
 
     /**
      * 创建 主对象

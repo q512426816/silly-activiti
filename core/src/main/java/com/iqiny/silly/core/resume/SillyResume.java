@@ -17,11 +17,6 @@ import java.util.Date;
  */
 public interface SillyResume extends SillyEntity {
 
-    @Override
-    default String category(){
-        return SUPPORT_ALL;
-    }
-
     void setBusinessId(String businessKey);
 
     void setProcessType(String processTypeNext);

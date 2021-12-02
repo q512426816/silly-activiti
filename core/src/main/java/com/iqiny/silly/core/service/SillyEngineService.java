@@ -20,7 +20,7 @@ import java.util.Map;
 /**
  * 傻瓜流程引擎服务 （流程控制服务，一般都结合第三方框架实现，比如 Activiti）
  */
-public interface SillyEngineService<T> extends SillyService, SillyMultipleCategory {
+public interface SillyEngineService<T> extends SillyService {
 
     /**
      * 启动流程

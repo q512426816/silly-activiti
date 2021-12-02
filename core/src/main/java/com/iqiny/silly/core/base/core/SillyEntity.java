@@ -8,18 +8,6 @@
  */
 package com.iqiny.silly.core.base.core;
 
-import com.iqiny.silly.core.base.SillyCategory;
-
 public interface SillyEntity {
-
-    /**
-     * 特殊种类 表示 兼容其他全部类型
-     */
-    String SUPPORT_ALL = SillyCategory.DEFAULT_CATEGORY;
-
-    /**
-     * 种类，需要保证唯一
-     */
-    String category();
 
 }

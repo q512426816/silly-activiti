@@ -59,16 +59,8 @@ public abstract class SillyConfigUtil {
         addSillyConfig(true, sillyCategoryConfig.usedCategory(), sillyCategoryConfig);
     }
 
-
     public static SillyCategoryConfig getSillyConfig(String category) {
         return SILLY_CONFIG_MAP.get(category);
     }
-
-
-    /**
-     * 获取全部的业务分类值
-     */
-    public static Set<String> allCategorySet() {
-        return BaseSillyConfigContent.SillyConfigHashMap.allCategorySet();
-    }
+    
 }

@@ -20,12 +20,6 @@ public interface SillyConfigContent {
 
     String getProcessPattern();
 
-    Class<? extends SillyProcessProperty> getProcessPropertyClazz();
-
-    Class<? extends SillyPropertyHandle> getPropertyHandleClazz();
-
-    Class<? extends SillyCategoryConfig> getSillyCategoryConfigClazz();
-
     /**
      * 初始化
      */

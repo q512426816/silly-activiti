@@ -38,7 +38,7 @@ public class ScanSillyFactory<M extends SillyMaster, N extends SillyNode<V>, V e
     }
 
     @Override
-    public String category() {
+    public String usedCategory() {
         return category;
     }
 

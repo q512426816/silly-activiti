@@ -23,7 +23,7 @@ import java.util.Map;
  * @author QINY
  * @since 1.0
  */
-public interface SillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> extends SillyService, SillyCategory {
+public interface SillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> extends SillyService {
 
 
     /**

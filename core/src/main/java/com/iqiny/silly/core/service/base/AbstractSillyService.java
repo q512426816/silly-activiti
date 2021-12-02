@@ -153,27 +153,6 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         return sillyConvertorMap.get(handleKey);
     }
 
-    /**
-     * 批量保存处置类处理
-     *
-     * @param node
-     * @param variables
-     * @return
-     */
-    protected boolean batchSaveHandle(M master, N node, V variables, SillyPropertyHandle propertyHandle) {
-        String saveHandleNames = variables.getSaveHandleName();
-        SillyAssert.notEmpty(saveHandleNames, "批处理数据保存不可为空");
-        String[] saveHandleNameArr = StringUtils.split(saveHandleNames, SillyConstant.ARRAY_SPLIT_STR);
-        boolean lastFlag = true;
-        for (String saveHandleName : saveHandleNameArr) {
-            String stringValue = propertyHandle.getStringValue(saveHandleName.trim());
-            if (StringUtils.isNotEmpty(stringValue)) {
-                lastFlag = getSillyVariableSaveHandle(stringValue).handle(master, node, variables);
-            }
-        }
-        return lastFlag;
-    }
-
     protected SillyVariableSaveHandle getSillyVariableSaveHandle(String saveHandleName) {
         if (sillySaveHandleMap == null) {
             throw new SillyException("Silly数据保存处理器未设置！");

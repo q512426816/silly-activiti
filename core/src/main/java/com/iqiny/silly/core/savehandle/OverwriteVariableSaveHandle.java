@@ -31,7 +31,7 @@ public class OverwriteVariableSaveHandle implements SillyVariableSaveHandle {
 
     @Override
     public boolean handle(SillyMaster master, SillyNode node, SillyVariable variable) {
-        SillyCategoryConfig sillyCategoryConfig = SillyConfigUtil.getSillyConfig(master.category());
+        SillyCategoryConfig sillyCategoryConfig = SillyConfigUtil.getSillyConfig(master.usedCategory());
 
         // 直接更新同名数据 状态为 旧版本
         // （若有）更新之前的流程变量信息 为历史状态

@@ -8,6 +8,8 @@
  */
 package com.iqiny.silly.core.base.core;
 
+import com.iqiny.silly.core.base.SillyCategory;
+
 import java.util.Date;
 
 /**
@@ -16,7 +18,7 @@ import java.util.Date;
  * @author QINY
  * @since 1.0
  */
-public interface SillyMaster extends SillyEntity {
+public interface SillyMaster extends SillyEntity, SillyCategory {
 
     /**
      * 主键
