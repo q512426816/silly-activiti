@@ -14,7 +14,7 @@ import com.iqiny.silly.common.util.SillyReflectUtil;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyCategory;
 import com.iqiny.silly.core.base.SillyFactory;
-import com.iqiny.silly.core.base.SillyMultipleCategory;
+import com.iqiny.silly.core.base.SillyProperties;
 import com.iqiny.silly.core.cache.SillyCache;
 import com.iqiny.silly.core.common.SillyCoreUtil;
 import com.iqiny.silly.core.config.html.SillyHtmlTagConfig;
@@ -41,6 +41,7 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
 
     private final static Log log = LogFactory.getLog(BaseSillyConfigContent.class);
 
+    private SillyProperties sillyProperties;
     private boolean initialized = false;
     private boolean refresh = false;
 
@@ -50,9 +51,7 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
     protected final Set<String> categorySet = new LinkedHashSet<>();
 
     public Set<String> allCategorySet() {
-        if (categorySet.isEmpty()) {
-            loadCategorySet();
-        }
+        loadCategorySet();
         return categorySet;
     }
 
@@ -129,10 +128,6 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
 
     public Class<? extends SillyCategoryConfig> getSillyCategoryConfigClazz(String category) {
         return sillyCategoryConfigClazz;
-    }
-
-    public void setSillyCategoryConfigClazz(Class<? extends SillyCategoryConfig> sillyCategoryConfigClazz) {
-        this.sillyCategoryConfigClazz = sillyCategoryConfigClazz;
     }
 
     @Override
@@ -533,4 +528,14 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
 
     protected abstract Class<? extends SillyPropertyHandle> getPropertyHandleClazz(String category);
 
+
+    @Override
+    public SillyProperties getSillyProperties() {
+        return sillyProperties;
+    }
+
+    @Override
+    public void setSillyProperties(SillyProperties sillyProperties) {
+        this.sillyProperties = sillyProperties;
+    }
 }

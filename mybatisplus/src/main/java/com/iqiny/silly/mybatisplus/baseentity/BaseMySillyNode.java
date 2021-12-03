@@ -6,7 +6,7 @@
  *  project name：silly-mybatisplus 1.0.6-RELEASE
  *  project description：top silly project pom.xml file
  */
-package com.iqiny.silly.mybatisplus;
+package com.iqiny.silly.mybatisplus.baseentity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.extension.activerecord.Model;

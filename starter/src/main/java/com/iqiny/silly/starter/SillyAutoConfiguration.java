@@ -8,30 +8,30 @@
  */
 package com.iqiny.silly.starter;
 
-
 import com.iqiny.silly.activiti.scan.AutoScanSillyConfigContent;
 import com.iqiny.silly.activiti.spring.SpringSillyContent;
-import com.iqiny.silly.common.util.StringUtils;
+import com.iqiny.silly.core.base.SillyProperties;
 import com.iqiny.silly.core.config.SillyConfigContent;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
 
 /**
  * 傻瓜Spring自动配置
  */
+@Configuration
+@EnableConfigurationProperties({StarterSillyProperties.class})
+@ComponentScan(
+        basePackages = {
+                "com.iqiny.silly.spring",
+        }
+)
 @ConditionalOnProperty(value = "silly.enabled", matchIfMissing = true)
 public class SillyAutoConfiguration {
-
-    private static final String SCAN_PACKAGE_PROPERTY = "silly.scanEntityPackage";
-    private static final String SCAN_PROCESS_PATTERN = "silly.processPattern";
-
-    private ConfigurableEnvironment env;
-
-    public SillyAutoConfiguration(ConfigurableEnvironment env) {
-        this.env = env;
-    }
 
     @Bean
     @ConditionalOnMissingBean
@@ -41,14 +41,10 @@ public class SillyAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public SillyConfigContent sillyConfigContent() {
-        final AutoScanSillyConfigContent autoScanSillyConfigContent = new AutoScanSillyConfigContent();
-        autoScanSillyConfigContent.setEntityScanPackage(env.getProperty(SCAN_PACKAGE_PROPERTY));
-        String processPattern = env.getProperty(SCAN_PROCESS_PATTERN);
-        if (StringUtils.isNotEmpty(processPattern)) {
-            autoScanSillyConfigContent.setProcessPattern(processPattern);
-        }
-        return autoScanSillyConfigContent;
+    public SillyConfigContent sillyConfigContent(SillyProperties properties) {
+        SillyConfigContent content = new AutoScanSillyConfigContent();
+        content.setSillyProperties(properties);
+        return content;
     }
 
 }

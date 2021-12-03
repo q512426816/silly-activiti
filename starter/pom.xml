@@ -43,6 +43,11 @@
             <groupId>com.iqiny.silly</groupId>
             <artifactId>silly-activiti</artifactId>
         </dependency>
+        <!--silly-all-->
+        <dependency>
+            <groupId>com.iqiny.silly</groupId>
+            <artifactId>silly-mybatisplus</artifactId>
+        </dependency>
         <!--spring-->
         <dependency>
             <groupId>org.springframework.boot</groupId>

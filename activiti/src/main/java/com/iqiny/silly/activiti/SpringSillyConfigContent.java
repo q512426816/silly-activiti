@@ -11,6 +11,8 @@ package com.iqiny.silly.activiti;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
 import com.iqiny.silly.activiti.convertor.SillyListConvertor;
+import com.iqiny.silly.core.base.SillyProperties;
+import com.iqiny.silly.core.common.SillyCoreUtil;
 import com.iqiny.silly.core.savehandle.DataJoinVariableSaveHandle;
 import com.iqiny.silly.core.savehandle.OverwriteVariableSaveHandle;
 import com.iqiny.silly.core.savehandle.SaveVariableSaveHandle;
@@ -18,8 +20,6 @@ import com.iqiny.silly.core.savehandle.SkipVariableSaveHandle;
 import com.iqiny.silly.activiti.spring.SillySpelPropertyHandle;
 import com.iqiny.silly.activiti.spring.SpringSillyContent;
 import com.iqiny.silly.common.util.SillyAssert;
-import com.iqiny.silly.common.util.SillyReflectUtil;
-import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.cache.SillyCache;
 import com.iqiny.silly.core.config.BaseSillyConfigContent;
 import com.iqiny.silly.core.config.SillyCurrentUserUtil;
@@ -55,29 +55,55 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
 
     private final static Log log = LogFactory.getLog(SpringSillyConfigContent.class);
 
-    protected String processPattern = "classpath*:/silly/*.json";
+    protected String processPattern;
 
-    protected Class<? extends SillyProcessProperty> processPropertyClazz = DefaultProcessProperty.class;
+    Class<? extends SillyWriteService> defaultWriteServiceClazz;
 
-    protected Class<? extends SillyPropertyHandle> propertyHandleClazz = SillySpelPropertyHandle.class;
+    Class<? extends SillyReadService> defaultReadServiceClazz;
 
-    protected String[] categorys;
+    protected Class<? extends SillyProcessProperty> processPropertyClazz;
+
+    protected Class<? extends SillyPropertyHandle> propertyHandleClazz;
+
+    private String[] categories;
+
+    private boolean loadCategoryFlag = false;
 
     public SpringSillyConfigContent() {
     }
 
     @Override
-    protected void loadCategorySet() {
-        if (categorys != null) {
-            for (String category : categorys) {
-                addCategorySet(category);
-            }
-        }
+    protected void preInit() {
+        log.info("SpringSillyConfigContent  " + this.getClass().getName() + " 初始化开始");
+        SillyProperties sillyProperties = getSillyProperties();
+        SillyAssert.notNull(sillyProperties, "sillyProperties 配置属性不可为空");
+
+        this.processPattern = sillyProperties.getProcessPattern();
+        this.defaultWriteServiceClazz = sillyProperties.getDefaultWriteServiceClazz();
+        this.defaultReadServiceClazz = sillyProperties.getDefaultReadServiceClazz();
+        this.processPropertyClazz = sillyProperties.getProcessPropertyClazz();
+        this.propertyHandleClazz = sillyProperties.getPropertyHandleClazz();
+        this.categories = sillyProperties.getCategories();
     }
 
     @Override
-    protected void preInit() {
-        log.info("SpringSillyConfigContent  " + this.getClass().getName() + " 初始化开始");
+    protected void initFiled() {
+        this.loadCategoryFlag = false;
+        super.initFiled();
+    }
+
+    @Override
+    protected synchronized void loadCategorySet() {
+        if (loadCategoryFlag) {
+            return;
+        }
+
+        loadCategoryFlag = true;
+        if (categories != null) {
+            for (String category : categories) {
+                addCategorySet(category);
+            }
+        }
     }
 
     @Override
@@ -197,7 +223,7 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
     public void refreshProcessResource() {
         try {
             ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-            Resource[] resources = resolver.getResources(getProcessPattern());
+            Resource[] resources = resolver.getResources(processPattern);
             for (Resource resource : resources) {
                 loadSillyProcessProperty(resource);
             }
@@ -240,21 +266,8 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
         log.info("已成功加载分类：" + allCategorySet() + "");
     }
 
-    @Override
-    public String getProcessPattern() {
-        return processPattern;
-    }
-
-    public void setProcessPattern(String processPattern) {
-        this.processPattern = processPattern;
-    }
-
     public Class<? extends SillyProcessProperty> getProcessPropertyClazz(String category) {
         return processPropertyClazz;
-    }
-
-    public void setProcessPropertyClazz(Class<? extends SillyProcessProperty> processPropertyClazz) {
-        this.processPropertyClazz = processPropertyClazz;
     }
 
     @Override
@@ -262,12 +275,33 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
         return propertyHandleClazz;
     }
 
-    public void setPropertyHandleClazz(Class<? extends SillyPropertyHandle> propertyHandleClazz) {
-        this.propertyHandleClazz = propertyHandleClazz;
+    @Override
+    public SillyReadService getSillyReadService(String category) {
+        SillyReadService readService = SillyCoreUtil.consistentOne(category, sillyReadServiceList);
+        if (readService == null) {
+            readService =  SpringSillyContent.registerBean(
+                    SpringSillyContent.getSillyReadServiceBeanName(category),
+                    defaultReadServiceClazz,
+                    bdb -> {
+                        bdb.addPropertyValue("category", category);
+                    });
+            addSillyReadService(readService);
+        }
+        return readService;
     }
 
-    public SillyPropertyHandle getSillyPropertyHandle() {
-        return SillyReflectUtil.newInstance(propertyHandleClazz);
+    @Override
+    public SillyWriteService getSillyWriteService(String category) {
+        SillyWriteService writeService = SillyCoreUtil.consistentOne(category, sillyWriteServiceList);
+        if (writeService == null) {
+            writeService = SpringSillyContent.registerBean(
+                    SpringSillyContent.getSillyWriteServiceBeanName(category),
+                    defaultWriteServiceClazz,
+                    bdb -> {
+                        bdb.addPropertyValue("category", category);
+                    });
+            addSillyWriteService(writeService);
+        }
+        return writeService;
     }
-
 }

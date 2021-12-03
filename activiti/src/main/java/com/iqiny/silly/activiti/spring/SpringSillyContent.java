@@ -8,6 +8,7 @@
  */
 package com.iqiny.silly.activiti.spring;
 
+import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.core.base.SillyInitializable;
 import com.iqiny.silly.core.config.SillyCategoryConfig;
 import com.iqiny.silly.core.config.SillyConfigContent;
@@ -15,6 +16,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.lang.NonNull;
@@ -22,6 +27,8 @@ import org.springframework.lang.NonNull;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * 傻瓜 Spring 相关操作
@@ -34,6 +41,18 @@ public class SpringSillyContent implements ApplicationContextAware, Initializing
 
     public static ApplicationContext getApplicationContext() {
         return applicationContext;
+    }
+
+    private final static String SILLY_READ_SERVICE_PREFIX = "SillyReadService";
+    private final static String SILLY_WRITE_SERVICE_PREFIX = "SillyWriteService";
+
+
+    public static String getSillyReadServiceBeanName(String category) {
+        return SILLY_READ_SERVICE_PREFIX + category;
+    }
+
+    public static String getSillyWriteServiceBeanName(String category) {
+        return SILLY_WRITE_SERVICE_PREFIX + category;
     }
 
     /**
@@ -60,7 +79,23 @@ public class SpringSillyContent implements ApplicationContextAware, Initializing
         return applicationContext.getBean(clazz);
     }
 
+    public static <T> T registerBean(String beanName, Class<T> clazz, Consumer<BeanDefinitionBuilder> consumer) {
+        BeanDefinitionRegistry beanFactory = (BeanDefinitionRegistry) applicationContext.getAutowireCapableBeanFactory();
+        if (applicationContext.containsBean(beanName)) {
+            // 若有相同名称的移出此Bean
+            beanFactory.removeBeanDefinition(beanName);
+            log.info("移出 BeanDefinition: " + beanName);
+        }
+        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clazz);
+        if (consumer != null) {
+            consumer.accept(beanDefinitionBuilder);
+        }
 
+        BeanDefinition beanDefinition = beanDefinitionBuilder.getRawBeanDefinition();
+        beanFactory.registerBeanDefinition(beanName, beanDefinition);
+        log.info("动态注册Bean 成功：" + beanName);
+        return applicationContext.getBean(beanName, clazz);
+    }
 
     @Override
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {

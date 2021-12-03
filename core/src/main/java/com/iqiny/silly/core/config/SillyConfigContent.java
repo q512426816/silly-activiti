@@ -8,8 +8,7 @@
  */
 package com.iqiny.silly.core.config;
 
-import com.iqiny.silly.core.config.property.SillyProcessProperty;
-import com.iqiny.silly.core.config.property.SillyPropertyHandle;
+import com.iqiny.silly.core.base.SillyProperties;
 
 import java.util.List;
 
@@ -18,7 +17,9 @@ import java.util.List;
  */
 public interface SillyConfigContent {
 
-    String getProcessPattern();
+    SillyProperties getSillyProperties();
+
+    void setSillyProperties(SillyProperties sillyProperties);
 
     /**
      * 初始化

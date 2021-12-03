@@ -99,7 +99,7 @@ public abstract class SillyCoreUtil {
             return null;
         }
 
-        // 优先取一致的
+        // 取一致的
         for (T t : list) {
             boolean available = consistent(category, t);
             if (available) {

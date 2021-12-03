@@ -8,21 +8,20 @@
  */
 package com.iqiny.silly.mybatisplus.service;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.collect.Lists;
 import com.iqiny.silly.activiti.EnhanceSillyReadService;
 import com.iqiny.silly.common.SillyConstant;
-import com.iqiny.silly.common.util.SillyMapUtils;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyMasterTask;
 import com.iqiny.silly.core.read.SillyMasterTaskUtil;
-import com.iqiny.silly.mybatisplus.BaseMySillyMaster;
-import com.iqiny.silly.mybatisplus.BaseMySillyNode;
-import com.iqiny.silly.mybatisplus.BaseMySillyVariable;
+import com.iqiny.silly.mybatisplus.baseentity.BaseMySillyMaster;
+import com.iqiny.silly.mybatisplus.baseentity.BaseMySillyNode;
+import com.iqiny.silly.mybatisplus.baseentity.BaseMySillyVariable;
 import com.iqiny.silly.mybatisplus.utils.QueryUtil;
-import org.apache.commons.collections.MapUtils;
 
 import java.util.*;
 
@@ -152,6 +151,22 @@ public abstract class BaseMySillyReadService<M extends BaseMySillyMaster<M>, N e
 
     protected abstract IPage<Map<String, Object>> doQueryPage(IPage<Map<String, Object>> page, Map<String, Object> params);
 
+    public QueryWrapper<M> makeQueryWrapper(Map<String, Object> params) {
+        if (masterClass() == null || params == null) {
+            return new QueryWrapper<>();
+        }
+        String json = JSON.toJSONString(params);
+        M entity = JSON.parseObject(json, masterClass());
+        return makeQueryWrapper(entity);
+    }
+
+    public QueryWrapper<M> makeQueryWrapper(M entity) {
+        QueryWrapper<M> qw = new QueryWrapper<>();
+        if (entity != null) {
+            qw.setEntity(entity);
+        }
+        return qw;
+    }
 
     protected QueryWrapper<V> makeQueryWrapper(String key, Object value) {
         final String start = variableQueryStart();

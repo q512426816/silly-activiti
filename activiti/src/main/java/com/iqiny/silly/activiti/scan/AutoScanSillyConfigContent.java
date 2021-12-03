@@ -13,6 +13,7 @@ import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.SillyReflectUtil;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyCategory;
+import com.iqiny.silly.core.base.SillyProperties;
 import com.iqiny.silly.core.base.core.SillyEntity;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
@@ -55,6 +56,18 @@ public class AutoScanSillyConfigContent extends SpringSillyConfigContent {
     protected final List<Class<? extends SillyVariable>> variableClazzList = new ArrayList<>();
     protected final List<Class<? extends SillyResume>> resumeClazzList = new ArrayList<>();
 
+
+    @Override
+    protected void preInit() {
+        super.preInit();
+        SillyProperties sillyProperties = getSillyProperties();
+        this.entityScanPackage = sillyProperties.getEntityScanPackage();
+        this.masterSuperType = sillyProperties.getMasterSuperType();
+        this.nodeSuperType = sillyProperties.getNodeSuperType();
+        this.variableSuperType = sillyProperties.getVariableSuperType();
+        this.resumeSuperType = sillyProperties.getResumeSuperType();
+    }
+
     @Override
     protected void initFiled() {
         masterClazzList.clear();
@@ -95,10 +108,6 @@ public class AutoScanSillyConfigContent extends SpringSillyConfigContent {
             sillyFactory.setResumeClazz(resumeClazz);
             addSillyFactory(sillyFactory);
         }
-    }
-
-    public void setEntityScanPackage(String entityScanPackage) {
-        this.entityScanPackage = entityScanPackage;
     }
 
     /**

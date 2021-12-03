@@ -12,7 +12,6 @@ import com.iqiny.silly.activiti.spring.SpringSillyContent;
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.StringUtils;
-import com.iqiny.silly.core.base.SillyCategory;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.config.SillyCategoryConfig;
 import com.iqiny.silly.core.config.SillyConfigUtil;
