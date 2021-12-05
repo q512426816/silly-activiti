@@ -3,10 +3,10 @@
  *
  *  https://gitee.com/iqiny/silly
  *
- *  project name：silly-activiti 1.0.6-RELEASE
+ *  project name：silly-spring
  *  project description：top silly project pom.xml file
  */
-package com.iqiny.silly.activiti.spring;
+package com.iqiny.silly.spring;
 
 import com.iqiny.silly.core.base.SillyInitializable;
 import com.iqiny.silly.core.config.SillyCategoryConfig;

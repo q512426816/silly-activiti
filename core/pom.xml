@@ -11,7 +11,7 @@
 
     <artifactId>silly-core</artifactId>
     <packaging>jar</packaging>
-    <name>silly-core ${project.version}</name>
+    <name>silly-core</name>
 
     <dependencies>
         <dependency>

@@ -3,12 +3,12 @@
  *
  *  https://gitee.com/iqiny/silly
  *
- *  project name：silly-activiti 1.0.6-RELEASE
+ *  project name：silly-activiti
  *  project description：top silly project pom.xml file
  */
 package com.iqiny.silly.activiti;
 
-import com.iqiny.silly.activiti.spring.SpringSillyContent;
+import com.iqiny.silly.spring.SpringSillyContent;
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.StringUtils;
@@ -30,7 +30,7 @@ import org.activiti.engine.task.Task;
 import java.util.*;
 
 /**
- * 工作流引擎服务
+ * 集成activiti 工作流引擎服务
  */
 public abstract class BaseSillyActivitiEngineService implements SillyEngineService<SillyActivitiTask> {
 

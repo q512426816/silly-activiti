@@ -3,12 +3,12 @@
  *
  *  https://gitee.com/iqiny/silly
  *
- *  project name：silly-spring-boot-starter 1.0.6-RELEASE
+ *  project name：silly-spring-boot-starter
  *  project description：top silly project pom.xml file
  */
 package com.iqiny.silly.starter;
 
-import com.iqiny.silly.activiti.spring.SillySpelPropertyHandle;
+import com.iqiny.silly.spring.spel.SillySpelPropertyHandle;
 import com.iqiny.silly.core.base.SillyProperties;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;

@@ -11,7 +11,7 @@
 
     <artifactId>silly-common</artifactId>
     <packaging>jar</packaging>
-    <name>silly-common ${project.version}</name>
+    <name>silly-common</name>
 
     <properties>
         <apache.commons.version>3.12.0</apache.commons.version>

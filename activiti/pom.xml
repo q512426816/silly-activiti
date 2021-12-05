@@ -11,7 +11,7 @@
 
     <artifactId>silly-activiti</artifactId>
     <packaging>jar</packaging>
-    <name>silly-activiti ${project.version}</name>
+    <name>silly-activiti</name>
 
     <dependencies>
         <dependency>
@@ -20,15 +20,16 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>silly-spring</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- activiti-engine -->
         <dependency>
             <groupId>org.activiti</groupId>
             <artifactId>activiti-engine</artifactId>
-        </dependency>
-        <!-- activiti-spring -->
-        <dependency>
-            <groupId>org.activiti</groupId>
-            <artifactId>activiti-spring</artifactId>
         </dependency>
 
     </dependencies>

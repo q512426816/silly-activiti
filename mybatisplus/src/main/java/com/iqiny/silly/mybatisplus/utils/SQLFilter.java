@@ -3,7 +3,7 @@
  *
  *  https://gitee.com/iqiny/silly
  *
- *  project name：silly-mybatisplus 1.0.6-RELEASE
+ *  project name：silly-mybatisplus
  *  project description：top silly project pom.xml file
  */
 package com.iqiny.silly.mybatisplus.utils;

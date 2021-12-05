@@ -3,13 +3,13 @@
  *
  *  https://gitee.com/iqiny/silly
  *
- *  project name：silly-spring-boot-starter 1.0.6-RELEASE
+ *  project name：silly-spring-boot-starter
  *  project description：top silly project pom.xml file
  */
 package com.iqiny.silly.starter;
 
-import com.iqiny.silly.activiti.scan.AutoScanSillyConfigContent;
-import com.iqiny.silly.activiti.spring.SpringSillyContent;
+import com.iqiny.silly.spring.scan.AutoScanSillyConfigContent;
+import com.iqiny.silly.spring.SpringSillyContent;
 import com.iqiny.silly.core.base.SillyProperties;
 import com.iqiny.silly.core.config.SillyConfigContent;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -18,7 +18,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.ConfigurableEnvironment;
 
 /**
  * 傻瓜Spring自动配置

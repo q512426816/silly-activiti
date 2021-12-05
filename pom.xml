@@ -15,9 +15,10 @@
         <module>all</module>
         <module>starter</module>
         <module>mybatisplus</module>
+        <module>spring</module>
     </modules>
     <packaging>pom</packaging>
-    <name>silly-parent ${project.version}</name>
+    <name>silly-parent</name>
     <description>top silly project pom.xml file</description>
     <url>http://silly.iqiny.com</url>
 

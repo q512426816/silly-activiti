@@ -3,7 +3,7 @@
  *
  *  https://gitee.com/iqiny/silly
  *
- *  project name：silly-activiti 1.0.6-RELEASE
+ *  project name：silly-activiti
  *  project description：top silly project pom.xml file
  */
 package com.iqiny.silly.activiti;

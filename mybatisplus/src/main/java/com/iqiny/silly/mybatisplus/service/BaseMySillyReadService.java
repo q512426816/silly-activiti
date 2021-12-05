@@ -3,7 +3,7 @@
  *
  *  https://gitee.com/iqiny/silly
  *
- *  project name：silly-mybatisplus 1.0.6-RELEASE
+ *  project name：silly-mybatisplus
  *  project description：top silly project pom.xml file
  */
 package com.iqiny.silly.mybatisplus.service;
@@ -13,7 +13,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.collect.Lists;
-import com.iqiny.silly.activiti.EnhanceSillyReadService;
+import com.iqiny.silly.spring.service.EnhanceSillyReadService;
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyMasterTask;

@@ -3,7 +3,7 @@
  *
  *  https://gitee.com/iqiny/silly
  *
- *  project name：silly-mybatisplus 1.0.6-RELEASE
+ *  project name：silly-mybatisplus
  *  project description：top silly project pom.xml file
  */
 package com.iqiny.silly.mybatisplus.service;
@@ -11,13 +11,12 @@ package com.iqiny.silly.mybatisplus.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlMethod;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
-import com.iqiny.silly.activiti.EnhanceSillyWriteService;
+import com.iqiny.silly.spring.service.EnhanceSillyWriteService;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.engine.SillyTask;
 import com.iqiny.silly.mybatisplus.baseentity.BaseMySillyMaster;
 import com.iqiny.silly.mybatisplus.baseentity.BaseMySillyNode;
 import com.iqiny.silly.mybatisplus.baseentity.BaseMySillyVariable;
-import org.activiti.engine.task.Task;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.transaction.annotation.Transactional;
 

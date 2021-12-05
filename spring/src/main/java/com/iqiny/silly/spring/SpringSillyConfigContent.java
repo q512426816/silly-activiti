@@ -3,21 +3,19 @@
  *
  *  https://gitee.com/iqiny/silly
  *
- *  project name：silly-activiti 1.0.6-RELEASE
+ *  project name：silly-spring
  *  project description：top silly project pom.xml file
  */
-package com.iqiny.silly.activiti;
+package com.iqiny.silly.spring;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
-import com.iqiny.silly.activiti.convertor.SillyListConvertor;
 import com.iqiny.silly.core.base.SillyProperties;
 import com.iqiny.silly.core.common.SillyCoreUtil;
 import com.iqiny.silly.core.savehandle.DataJoinVariableSaveHandle;
 import com.iqiny.silly.core.savehandle.OverwriteVariableSaveHandle;
 import com.iqiny.silly.core.savehandle.SaveVariableSaveHandle;
 import com.iqiny.silly.core.savehandle.SkipVariableSaveHandle;
-import com.iqiny.silly.activiti.spring.SpringSillyContent;
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.core.cache.SillyCache;
 import com.iqiny.silly.core.config.BaseSillyConfigContent;
@@ -111,7 +109,6 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
 
     @Override
     protected void hookInitSillyConvertorList() {
-        addSillyVariableConvertor(new SillyListConvertor());
         final Set<SillyVariableConvertor> beanSet = SpringSillyContent.getBeanSet(SillyVariableConvertor.class);
         for (SillyVariableConvertor convertor : beanSet) {
             addSillyVariableConvertor(convertor);

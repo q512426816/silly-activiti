@@ -3,10 +3,10 @@
  *
  *  https://gitee.com/iqiny/silly
  *
- *  project name：silly-activiti 1.0.6-RELEASE
+ *  project name：silly-spring
  *  project description：top silly project pom.xml file
  */
-package com.iqiny.silly.activiti.convertor;
+package com.iqiny.silly.spring.convertor;
 
 
 import com.iqiny.silly.common.SillyConstant;
@@ -17,6 +17,7 @@ import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +28,7 @@ import java.util.Map;
  * 数据Value: List<String>
  * map: {key: "key", value: ["1","2","3"]}
  */
+@Component
 public class SillyListConvertor implements SillyVariableConvertor<List<String>> {
 
     protected Log log = LogFactory.getLog(SillyListConvertor.class);

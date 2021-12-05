@@ -11,7 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>silly-spring-boot-starter</artifactId>
     <packaging>jar</packaging>
-    <name>silly-spring-boot-starter ${project.version}</name>
+    <name>silly-spring-boot-starter</name>
 
     <properties>
         <spring-boot.version>1.5.22.RELEASE</spring-boot.version>
@@ -38,16 +38,12 @@
     </dependencyManagement>
 
     <dependencies>
-        <!--silly-all-->
-        <dependency>
-            <groupId>com.iqiny.silly</groupId>
-            <artifactId>silly-activiti</artifactId>
-        </dependency>
-        <!--silly-all-->
+        <!--silly-spring-->
         <dependency>
             <groupId>com.iqiny.silly</groupId>
             <artifactId>silly-mybatisplus</artifactId>
         </dependency>
+
         <!--spring-->
         <dependency>
             <groupId>org.springframework.boot</groupId>

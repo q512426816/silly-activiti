@@ -9,7 +9,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <name>silly All-in-one ${project.version}</name>
+    <name>silly All-in-one</name>
     <url>http://silly.iqiny.com</url>
     <description>silly activiti.</description>
 
@@ -84,6 +84,11 @@
         <dependency>
             <groupId>com.iqiny.silly</groupId>
             <artifactId>silly-mybatisplus</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.iqiny.silly</groupId>
+            <artifactId>silly-spring</artifactId>
         </dependency>
 
         <dependency>
@@ -170,6 +175,7 @@
                                     <include>com.iqiny.silly:silly-core</include>
                                     <include>com.iqiny.silly:silly-activiti</include>
                                     <include>com.iqiny.silly:silly-mybatisplus</include>
+                                    <include>com.iqiny.silly:silly-spring</include>
                                     <include>com.iqiny.silly:silly-spring-boot-starter</include>
                                 </includes>
                             </artifactSet>

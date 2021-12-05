@@ -3,12 +3,12 @@
  *
  *  https://gitee.com/iqiny/silly
  *
- *  project name：silly-activiti 1.0.6-RELEASE
+ *  project name：silly-spring
  *  project description：top silly project pom.xml file
  */
-package com.iqiny.silly.activiti.scan;
+package com.iqiny.silly.spring.scan;
 
-import com.iqiny.silly.activiti.SpringSillyConfigContent;
+import com.iqiny.silly.spring.SpringSillyConfigContent;
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.SillyReflectUtil;
 import com.iqiny.silly.common.util.StringUtils;
@@ -22,7 +22,6 @@ import com.iqiny.silly.core.common.SillyCoreUtil;
 import com.iqiny.silly.core.resume.SillyResume;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ibatis.io.Resources;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -131,7 +130,7 @@ public class AutoScanSillyConfigContent extends SpringSillyConfigContent {
             for (Resource resource : resources) {
                 try {
                     ClassMetadata classMetadata = METADATA_READER_FACTORY.getMetadataReader(resource).getClassMetadata();
-                    Class<?> clazz = Resources.classForName(classMetadata.getClassName());
+                    Class<?> clazz = Class.forName(classMetadata.getClassName());
                     for (Class<? extends SillyEntity> assignableType : assignableTypes) {
                         if (assignableType.isAssignableFrom(clazz)) {
                             if (masterSuperType.isAssignableFrom(clazz)) {
