@@ -43,6 +43,29 @@ public interface SillyWriteService<M extends SillyMaster, N extends SillyNode<V>
     M saveTaskMap(Map<String, Object> saveMap);
 
     /**
+     * 变更任务处置人
+     * @param taskId
+     * @param userId
+     * @param reason
+     */
+    void changeUser(String taskId, String userId, String reason);
+
+    /**
+     * 删除主表及关闭工作流
+     *
+     * @param masterId
+     * @param processInstanceId
+     */
+    void delete(String masterId, String processInstanceId);
+
+    /**
+     * 强制结束流程
+     *
+     * @param processInstanceId
+     */
+    void forceEndProcess(String processInstanceId);
+
+    /**
      * 新增主表数据
      *
      * @param master 主对象

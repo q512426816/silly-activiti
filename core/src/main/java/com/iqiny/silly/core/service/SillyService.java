@@ -19,9 +19,4 @@ import com.iqiny.silly.core.config.SillyCategoryConfig;
  */
 public interface SillyService extends SillyInitializable {
 
-    /**
-     * 初始化傻瓜配置
-     */
-    SillyCategoryConfig getSillyConfig(String category);
-
 }

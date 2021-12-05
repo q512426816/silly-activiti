@@ -8,8 +8,6 @@
  */
 package com.iqiny.silly.core.resume;
 
-import com.iqiny.silly.core.base.SillyInitializable;
-import com.iqiny.silly.core.base.SillyMultipleCategory;
 import com.iqiny.silly.core.service.SillyService;
 
 import java.util.List;
@@ -30,7 +28,7 @@ public interface SillyResumeService<R extends SillyResume> extends SillyService 
      */
     String makeResumeHandleInfo(String handleType, String nextUserIds, String taskName, String content);
 
-    void insert(R process);
+    void insert(SillyResume process);
 
     List<R> selectList(String masterId, String businessType);
 

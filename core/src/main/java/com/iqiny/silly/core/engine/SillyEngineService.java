@@ -6,13 +6,11 @@
  *  project name：silly-core 1.0.6-RELEASE
  *  project description：top silly project pom.xml file
  */
-package com.iqiny.silly.core.service;
+package com.iqiny.silly.core.engine;
 
-import com.iqiny.silly.core.base.SillyInitializable;
 import com.iqiny.silly.core.base.SillyMasterTask;
-import com.iqiny.silly.core.base.SillyMultipleCategory;
 import com.iqiny.silly.core.base.core.SillyMaster;
-import com.iqiny.silly.core.read.MySillyMasterTask;
+import com.iqiny.silly.core.service.SillyService;
 
 import java.util.List;
 import java.util.Map;
@@ -20,7 +18,7 @@ import java.util.Map;
 /**
  * 傻瓜流程引擎服务 （流程控制服务，一般都结合第三方框架实现，比如 Activiti）
  */
-public interface SillyEngineService<T> extends SillyService {
+public interface SillyEngineService<T extends SillyTask> extends SillyService {
 
     /**
      * 启动流程
@@ -38,7 +36,7 @@ public interface SillyEngineService<T> extends SillyService {
      * @param userId      用户ID
      * @param variableMap 流程变量
      */
-    void complete(T task, String userId, Map<String, Object> variableMap);
+    void complete(SillyTask task, String userId, Map<String, Object> variableMap);
 
     /**
      * 任务流程任务改变
@@ -48,7 +46,7 @@ public interface SillyEngineService<T> extends SillyService {
      * @param userId  变更到的 用户ID （到谁）
      * @return 新的任务
      */
-    List<T> changeTask(T task, String nodeKey, String userId);
+    List<T> changeTask(SillyTask task, String nodeKey, String userId);
 
     /**
      * 通过流程实例ID 获取当前的任务
@@ -57,14 +55,6 @@ public interface SillyEngineService<T> extends SillyService {
      * @return 任务
      */
     List<T> findTaskByProcessInstanceId(String processInstanceId);
-
-    /**
-     * 获取任务ID
-     *
-     * @param task 任务对象
-     * @return 任务ID
-     */
-    String getTaskId(T task);
 
     /**
      * 通过任务ID 获取任务
@@ -83,12 +73,20 @@ public interface SillyEngineService<T> extends SillyService {
     String getBusinessKey(String processInstanceId);
 
     /**
+     * 通过流程实例ID 获取主表ID
+     *
+     * @param taskId 任务ID
+     * @return 主表ID
+     */
+    String getBusinessKeyByTaskId(String taskId);
+
+    /**
      * 获取任务执行时长
      *
      * @param task 任务
      * @return 执行耗时（毫秒 ms）
      */
-    Long getTaskDueTime(T task);
+    Long getTaskDueTime(SillyTask task);
 
     /**
      * 获取任务的可执行人ID列表
@@ -96,7 +94,7 @@ public interface SillyEngineService<T> extends SillyService {
      * @param task 任务
      * @return 执行人ID列表
      */
-    List<String> getTaskUserIds(T task);
+    List<String> getTaskUserIds(SillyTask task);
 
     /**
      * 通过流程实例ID 结束流程
@@ -119,14 +117,6 @@ public interface SillyEngineService<T> extends SillyService {
      * @return 流程Key
      */
     String getActKeyNameByProcessInstanceId(String processInstanceId);
-
-    /**
-     * 获取任务节点定义ID
-     *
-     * @param taskId 任务ID
-     * @return 节点定义ID
-     */
-    String getTaskNodeKey(String taskId);
 
     /**
      * 获取进行中的主表ID

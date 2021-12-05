@@ -8,8 +8,6 @@
  */
 package com.iqiny.silly.core.config.html;
 
-import java.util.List;
-
 /**
  * 傻瓜变量 对应的 html 标签模板
  */

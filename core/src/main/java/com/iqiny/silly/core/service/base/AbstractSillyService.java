@@ -8,10 +8,8 @@
  */
 package com.iqiny.silly.core.service.base;
 
-import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.SillyAssert;
-import com.iqiny.silly.common.util.SillyReflectUtil;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyCategory;
 import com.iqiny.silly.core.base.SillyFactory;
@@ -24,11 +22,12 @@ import com.iqiny.silly.core.config.SillyCategoryConfig;
 import com.iqiny.silly.core.config.SillyConfigUtil;
 import com.iqiny.silly.core.config.property.*;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
+import com.iqiny.silly.core.engine.SillyTask;
 import com.iqiny.silly.core.group.SillyTaskGroupHandle;
 import com.iqiny.silly.core.resume.SillyResume;
 import com.iqiny.silly.core.resume.SillyResumeService;
 import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
-import com.iqiny.silly.core.service.SillyEngineService;
+import com.iqiny.silly.core.engine.SillyEngineService;
 import com.iqiny.silly.core.service.SillyService;
 
 import java.util.*;
@@ -40,15 +39,16 @@ import java.util.*;
  * @param <N> 节点
  * @param <V> 变量
  */
-public abstract class AbstractSillyService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable, T> implements SillyService, SillyCategory {
+@SuppressWarnings("unchecked")
+public abstract class AbstractSillyService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> implements SillyService, SillyCategory {
 
     protected SillyFactory<M, N, V, ? extends SillyResume> sillyFactory;
 
-    protected SillyEngineService<T> sillyEngineService;
+    protected SillyEngineService<? extends SillyTask> sillyEngineService;
 
     protected SillyCurrentUserUtil sillyCurrentUserUtil;
 
-    protected SillyResumeService sillyResumeService;
+    protected SillyResumeService<? extends SillyResume> sillyResumeService;
 
     protected Map<String, SillyVariableConvertor> sillyConvertorMap;
 
@@ -91,14 +91,15 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
     public void init() {
         SillyCategoryConfig sillyCategoryConfig = getSillyConfig();
         SillyAssert.notNull(sillyCategoryConfig);
-        setSillyFactory(sillyCategoryConfig.getSillyFactory());
-        setSillyEngineService(sillyCategoryConfig.getSillyEngineService());
-        setCurrentUserUtil(sillyCategoryConfig.getSillyCurrentUserUtil());
-        setSillyConvertorMap(sillyCategoryConfig.getSillyConvertorMap());
-        setSillySaveHandleMap(sillyCategoryConfig.getSillyVariableSaveHandleMap());
-        setSillyResumeService(sillyCategoryConfig.getSillyResumeService());
-        setSillyTaskGroupHandle(sillyCategoryConfig.getSillyTaskGroupHandle());
-        setSillyCache(sillyCategoryConfig.getSillyCache());
+
+        this.sillyFactory = sillyCategoryConfig.getSillyFactory();
+        this.sillyEngineService = sillyCategoryConfig.getSillyEngineService();
+        this.sillyCurrentUserUtil = sillyCategoryConfig.getSillyCurrentUserUtil();
+        this.sillyConvertorMap = sillyCategoryConfig.getSillyConvertorMap();
+        this.sillySaveHandleMap = sillyCategoryConfig.getSillyVariableSaveHandleMap();
+        this.sillyResumeService = sillyCategoryConfig.getSillyResumeService();
+        this.sillyTaskGroupHandle = sillyCategoryConfig.getSillyTaskGroupHandle();
+        this.sillyCache = sillyCategoryConfig.getSillyCache();
         setEntityClazz(sillyCategoryConfig.getSillyFactory());
 
         otherInit();
@@ -112,37 +113,8 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
 
     protected abstract void otherInit();
 
-    @Override
-    public SillyCategoryConfig getSillyConfig(String category) {
-        return SillyConfigUtil.getSillyConfig(category);
-    }
-
     public SillyCategoryConfig getSillyConfig() {
-        return getSillyConfig(usedCategory());
-    }
-
-    public void setSillyFactory(SillyFactory<M, N, V, ? extends SillyResume> sillyFactory) {
-        this.sillyFactory = sillyFactory;
-    }
-
-    public void setSillyEngineService(SillyEngineService<T> sillyEngineService) {
-        this.sillyEngineService = sillyEngineService;
-    }
-
-    public void setCurrentUserUtil(SillyCurrentUserUtil sillyCurrentUserUtil) {
-        this.sillyCurrentUserUtil = sillyCurrentUserUtil;
-    }
-
-    public void setSillyConvertorMap(Map<String, SillyVariableConvertor> sillyConvertorMap) {
-        this.sillyConvertorMap = sillyConvertorMap;
-    }
-
-    public void setSillyResumeService(SillyResumeService sillyResumeService) {
-        this.sillyResumeService = sillyResumeService;
-    }
-
-    public void setSillySaveHandleMap(Map<String, SillyVariableSaveHandle> sillySaveHandleMap) {
-        this.sillySaveHandleMap = sillySaveHandleMap;
+        return SillyConfigUtil.getSillyConfig(usedCategory());
     }
 
     protected SillyVariableConvertor<?> getSillyConvertor(String handleKey) {
@@ -160,14 +132,6 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         SillyVariableSaveHandle sillyVariableSaveHandle = sillySaveHandleMap.get(saveHandleName);
         SillyAssert.notNull(sillyVariableSaveHandle, "saveHandleName：" + saveHandleName + " 未进行配置");
         return sillyVariableSaveHandle;
-    }
-
-    public SillyTaskGroupHandle getSillyTaskGroupHandle() {
-        return sillyTaskGroupHandle;
-    }
-
-    public void setSillyTaskGroupHandle(SillyTaskGroupHandle sillyTaskGroupHandle) {
-        this.sillyTaskGroupHandle = sillyTaskGroupHandle;
     }
 
     protected Object getPropertyHandleRoot(String masterId) {
@@ -262,11 +226,4 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         return masterClass;
     }
 
-    public SillyCache getSillyCache() {
-        return sillyCache;
-    }
-
-    public void setSillyCache(SillyCache sillyCache) {
-        this.sillyCache = sillyCache;
-    }
 }

@@ -21,7 +21,6 @@ import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.read.SillyMasterTaskUtil;
 import com.iqiny.silly.core.service.SillyReadService;
-import org.apache.commons.collections.MapUtils;
 
 import java.util.*;
 
@@ -33,8 +32,8 @@ import java.util.*;
  * @param <V> 变量
  */
 @SuppressWarnings("unchecked")
-public abstract class AbstractSillyReadService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable, T>
-        extends AbstractSillyService<M, N, V, T> implements SillyReadService<M, N, V> {
+public abstract class AbstractSillyReadService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable>
+        extends AbstractSillyService<M, N, V> implements SillyReadService<M, N, V> {
 
     public static final String DEFAULT_QUERY_IDS_PARAM_NAME = "partitionMasterIds";
 
@@ -288,7 +287,7 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
     }
 
     protected void convertorRecordValue(String convertorName, Map<String, Object> record, String field) {
-        getSillyConvertor(convertorName).convert(record, field, MapUtils.getString(record, field));
+        getSillyConvertor(convertorName).convert(record, field, SillyMapUtils.getString(record, field));
     }
 
 

@@ -13,9 +13,8 @@ import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.core.SillyMaster;
-import com.iqiny.silly.core.config.SillyCategoryConfig;
-import com.iqiny.silly.core.config.SillyConfigUtil;
-import com.iqiny.silly.core.service.SillyEngineService;
+import com.iqiny.silly.core.engine.SillyEngineService;
+import com.iqiny.silly.core.engine.SillyTask;
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
@@ -33,7 +32,7 @@ import java.util.*;
 /**
  * 工作流引擎服务
  */
-public abstract class BaseSillyActivitiEngineService implements SillyEngineService<Task> {
+public abstract class BaseSillyActivitiEngineService implements SillyEngineService<SillyActivitiTask> {
 
     protected RuntimeService runtimeService;
     protected HistoryService historyService;
@@ -41,17 +40,31 @@ public abstract class BaseSillyActivitiEngineService implements SillyEngineServi
     protected RepositoryService repositoryService;
 
     @Override
-    public SillyCategoryConfig getSillyConfig(String category) {
-        return SillyConfigUtil.getSillyConfig(category);
-    }
-
-
-    @Override
     public void init() {
         this.runtimeService = SpringSillyContent.getBean(RuntimeService.class);
         this.historyService = SpringSillyContent.getBean(HistoryService.class);
         this.taskService = SpringSillyContent.getBean(TaskService.class);
         this.repositoryService = SpringSillyContent.getBean(RepositoryService.class);
+    }
+
+    public SillyActivitiTask convertor(Task task) {
+        if (task == null) {
+            return null;
+        }
+
+        return new SillyActivitiTask(task);
+    }
+
+    public List<SillyActivitiTask> convertor(List<Task> tasks) {
+        if (tasks == null) {
+            return null;
+        }
+
+        List<SillyActivitiTask> taskList = new ArrayList<>();
+        for (Task task : tasks) {
+            taskList.add(new SillyActivitiTask(task));
+        }
+        return taskList;
     }
 
     @Override
@@ -70,7 +83,7 @@ public abstract class BaseSillyActivitiEngineService implements SillyEngineServi
     }
 
     @Override
-    public void complete(Task task, String userId, Map<String, Object> variableMap) {
+    public void complete(SillyTask task, String userId, Map<String, Object> variableMap) {
         String taskId = task.getId();
         if (StringUtils.isEmpty(task.getId())) {
             throw new RuntimeException("当前执行的任务ID获取失败");
@@ -79,14 +92,14 @@ public abstract class BaseSillyActivitiEngineService implements SillyEngineServi
             // 认领任务
             taskService.claim(taskId, userId);
         } else {
-            task.setAssignee(userId);
+            taskService.setAssignee(taskId, userId);
         }
         // 完成任务
         taskService.complete(taskId, variableMap);
     }
 
     @Override
-    public synchronized List<Task> changeTask(Task task, String nodeKey, String userId) {
+    public synchronized List<SillyActivitiTask> changeTask(SillyTask task, String nodeKey, String userId) {
         String processInstanceId = task.getProcessInstanceId();
         String taskId = task.getId();
         if (StringUtils.isEmpty(taskId) || StringUtils.isEmpty(processInstanceId)) {
@@ -97,27 +110,19 @@ public abstract class BaseSillyActivitiEngineService implements SillyEngineServi
     }
 
     @Override
-    public List<Task> findTaskByProcessInstanceId(String processInstanceId) {
+    public List<SillyActivitiTask> findTaskByProcessInstanceId(String processInstanceId) {
         if (StringUtils.isEmpty(processInstanceId)) {
             throw new SillyException("查询任务列表，流程实例ID不可为空！");
         }
-        return taskService.createTaskQuery().processInstanceId(processInstanceId).list();
+        return convertor(taskService.createTaskQuery().processInstanceId(processInstanceId).list());
     }
 
     @Override
-    public String getTaskId(Task task) {
-        if (task == null) {
-            return null;
-        }
-        return task.getId();
-    }
-
-    @Override
-    public Task findTaskById(String taskId) {
+    public SillyActivitiTask findTaskById(String taskId) {
         if (StringUtils.isEmpty(taskId)) {
             return null;
         }
-        return taskService.createTaskQuery().taskId(taskId).singleResult();
+        return convertor(taskService.createTaskQuery().taskId(taskId).singleResult());
     }
 
     @Override
@@ -127,7 +132,7 @@ public abstract class BaseSillyActivitiEngineService implements SillyEngineServi
     }
 
     @Override
-    public Long getTaskDueTime(Task task) {
+    public Long getTaskDueTime(SillyTask task) {
         if (task == null || StringUtils.isEmpty(task.getId()) || StringUtils.isEmpty(task.getExecutionId())) {
             return 0L;
         }
@@ -142,7 +147,7 @@ public abstract class BaseSillyActivitiEngineService implements SillyEngineServi
     }
 
     @Override
-    public List<String> getTaskUserIds(Task task) {
+    public List<String> getTaskUserIds(SillyTask task) {
         final String taskId = task.getId();
         List<String> ids = new ArrayList<>();
         if (StringUtils.isNotEmpty(taskId)) {
@@ -156,18 +161,18 @@ public abstract class BaseSillyActivitiEngineService implements SillyEngineServi
 
     @Override
     public void endProcessByProcessInstanceId(String processInstanceId, String userId) {
-        List<Task> tasks = findTaskByProcessInstanceId(processInstanceId);
+        List<SillyActivitiTask> tasks = findTaskByProcessInstanceId(processInstanceId);
         if (!tasks.isEmpty()) {
             endProcessByProcessInstanceId(processInstanceId, tasks.get(0), userId);
         }
     }
 
-    public void endProcessByProcessInstanceId(String actProcessId, Task task, String userId) {
+    public void endProcessByProcessInstanceId(String actProcessId, SillyActivitiTask task, String userId) {
         if (task != null) {
             changeTask(task, SillyConstant.ActivitiNode.KEY_END, userId);
         }
         if (actProcessId != null) {
-            List<Task> tasks = findTaskByProcessInstanceId(actProcessId);
+            List<SillyActivitiTask> tasks = findTaskByProcessInstanceId(actProcessId);
             if (!tasks.isEmpty()) {
                 endProcessByProcessInstanceId(actProcessId, tasks.get(0).getId());
             }
@@ -185,20 +190,6 @@ public abstract class BaseSillyActivitiEngineService implements SillyEngineServi
             return deployedProcessDefinition.getKey();
         }
         return null;
-    }
-
-    @Override
-    public String getTaskNodeKey(String taskId) {
-        if (StringUtils.isEmpty(taskId)) {
-            return null;
-        }
-        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
-        if (task != null) {
-            return task.getTaskDefinitionKey();
-        } else {
-            // 状态设置为已完成
-            return SillyConstant.ActivitiNode.KEY_END;
-        }
     }
 
     public String getVersion(String processId) {
@@ -241,9 +232,9 @@ public abstract class BaseSillyActivitiEngineService implements SillyEngineServi
     }
 
     @Override
-    public List<Task> findTaskByMasterId(String masterId) {
+    public List<SillyActivitiTask> findTaskByMasterId(String masterId) {
         final List<HistoricProcessInstance> processInstances = findProcessInstanceByMasterId(masterId);
-        List<Task> taskList = new ArrayList<>();
+        List<SillyActivitiTask> taskList = new ArrayList<>();
         for (HistoricProcessInstance processInstance : processInstances) {
             taskList.addAll(findTaskByProcessInstanceId(processInstance.getId()));
         }

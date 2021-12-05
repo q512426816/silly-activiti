@@ -9,7 +9,6 @@
 package com.iqiny.silly.core.config;
 
 import com.iqiny.silly.common.util.SillyAssert;
-import com.iqiny.silly.core.base.SillyCategory;
 
 import java.util.Map;
 import java.util.Set;

@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.core.enums.SqlMethod;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
 import com.iqiny.silly.activiti.EnhanceSillyWriteService;
 import com.iqiny.silly.common.util.StringUtils;
+import com.iqiny.silly.core.engine.SillyTask;
 import com.iqiny.silly.mybatisplus.baseentity.BaseMySillyMaster;
 import com.iqiny.silly.mybatisplus.baseentity.BaseMySillyNode;
 import com.iqiny.silly.mybatisplus.baseentity.BaseMySillyVariable;
@@ -57,7 +58,7 @@ public abstract class BaseMySillyWriteService<M extends BaseMySillyMaster<M>, N 
         node.preInsert();
         String taskId = node.getTaskId();
         if (StringUtils.isNotEmpty(taskId)) {
-            Task task = sillyEngineService.findTaskById(taskId);
+            SillyTask task = sillyEngineService.findTaskById(taskId);
             node.setNodeName(task.getName());
             if (StringUtils.isEmpty(node.getNodeKey())) {
                 node.setNodeKey(task.getTaskDefinitionKey());
