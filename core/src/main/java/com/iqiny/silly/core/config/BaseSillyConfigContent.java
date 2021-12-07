@@ -13,6 +13,7 @@ import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.SillyReflectUtil;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyCategory;
+import com.iqiny.silly.core.base.SillyContext;
 import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.base.SillyProperties;
 import com.iqiny.silly.core.cache.SillyCache;
@@ -41,7 +42,9 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
 
     private final static Log log = LogFactory.getLog(BaseSillyConfigContent.class);
 
-    private SillyProperties sillyProperties;
+    protected final SillyProperties sillyProperties;
+    protected final SillyContext sillyContext;
+
     private boolean initialized = false;
     private boolean refresh = false;
 
@@ -49,6 +52,15 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
      * 全部已识别的业务分类
      */
     protected final Set<String> categorySet = new LinkedHashSet<>();
+
+    public BaseSillyConfigContent(SillyProperties sillyProperties, SillyContext sillyContext) {
+        SillyAssert.notNull(sillyProperties, "sillyProperties 不可为空");
+        SillyAssert.notNull(sillyContext, "sillyContext 不可为空");
+
+        this.sillyProperties = sillyProperties;
+        this.sillyContext = sillyContext;
+    }
+
 
     public Set<String> allCategorySet() {
         loadCategorySet();
@@ -58,6 +70,11 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
     protected abstract void loadCategorySet();
 
     protected Class<? extends SillyCategoryConfig> sillyCategoryConfigClazz = DefaultSillyCategoryConfig.class;
+
+    /**
+     * 傻瓜上下文对象
+     */
+    protected List<SillyContext> sillyContextList = new ArrayList<>();
 
     /**
      * 业务配置信息集合
@@ -140,31 +157,43 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
         preInit();
         // 1 初始化 基本属性
         initFiled();
-        // 2 初始化 业务分类
+        // 2 初始化上下文
+        initSillyContextList();
+        // 3 初始化 业务分类
         initCategorySet();
-        // 3 初始化 当前人工具
+        // 4 初始化 当前人工具
         initCurrentUserUtilList();
-        // 4 初始化 傻瓜工厂
+        // 5 初始化 傻瓜工厂
         initSillyFactory();
-        // 5 初始化 傻瓜转换器
+        // 6 初始化 傻瓜转换器
         initSillyConvertorList();
-        // 6 初始化 傻瓜数据保存器
+        // 7 初始化 傻瓜数据保存器
         initSillyVariableSaveHandleList();
-        // 7 初始化 傻瓜页面代码生成模板
+        // 8 初始化 傻瓜页面代码生成模板
         initSillyHtmlTagTemplateList();
-        // 8 初始化 傻瓜服务
+        // 9 初始化 傻瓜服务
         initSillyService();
-        // 9 初始化 傻瓜流程参数
+        // 10 初始化 傻瓜流程参数
         initSillyProcessProperty();
-        // 10 初始化 傻瓜任务组处理类
+        // 11 初始化 傻瓜任务组处理类
         initSillyTaskGroupHandle();
-        // 11 初始化 傻瓜缓存配置
+        // 12 初始化 傻瓜缓存配置
         initSillyCacheList();
 
-        // 12 校验配置
+        // 13 校验配置
         checkConfig();
 
-        // 13 将配置资源转换为业务配置
+        // 14 将配置资源转换为业务配置
+        initSillyCategoryConfigList();
+
+        this.initialized = true;
+        this.refresh = false;
+
+        // 15 初始化完成回调
+        initComplete();
+    }
+
+    private void initSillyCategoryConfigList() {
         sillyCategoryConfigList = convertSillyConfig();
         for (SillyCategoryConfig sillyCategoryConfig : sillyCategoryConfigList) {
             if (this.refresh) {
@@ -173,12 +202,17 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
                 sillyCategoryConfig.init();
             }
         }
+    }
 
-        this.initialized = true;
-        this.refresh = false;
+    private void initSillyContextList() {
+        hookSillyContextList();
+    }
 
-        // 14 初始化完成回调
-        initComplete();
+    protected abstract void hookSillyContextList();
+
+
+    protected void addSillyContext(SillyContext sillyContext) {
+        sillyContextList.add(sillyContext);
     }
 
     @Override
@@ -193,6 +227,7 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
      */
     protected void initFiled() {
         categorySet.clear();
+        sillyContextList.clear();
         sillyCategoryConfigList.clear();
         sillyCurrentUserUtilList.clear();
         sillyEngineServiceList.clear();
@@ -420,6 +455,11 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
         sillyCurrentUserUtilList.add(currentUserUtil);
     }
 
+
+    public SillyContext getSillyContext(String category) {
+        return SillyCoreUtil.availableOne(category, sillyContextList);
+    }
+
     public SillyCurrentUserUtil getCurrentUserUtil(String category) {
         return SillyCoreUtil.availableOne(category, sillyCurrentUserUtilList);
     }
@@ -447,7 +487,6 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
     public SillyResumeService getSillyResumeService(String category) {
         return SillyCoreUtil.availableOne(category, sillyResumeServiceList);
     }
-
 
     public SillyFactory getSillyFactory(String category) {
         return SillyCoreUtil.availableOne(category, sillyFactoryList);
@@ -510,6 +549,7 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
         SillyCategoryConfig sillyCategoryConfig = SillyReflectUtil.newInstance(getSillyCategoryConfigClazz(category));
         sillyCategoryConfig
                 .setCategory(category)
+                .setSillyContext(getSillyContext(category))
                 .setPropertyHandleClazz(getPropertyHandleClazz(category))
                 .setSillyTaskGroupHandle(getSillyTaskGroupHandle(category))
                 .setSillyConvertorMap(getSillyConvertorMap(category))
@@ -528,14 +568,4 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
 
     protected abstract Class<? extends SillyPropertyHandle> getPropertyHandleClazz(String category);
 
-
-    @Override
-    public SillyProperties getSillyProperties() {
-        return sillyProperties;
-    }
-
-    @Override
-    public void setSillyProperties(SillyProperties sillyProperties) {
-        this.sillyProperties = sillyProperties;
-    }
 }

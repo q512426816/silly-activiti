@@ -10,8 +10,11 @@ package com.iqiny.silly.spring;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
+import com.iqiny.silly.core.base.SillyContext;
+import com.iqiny.silly.core.base.SillyInitializable;
 import com.iqiny.silly.core.base.SillyProperties;
 import com.iqiny.silly.core.common.SillyCoreUtil;
+import com.iqiny.silly.core.config.SillyCategoryConfig;
 import com.iqiny.silly.core.savehandle.DataJoinVariableSaveHandle;
 import com.iqiny.silly.core.savehandle.OverwriteVariableSaveHandle;
 import com.iqiny.silly.core.savehandle.SaveVariableSaveHandle;
@@ -36,6 +39,8 @@ import com.iqiny.silly.core.service.SillyWriteService;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -47,11 +52,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 @SuppressWarnings("all")
-public class SpringSillyConfigContent extends BaseSillyConfigContent {
+public class SpringSillyConfigContent extends BaseSillyConfigContent implements InitializingBean {
 
     private final static Log log = LogFactory.getLog(SpringSillyConfigContent.class);
 
     protected String processPattern;
+
+    Class<? extends SillyEngineService> defaultEngineServiceClazz;
 
     Class<? extends SillyWriteService> defaultWriteServiceClazz;
 
@@ -65,16 +72,17 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
 
     private boolean loadCategoryFlag = false;
 
-    public SpringSillyConfigContent() {
+    public SpringSillyConfigContent(SillyProperties sillyProperties, SillyContext sillyContext) {
+        super(sillyProperties, sillyContext);
     }
 
     @Override
     protected void preInit() {
         log.info("SpringSillyConfigContent  " + this.getClass().getName() + " 初始化开始");
-        SillyProperties sillyProperties = getSillyProperties();
         SillyAssert.notNull(sillyProperties, "sillyProperties 配置属性不可为空");
 
         this.processPattern = sillyProperties.getProcessPattern();
+        this.defaultEngineServiceClazz = sillyProperties.getDefaultEngineServiceClazz();
         this.defaultWriteServiceClazz = sillyProperties.getDefaultWriteServiceClazz();
         this.defaultReadServiceClazz = sillyProperties.getDefaultReadServiceClazz();
         this.processPropertyClazz = sillyProperties.getProcessPropertyClazz();
@@ -103,13 +111,21 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
     }
 
     @Override
+    protected void hookSillyContextList() {
+        final Set<SillyContext> beanSet = sillyContext.getBeanSet(SillyContext.class);
+        for (SillyContext sillyContext : beanSet) {
+            addSillyContext(sillyContext);
+        }
+    }
+
+    @Override
     protected void initBaseSillyFactoryList() {
 
     }
 
     @Override
     protected void hookInitSillyConvertorList() {
-        final Set<SillyVariableConvertor> beanSet = SpringSillyContent.getBeanSet(SillyVariableConvertor.class);
+        final Set<SillyVariableConvertor> beanSet = sillyContext.getBeanSet(SillyVariableConvertor.class);
         for (SillyVariableConvertor convertor : beanSet) {
             addSillyVariableConvertor(convertor);
         }
@@ -122,7 +138,7 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
         addSillyVariableSaveHandle(new DataJoinVariableSaveHandle());
         addSillyVariableSaveHandle(new SaveVariableSaveHandle());
         addSillyVariableSaveHandle(new SkipVariableSaveHandle());
-        final Set<SillyVariableSaveHandle> beanSet = SpringSillyContent.getBeanSet(SillyVariableSaveHandle.class);
+        final Set<SillyVariableSaveHandle> beanSet = sillyContext.getBeanSet(SillyVariableSaveHandle.class);
         for (SillyVariableSaveHandle saveHandle : beanSet) {
             addSillyVariableSaveHandle(saveHandle);
         }
@@ -130,7 +146,7 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
 
     @Override
     protected void hookInitSillyHtmlTagTemplateList() {
-        final Set<SillyHtmlTagTemplate> beanSet = SpringSillyContent.getBeanSet(SillyHtmlTagTemplate.class);
+        final Set<SillyHtmlTagTemplate> beanSet = sillyContext.getBeanSet(SillyHtmlTagTemplate.class);
         for (SillyHtmlTagTemplate htmlTagTemplate : beanSet) {
             addSillyHtmlTagTemplate(htmlTagTemplate);
         }
@@ -138,7 +154,7 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
 
     @Override
     protected void initEngineSillyService() {
-        final Set<SillyEngineService> engineServices = SpringSillyContent.getBeanSet(SillyEngineService.class);
+        final Set<SillyEngineService> engineServices = sillyContext.getBeanSet(SillyEngineService.class);
         for (SillyEngineService engineService : engineServices) {
             addSillyEngineService(engineService);
         }
@@ -146,7 +162,7 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
 
     @Override
     protected void initResumeSillyService() {
-        final Set<SillyResumeService> resumeServices = SpringSillyContent.getBeanSet(SillyResumeService.class);
+        final Set<SillyResumeService> resumeServices = sillyContext.getBeanSet(SillyResumeService.class);
         for (SillyResumeService resumeService : resumeServices) {
             addSillyResumeService(resumeService);
         }
@@ -154,7 +170,7 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
 
     @Override
     protected void initReadSillyService() {
-        final Set<SillyReadService> readServices = SpringSillyContent.getBeanSet(SillyReadService.class);
+        final Set<SillyReadService> readServices = sillyContext.getBeanSet(SillyReadService.class);
         for (SillyReadService readService : readServices) {
             addSillyReadService(readService);
         }
@@ -162,7 +178,7 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
 
     @Override
     protected void initWriteSillyService() {
-        final Set<SillyWriteService> writeServices = SpringSillyContent.getBeanSet(SillyWriteService.class);
+        final Set<SillyWriteService> writeServices = sillyContext.getBeanSet(SillyWriteService.class);
         for (SillyWriteService writeService : writeServices) {
             addSillyWriteService(writeService);
         }
@@ -175,7 +191,7 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
 
     @Override
     protected SillyTaskGroupHandle loadSillyTaskGroupHandle() {
-        SillyTaskGroupHandle handle = SpringSillyContent.getBean(SillyTaskGroupHandle.class);
+        SillyTaskGroupHandle handle = sillyContext.getBean(SillyTaskGroupHandle.class);
         loadSillyTaskGroup(handle);
         loadSillyTaskCategoryGroup(handle);
         SillyAssert.notNull(handle, "任务组处理器未能正确加载");
@@ -184,7 +200,7 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
 
     @Override
     protected void hookSillyCacheList() {
-        final Set<SillyCache> sillyCaches = SpringSillyContent.getBeanSet(SillyCache.class);
+        final Set<SillyCache> sillyCaches = sillyContext.getBeanSet(SillyCache.class);
         for (SillyCache sillyCache : sillyCaches) {
             addSillyCache(sillyCache);
         }
@@ -192,21 +208,21 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
 
     @Override
     protected void hookSillyCurrentUserUtilList() {
-        final Set<SillyCurrentUserUtil> sillyCurrentUserUtils = SpringSillyContent.getBeanSet(SillyCurrentUserUtil.class);
+        final Set<SillyCurrentUserUtil> sillyCurrentUserUtils = sillyContext.getBeanSet(SillyCurrentUserUtil.class);
         for (SillyCurrentUserUtil currentUserUtil : sillyCurrentUserUtils) {
             addSillyCurrentUserUtil(currentUserUtil);
         }
     }
 
     protected void loadSillyTaskCategoryGroup(SillyTaskGroupHandle handle) {
-        Set<SillyTaskCategoryGroup> beanSet = SpringSillyContent.getBeanSet(SillyTaskCategoryGroup.class);
+        Set<SillyTaskCategoryGroup> beanSet = sillyContext.getBeanSet(SillyTaskCategoryGroup.class);
         for (SillyTaskCategoryGroup sillyTaskCategoryGroup : beanSet) {
             handle.addCategorySillyTaskGroup(sillyTaskCategoryGroup);
         }
     }
 
     protected void loadSillyTaskGroup(SillyTaskGroupHandle handle) {
-        Set<SillyTaskGroup> beanSet = SpringSillyContent.getBeanSet(SillyTaskGroup.class);
+        Set<SillyTaskGroup> beanSet = sillyContext.getBeanSet(SillyTaskGroup.class);
         for (SillyTaskGroup sillyTaskGroup : beanSet) {
             handle.addSillyTaskGroup(sillyTaskGroup);
         }
@@ -274,11 +290,12 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
     public SillyReadService getSillyReadService(String category) {
         SillyReadService readService = SillyCoreUtil.consistentOne(category, sillyReadServiceList);
         if (readService == null) {
-            readService =  SpringSillyContent.registerBean(
-                    SpringSillyContent.getSillyReadServiceBeanName(category),
+            readService = getSillyContext(category).registerBean(
+                    SpringSillyContext.getSillyReadServiceBeanName(category),
                     defaultReadServiceClazz,
                     bdb -> {
-                        bdb.addPropertyValue("category", category);
+                        SillyAssert.isTrue(bdb instanceof BeanDefinitionBuilder, "bdb类型错误" + bdb.getClass());
+                        ((BeanDefinitionBuilder) bdb).addPropertyValue("category", category);
                     });
             addSillyReadService(readService);
         }
@@ -289,14 +306,59 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent {
     public SillyWriteService getSillyWriteService(String category) {
         SillyWriteService writeService = SillyCoreUtil.consistentOne(category, sillyWriteServiceList);
         if (writeService == null) {
-            writeService = SpringSillyContent.registerBean(
-                    SpringSillyContent.getSillyWriteServiceBeanName(category),
+            writeService = getSillyContext(category).registerBean(
+                    SpringSillyContext.getSillyWriteServiceBeanName(category),
                     defaultWriteServiceClazz,
                     bdb -> {
-                        bdb.addPropertyValue("category", category);
+                        SillyAssert.isTrue(bdb instanceof BeanDefinitionBuilder, "bdb类型错误" + bdb.getClass());
+                        ((BeanDefinitionBuilder) bdb).addPropertyValue("category", category);
                     });
             addSillyWriteService(writeService);
         }
         return writeService;
+    }
+
+    @Override
+    public SillyEngineService getSillyEngineService(String category) {
+        SillyEngineService service = SillyCoreUtil.consistentOne(category, sillyEngineServiceList);
+        if (service == null) {
+            service = getSillyContext(category).registerBean(
+                    SpringSillyContext.getSillyEngineServiceBeanName(category),
+                    defaultEngineServiceClazz,
+                    bdb -> {
+                        SillyAssert.isTrue(bdb instanceof BeanDefinitionBuilder, "bdb类型错误" + bdb.getClass());
+                        ((BeanDefinitionBuilder) bdb).addPropertyValue("category", category);
+                    });
+            addSillyEngineService(service);
+        }
+        return service;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        // 初始化 配置
+        initSillyConfig();
+        // 初始化其余
+        initSillyInitializable();
+    }
+
+    protected void initSillyConfig() {
+        // 开始初始化配置
+        init();
+        log.info("SillyConfig:" + getClass().getName() + " 初始化完成");
+    }
+
+    protected void initSillyInitializable() {
+        // 开始初始化配置
+        final Set<SillyInitializable> beanSet = sillyContext.getBeanSet(SillyInitializable.class);
+        for (SillyInitializable sillyInitializable : beanSet) {
+            // 不对sillyConfig重新初始化！
+            if (!(sillyInitializable instanceof SillyCategoryConfig)) {
+                sillyInitializable.init();
+                if (log.isDebugEnabled()) {
+                    log.debug("SillyInitializable:" + sillyInitializable.getClass().getName() + " 初始化完成");
+                }
+            }
+        }
     }
 }

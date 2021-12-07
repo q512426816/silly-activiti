@@ -13,6 +13,7 @@ import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.config.property.SillyProcessProperty;
 import com.iqiny.silly.core.config.property.SillyPropertyHandle;
+import com.iqiny.silly.core.engine.SillyEngineService;
 import com.iqiny.silly.core.resume.SillyResume;
 import com.iqiny.silly.core.service.SillyReadService;
 import com.iqiny.silly.core.service.SillyWriteService;
@@ -43,5 +44,7 @@ public interface SillyProperties {
     Class<? extends SillyReadService> getDefaultReadServiceClazz();
 
     Class<? extends SillyWriteService> getDefaultWriteServiceClazz();
+
+    Class<? extends SillyEngineService> getDefaultEngineServiceClazz();
 
 }

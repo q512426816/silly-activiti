@@ -17,10 +17,6 @@ import java.util.List;
  */
 public interface SillyConfigContent {
 
-    SillyProperties getSillyProperties();
-
-    void setSillyProperties(SillyProperties sillyProperties);
-
     /**
      * 初始化
      */

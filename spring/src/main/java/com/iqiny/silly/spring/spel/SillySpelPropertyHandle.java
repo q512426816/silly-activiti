@@ -11,6 +11,7 @@ package com.iqiny.silly.spring.spel;
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.StringUtils;
+import com.iqiny.silly.core.base.SillyContext;
 import com.iqiny.silly.core.config.property.SillyPropertyHandle;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -29,13 +30,14 @@ public class SillySpelPropertyHandle implements SillyPropertyHandle {
     public static final String EL_END = "}";
 
     private StandardEvaluationContext context;
+    private SillyContext sillyContext;
     private Map<String, Object> values;
     private Object root;
 
     public StandardEvaluationContext getContext() {
         if (context == null) {
             context = new StandardEvaluationContext(root);
-            context.setBeanResolver(SillyBeanResolver.get());
+            context.setBeanResolver(new SillyBeanResolver(sillyContext));
             context.setVariables(getValues());
         }
         return context;
@@ -110,6 +112,11 @@ public class SillySpelPropertyHandle implements SillyPropertyHandle {
         SillyAssert.notNull(values, "配置处理器上下文对象不可为null");
         SillyAssert.isTrue(values instanceof Map, "配置处理器类型不支持" + values.getClass());
         setValues((Map<String, Object>) values);
+    }
+
+    @Override
+    public void setSillyContext(SillyContext sillyContext) {
+        this.sillyContext = sillyContext;
     }
 
     @Override

@@ -10,6 +10,7 @@ package com.iqiny.silly.core.config;
 
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.SillyReflectUtil;
+import com.iqiny.silly.core.base.SillyContext;
 import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
@@ -44,6 +45,11 @@ public class DefaultSillyCategoryConfig<M extends SillyMaster, N extends SillyNo
     protected String category;
 
     protected Class<? extends SillyPropertyHandle> propertyHandleClazz;
+
+    /**
+     * 傻瓜上下文对象
+     */
+    protected SillyContext sillyContext;
 
     /**
      * 当前人获取工具
@@ -157,6 +163,7 @@ public class DefaultSillyCategoryConfig<M extends SillyMaster, N extends SillyNo
     protected void checkConfig() {
         SillyAssert.notEmpty(usedCategory(), "silly Config usedCategory 未配置");
 
+        SillyAssert.notNull(this.sillyContext, "sillyContext 未配置" + usedCategory());
         SillyAssert.notNull(this.sillyCurrentUserUtil, "currentUserUtil 未配置" + usedCategory());
         SillyAssert.notNull(this.sillyEngineService, "sillyEngineService 未配置" + usedCategory());
         SillyAssert.notNull(this.sillyResumeService, "sillyResumeService 未配置" + usedCategory());
@@ -181,6 +188,17 @@ public class DefaultSillyCategoryConfig<M extends SillyMaster, N extends SillyNo
     }
 
 
+    @Override
+    public SillyContext getSillyContext() {
+        return sillyContext;
+    }
+
+    @Override
+    public SillyCategoryConfig<M, N, V> setSillyContext(SillyContext sillyContext) {
+        this.sillyContext = sillyContext;
+        return this;
+    }
+    
     @Override
     public Class<? extends SillyPropertyHandle> getPropertyHandleClazz() {
         return propertyHandleClazz;

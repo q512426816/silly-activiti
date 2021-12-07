@@ -8,6 +8,8 @@
  */
 package com.iqiny.silly.core.config.property;
 
+import com.iqiny.silly.core.base.SillyContext;
+
 /**
  * 表达式配置
  */
@@ -47,6 +49,8 @@ public interface SillyPropertyHandle {
      * @param context
      */
     void setValues(Object context);
+
+    void setSillyContext(SillyContext sillyContext);
 
     Object getValues();
 

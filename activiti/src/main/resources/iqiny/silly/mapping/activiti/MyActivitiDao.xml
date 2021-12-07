@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+
+     Copyright  iqiny.com
+
+     https://gitee.com/iqiny/silly
+
+     project name：silly-activiti
+     project description：top silly project pom.xml file
+
+-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iqiny.silly.core.read.MySillyMasterTask">
+
+    <select id="getDoingMasterTask" resultType="com.iqiny.silly.core.read.MySillyMasterTask">
+        SELECT
+        T4.CATEGORY_ AS "category",
+        T1.ID_ AS "taskId",
+        T1.TASK_DEF_KEY_ AS "nodeKey",
+        T2.BUSINESS_KEY_ AS "masterId",
+        T3.USER_ID_ AS "userId",
+        T1.ASSIGNEE_ AS "assignee",
+        T3.GROUP_ID_ AS "groupId"
+        FROM ACT_RU_TASK T1
+        INNER JOIN ACT_HI_PROCINST T2 ON T2.ID_ = T1.PROC_INST_ID_
+        LEFT JOIN ACT_RU_IDENTITYLINK T3 ON T3.TASK_ID_ = T1.ID_
+        LEFT JOIN ACT_RE_PROCDEF T4 ON T4.ID_ = T1.PROC_DEF_ID_
+        WHERE T2.BUSINESS_KEY_ IS NOT NULL
+        <if test="category!=null and category!=''">
+            AND T4.CATEGORY_ = #{category}
+        </if>
+        <if test="businessKey!=null and businessKey!=''">
+            AND T2.BUSINESS_KEY_ = #{businessKey}
+        </if>
+        <if test="(userId!=null and userId!='') or (allGroupId!=null and !allGroupId.isEmpty())">
+            AND (T3.USER_ID_ = #{userId} OR T1.ASSIGNEE_ = #{userId}
+            <if test="allGroupId!=null and !allGroupId.isEmpty()">
+                OR T3.GROUP_ID_ IN
+                <foreach collection="allGroupId" item="item" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+            )
+        </if>
+        GROUP BY T4.CATEGORY_, T1.ID_ ,T1.TASK_DEF_KEY_, T2.BUSINESS_KEY_, T3.USER_ID_, T1.ASSIGNEE_, T3.GROUP_ID_
+    </select>
+
+    <select id="getHistoryMasterTask" resultType="com.iqiny.silly.core.read.MySillyMasterTask">
+        SELECT
+        T1.BUSINESS_TYPE AS "category",
+        T1.PROCESS_NODE_KEY AS "nodeKey",
+        T1.BUSINESS_ID AS "masterId"
+        FROM QMIS_SILLY_RESUME T1
+        WHERE T1.DEL_FLAG = '0'
+        <if test="category!=null and category!=''">
+            AND T1.BUSINESS_TYPE = #{category}
+        </if>
+        <if test="userId!=null and userId!=''">
+            AND T1.HANDLE_USER_ID = #{userId}
+        </if>
+        GROUP BY T1.BUSINESS_TYPE, T1.PROCESS_NODE_KEY, T1.BUSINESS_ID
+    </select>
+
+</mapper>

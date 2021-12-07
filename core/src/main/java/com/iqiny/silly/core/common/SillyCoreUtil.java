@@ -35,18 +35,21 @@ public abstract class SillyCoreUtil {
         if (SillyCategory.DEFAULT_CATEGORY.equals(category)) {
             return true;
         }
-
+        
         if (obj instanceof Class) {
             obj = SillyReflectUtil.newInstance((Class) obj);
         }
 
+        boolean flag = true;
         if (obj instanceof SillyMultipleCategory) {
-            return ((SillyMultipleCategory) obj).isSupport(category);
-        } else if (obj instanceof SillyCategory) {
-            String usedCategory = ((SillyCategory) obj).usedCategory();
-            return SillyCategory.DEFAULT_CATEGORY.equals(usedCategory) || Objects.equals(usedCategory, category);
+            flag = ((SillyMultipleCategory) obj).isSupport(category);
         }
-        return true;
+
+        if (!flag && obj instanceof SillyCategory) {
+            String usedCategory = ((SillyCategory) obj).usedCategory();
+            flag = SillyCategory.DEFAULT_CATEGORY.equals(usedCategory) || Objects.equals(usedCategory, category);
+        }
+        return flag;
     }
 
     /**
@@ -61,17 +64,28 @@ public abstract class SillyCoreUtil {
             obj = SillyReflectUtil.newInstance((Class) obj);
         }
 
+        boolean flag = false;
         if (obj instanceof SillyMultipleCategory) {
-            return ((SillyMultipleCategory) obj).isSupport(category);
-        } else if (obj instanceof SillyCategory) {
-            String usedCategory = ((SillyCategory) obj).usedCategory();
-            return Objects.equals(usedCategory, category);
+            flag = ((SillyMultipleCategory) obj).isSupport(category);
         }
-        return false;
+        if (!flag && obj instanceof SillyCategory) {
+            String usedCategory = ((SillyCategory) obj).usedCategory();
+            flag = Objects.equals(usedCategory, category);
+        }
+
+        return flag;
     }
 
+    public static <T> T availableOrNull(String category, T t) {
+        if (t == null) {
+            return null;
+        }
 
-    public static <T> T availableOne(String category, List<T> list) {
+        boolean available = available(category, t);
+        return available ? t : null;
+    }
+
+    public static <T> T availableOne(String category, Collection<T> list) {
         if (list == null) {
             return null;
         }
@@ -94,7 +108,7 @@ public abstract class SillyCoreUtil {
         return null;
     }
 
-    public static <T> T consistentOne(String category, List<T> list) {
+    public static <T> T consistentOne(String category, Collection<T> list) {
         if (list == null) {
             return null;
         }
@@ -110,7 +124,7 @@ public abstract class SillyCoreUtil {
         return null;
     }
 
-    public static <T extends List> T availableList(String category, T t) {
+    public static <T extends Collection> T availableList(String category, T t) {
         if (t == null) {
             return null;
         }
@@ -125,27 +139,14 @@ public abstract class SillyCoreUtil {
         return categoryCollection;
     }
 
-    public static <T> void availableThen(String category, List<T> list, Consumer<T> consumer) {
+    public static <T> void availableThen(String category, Collection<T> list, Consumer<T> consumer) {
         if (list == null) {
             return;
         }
-        List<T> objects = availableList(category, list);
+        Collection<T> objects = availableList(category, list);
         for (T object : objects) {
             consumer.accept(object);
         }
     }
 
-    public static <T extends Map> T availableMap(String category, Map map, T categoryMap) {
-        if (map == null || categoryMap == null) {
-            return categoryMap;
-        }
-
-        map.forEach((k, v) -> {
-            boolean available = available(category, v);
-            if (available) {
-                categoryMap.put(k, v);
-            }
-        });
-        return categoryMap;
-    }
 }

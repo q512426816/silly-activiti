@@ -8,8 +8,9 @@
  */
 package com.iqiny.silly.starter;
 
+import com.iqiny.silly.core.base.SillyContext;
 import com.iqiny.silly.spring.scan.AutoScanSillyConfigContent;
-import com.iqiny.silly.spring.SpringSillyContent;
+import com.iqiny.silly.spring.SpringSillyContext;
 import com.iqiny.silly.core.base.SillyProperties;
 import com.iqiny.silly.core.config.SillyConfigContent;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -31,19 +32,17 @@ import org.springframework.context.annotation.Configuration;
 )
 @ConditionalOnProperty(value = "silly.enabled", matchIfMissing = true)
 public class SillyAutoConfiguration {
-
+    
     @Bean
     @ConditionalOnMissingBean
-    public SpringSillyContent springSillyContent() {
-        return new SpringSillyContent();
+    public SillyContext sillyContext() {
+        return new SpringSillyContext();
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public SillyConfigContent sillyConfigContent(SillyProperties properties) {
-        SillyConfigContent content = new AutoScanSillyConfigContent();
-        content.setSillyProperties(properties);
-        return content;
+    public SillyConfigContent sillyConfigContent(SillyProperties sillyProperties, SillyContext sillyContext) {
+        return new AutoScanSillyConfigContent(sillyProperties, sillyContext);
     }
 
 }

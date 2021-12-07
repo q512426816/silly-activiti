@@ -8,21 +8,22 @@
  */
 package com.iqiny.silly.spring.spel;
 
-import com.iqiny.silly.spring.SpringSillyContent;
+import com.iqiny.silly.core.base.SillyContext;
+import com.iqiny.silly.spring.SpringSillyContext;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.BeanResolver;
 import org.springframework.expression.EvaluationContext;
 
 public class SillyBeanResolver implements BeanResolver {
 
-    private static final SillyBeanResolver RESOLVER = new SillyBeanResolver();
+    private final SillyContext sillyContext;
 
-    public static BeanResolver get() {
-        return RESOLVER;
+    public SillyBeanResolver(SillyContext sillyContext){
+        this.sillyContext = sillyContext;
     }
 
     @Override
     public Object resolve(EvaluationContext context, String beanName) throws AccessException {
-        return SpringSillyContent.getBean(beanName);
+        return sillyContext.getBean(beanName);
     }
 }

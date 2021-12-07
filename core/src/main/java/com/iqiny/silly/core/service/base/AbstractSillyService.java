@@ -12,6 +12,7 @@ import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyCategory;
+import com.iqiny.silly.core.base.SillyContext;
 import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
@@ -41,6 +42,8 @@ import java.util.*;
  */
 @SuppressWarnings("unchecked")
 public abstract class AbstractSillyService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable> implements SillyService, SillyCategory {
+
+    protected SillyContext sillyContext;
 
     protected SillyFactory<M, N, V, ? extends SillyResume> sillyFactory;
 
@@ -92,6 +95,7 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         SillyCategoryConfig sillyCategoryConfig = getSillyConfig();
         SillyAssert.notNull(sillyCategoryConfig);
 
+        this.sillyContext = sillyCategoryConfig.getSillyContext();
         this.sillyFactory = sillyCategoryConfig.getSillyFactory();
         this.sillyEngineService = sillyCategoryConfig.getSillyEngineService();
         this.sillyCurrentUserUtil = sillyCategoryConfig.getSillyCurrentUserUtil();
@@ -157,6 +161,7 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         if (StringUtils.isNotEmpty(masterId)) {
             sillyPropertyHandle.setRoot(getPropertyHandleRoot(masterId));
         }
+        sillyPropertyHandle.setSillyContext(sillyContext);
         sillyPropertyHandle.setValues(new HashMap<>(values));
         return sillyPropertyHandle;
     }

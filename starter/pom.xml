@@ -41,6 +41,11 @@
         <!--silly-spring-->
         <dependency>
             <groupId>com.iqiny.silly</groupId>
+            <artifactId>silly-activiti</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.iqiny.silly</groupId>
             <artifactId>silly-mybatisplus</artifactId>
         </dependency>
 

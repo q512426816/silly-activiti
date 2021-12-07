@@ -165,6 +165,15 @@ public interface SillyEngineService<T extends SillyTask> extends SillyService {
      */
     List<T> findTaskByMasterId(String masterId);
 
+    /**
+     * 获取业务表ID 用户当前任务
+     *
+     * @param category
+     * @param userId
+     * @param masterId
+     * @return
+     */
+    List<SillyMasterTask> findMyTaskByMasterId(String category, String userId, String masterId);
 
     /**
      * 调整任务执行人
@@ -181,4 +190,12 @@ public interface SillyEngineService<T extends SillyTask> extends SillyService {
      * @param userId
      */
     void addUser(String taskId, String userId);
+
+    /**
+     * 删除参与者
+     *
+     * @param taskId
+     * @param userId
+     */
+    void deleteUser(String taskId, String userId);
 }

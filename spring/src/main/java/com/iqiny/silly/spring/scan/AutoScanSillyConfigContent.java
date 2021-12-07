@@ -8,6 +8,7 @@
  */
 package com.iqiny.silly.spring.scan;
 
+import com.iqiny.silly.core.base.SillyContext;
 import com.iqiny.silly.spring.SpringSillyConfigContent;
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.SillyReflectUtil;
@@ -55,11 +56,14 @@ public class AutoScanSillyConfigContent extends SpringSillyConfigContent {
     protected final List<Class<? extends SillyVariable>> variableClazzList = new ArrayList<>();
     protected final List<Class<? extends SillyResume>> resumeClazzList = new ArrayList<>();
 
+    public AutoScanSillyConfigContent(SillyProperties sillyProperties, SillyContext sillyContext) {
+        super(sillyProperties, sillyContext);
+    }
+
 
     @Override
     protected void preInit() {
         super.preInit();
-        SillyProperties sillyProperties = getSillyProperties();
         this.entityScanPackage = sillyProperties.getEntityScanPackage();
         this.masterSuperType = sillyProperties.getMasterSuperType();
         this.nodeSuperType = sillyProperties.getNodeSuperType();

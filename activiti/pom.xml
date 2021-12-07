@@ -20,16 +20,16 @@
             <version>${project.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>silly-spring</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
         <!-- activiti-engine -->
         <dependency>
             <groupId>org.activiti</groupId>
             <artifactId>activiti-engine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis-spring</artifactId>
+            <version>2.0.1</version>
+            <scope>compile</scope>
         </dependency>
 
     </dependencies>

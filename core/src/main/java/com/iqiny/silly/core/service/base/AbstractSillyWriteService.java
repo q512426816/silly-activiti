@@ -70,7 +70,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         }
         return lastFlag;
     }
-    
+
     /**
      * 提交数据 流程流转
      *
@@ -219,7 +219,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
     protected SillyMasterTask setNodeMyTaskId(String masterId, N node) {
         SillyMasterTask task = sillyEngineService.getOneTask(usedCategory(), sillyCurrentUserUtil.currentUserId(), masterId);
         SillyAssert.notNull(task, "未找到您需要处置的任务" + usedCategory());
-        
+
         node.setTaskId(task.getTaskId());
         if (StringUtils.isEmpty(node.getNodeKey())) {
             node.setNodeKey(task.getNodeKey());
@@ -627,8 +627,8 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
             SillyVariableConvertor<?> handler = getSillyConvertor(variableType);
             // 仅对 string、list 类型的数据进行自动转换
             if (variableType.equals(SillyConstant.ActivitiNode.CONVERTOR_STRING) || variableType.equals(SillyConstant.ActivitiNode.CONVERTOR_LIST)) {
-                for (String name : sillyConvertorMap.keySet()) {
-                    SillyVariableConvertor<?> convertor = sillyConvertorMap.get(name);
+                for (Map.Entry<String, SillyVariableConvertor> convertorEntry : sillyConvertorMap.entrySet()) {
+                    SillyVariableConvertor<?> convertor = convertorEntry.getValue();
                     if (convertor instanceof SillyAutoConvertor) {
                         SillyAutoConvertor autoConvertor = (SillyAutoConvertor) convertor;
                         if (autoConvertor.auto() && autoConvertor.canConvertor(variable.getVariableName(), variable.getVariableText())) {
@@ -966,33 +966,26 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
     }
 
     public M makeMasterByVariables(List<V> vList) {
-        Map<String, Object> masterMap = new HashMap<>();
-        for (V v : vList) {
-            String name = v.getVariableName();
-            String value = v.getVariableText();
-
-            if (Objects.equals(v.getBelong(), SillyConstant.ActivitiVariable.BELONG_MASTER)) {
-                masterMap.put(name, value);
-            }
-        }
-
-        String masterJson = JSON.toJSONString(masterMap);
-        return JSON.parseObject(masterJson, masterClass());
+        return doMakeObjByVariable(vList, SillyConstant.ActivitiVariable.BELONG_MASTER, masterClass());
     }
 
     public N makeNodeByVariables(List<V> vList) {
-        Map<String, Object> nodeMap = new HashMap<>();
+        return doMakeObjByVariable(vList, SillyConstant.ActivitiVariable.BELONG_NODE, nodeClass());
+    }
+
+    protected <T> T doMakeObjByVariable(List<V> vList, String belong, Class<T> clazz) {
+        Map<String, Object> objMap = new HashMap<>();
         for (V v : vList) {
             String name = v.getVariableName();
             String value = v.getVariableText();
 
-            if (Objects.equals(v.getBelong(), SillyConstant.ActivitiVariable.BELONG_NODE)) {
-                nodeMap.put(name, value);
+            if (Objects.equals(v.getBelong(), belong)) {
+                objMap.put(name, value);
             }
         }
 
-        String nodeJson = JSON.toJSONString(nodeMap);
-        return JSON.parseObject(nodeJson, nodeClass());
+        String objJson = JSON.toJSONString(objMap);
+        return JSON.parseObject(objJson, clazz);
     }
 
     public List<V> toVariableList(Map<String, Object> map) {
@@ -1054,5 +1047,5 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         v.setVariableType(variableType);
         list.add(v);
     }
-    
+
 }

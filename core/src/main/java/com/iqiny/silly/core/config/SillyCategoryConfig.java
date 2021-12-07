@@ -9,6 +9,7 @@
 package com.iqiny.silly.core.config;
 
 import com.iqiny.silly.core.base.SillyCategory;
+import com.iqiny.silly.core.base.SillyContext;
 import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
@@ -48,6 +49,13 @@ public interface SillyCategoryConfig<M extends SillyMaster, N extends SillyNode<
     
     void refresh();
 
+    /**
+     * 傻瓜上下文环境
+     */
+    SillyContext getSillyContext();
+
+    SillyCategoryConfig<M, N, V> setSillyContext(SillyContext sillyContext);
+    
     /**
      * 设置变量处置类类型
      */

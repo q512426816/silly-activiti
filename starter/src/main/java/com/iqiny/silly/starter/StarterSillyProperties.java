@@ -8,6 +8,8 @@
  */
 package com.iqiny.silly.starter;
 
+import com.iqiny.silly.activiti.DefaultSillyActivitiEngineService;
+import com.iqiny.silly.core.engine.SillyEngineService;
 import com.iqiny.silly.spring.spel.SillySpelPropertyHandle;
 import com.iqiny.silly.core.base.SillyProperties;
 import com.iqiny.silly.core.base.core.SillyMaster;
@@ -52,6 +54,8 @@ public class StarterSillyProperties implements SillyProperties {
     private Class<? extends SillyReadService> defaultReadServiceClazz = DefaultMySillyReadService.class;
 
     private Class<? extends SillyWriteService> defaultWriteServiceClazz = DefaultMySillyWriteService.class;
+
+    private Class<? extends SillyEngineService> defaultEngineServiceClazz = DefaultSillyActivitiEngineService.class;
 
     @Override
     public String getProcessPattern() {
@@ -150,5 +154,14 @@ public class StarterSillyProperties implements SillyProperties {
 
     public void setDefaultWriteServiceClazz(Class<? extends SillyWriteService> defaultWriteServiceClazz) {
         this.defaultWriteServiceClazz = defaultWriteServiceClazz;
+    }
+
+    @Override
+    public Class<? extends SillyEngineService> getDefaultEngineServiceClazz() {
+        return defaultEngineServiceClazz;
+    }
+
+    public void setDefaultEngineServiceClazz(Class<? extends SillyEngineService> defaultEngineServiceClazz) {
+        this.defaultEngineServiceClazz = defaultEngineServiceClazz;
     }
 }

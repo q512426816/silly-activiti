@@ -8,7 +8,9 @@
  */
 package com.iqiny.silly.spring;
 
+import com.iqiny.silly.core.base.SillyContext;
 import com.iqiny.silly.core.base.SillyInitializable;
+import com.iqiny.silly.core.common.SillyCoreUtil;
 import com.iqiny.silly.core.config.SillyCategoryConfig;
 import com.iqiny.silly.core.config.SillyConfigContent;
 import org.apache.commons.logging.Log;
@@ -22,6 +24,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.lang.NonNull;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -30,9 +33,9 @@ import java.util.function.Consumer;
 /**
  * 傻瓜 Spring 相关操作
  */
-public class SpringSillyContent implements ApplicationContextAware, InitializingBean {
+public class SpringSillyContext implements SillyContext, ApplicationContextAware {
 
-    private final static Log log = LogFactory.getLog(SpringSillyContent.class);
+    private final static Log log = LogFactory.getLog(SpringSillyContext.class);
 
     private static ApplicationContext applicationContext;
 
@@ -42,6 +45,7 @@ public class SpringSillyContent implements ApplicationContextAware, Initializing
 
     private final static String SILLY_READ_SERVICE_PREFIX = "SillyReadService";
     private final static String SILLY_WRITE_SERVICE_PREFIX = "SillyWriteService";
+    private final static String SILLY_ENGINE_SERVICE_PREFIX = "SillyEngineService";
 
 
     public static String getSillyReadServiceBeanName(String category) {
@@ -52,6 +56,10 @@ public class SpringSillyContent implements ApplicationContextAware, Initializing
         return SILLY_WRITE_SERVICE_PREFIX + category;
     }
 
+    public static String getSillyEngineServiceBeanName(String category) {
+        return SILLY_ENGINE_SERVICE_PREFIX + category;
+    }
+
     /**
      * 获取Bean 同时会在容器中寻找相应Bean 注册到Spring环境中
      *
@@ -59,24 +67,35 @@ public class SpringSillyContent implements ApplicationContextAware, Initializing
      * @param <T>
      * @return
      */
-    public static <T> Set<T> getBeanSet(Class<T> clazz) {
+    @Override
+    public <T> Set<T> getBeanSet(String category, Class<T> clazz) {
         Set<T> set = new LinkedHashSet<>();
         final Set<Map.Entry<String, T>> entries = applicationContext.getBeansOfType(clazz).entrySet();
         for (Map.Entry<String, T> entry : entries) {
-            set.add(entry.getValue());
+            T value = entry.getValue();
+            boolean available = SillyCoreUtil.available(category, value);
+            if (available) {
+                set.add(value);
+            }
         }
         return set;
     }
 
-    public static Object getBean(String beanName) {
-        return applicationContext.getBean(beanName);
+
+    @Override
+    public <T> T getBean(String category, String beanName) {
+        Object bean = applicationContext.getBean(beanName);
+        return (T) SillyCoreUtil.availableOrNull(category, bean);
     }
 
-    public static <T> T getBean(Class<T> clazz) {
-        return applicationContext.getBean(clazz);
+    @Override
+    public <T> T getBean(String category, Class<T> clazz) {
+        Set<T> sets = getBeanSet(category, clazz);
+        return SillyCoreUtil.availableOne(category, new ArrayList<>(sets));
     }
 
-    public static <T> T registerBean(String beanName, Class<T> clazz, Consumer<BeanDefinitionBuilder> consumer) {
+    @Override
+    public <T> T registerBean(String category, String beanName, Class<T> clazz, Consumer<Object> consumer) {
         BeanDefinitionRegistry beanFactory = (BeanDefinitionRegistry) applicationContext.getAutowireCapableBeanFactory();
         if (applicationContext.containsBean(beanName)) {
             // 若有相同名称的移出此Bean
@@ -96,37 +115,7 @@ public class SpringSillyContent implements ApplicationContextAware, Initializing
 
     @Override
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
-        SpringSillyContent.applicationContext = applicationContext;
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        initSillyConfig();
-        initSillyInitializable();
-    }
-
-    protected void initSillyConfig() {
-        // 开始初始化配置
-        final Set<SillyConfigContent> beanSet = getBeanSet(SillyConfigContent.class);
-        for (SillyConfigContent sillyCategoryConfig : beanSet) {
-            // SillyConfig初始化！
-            sillyCategoryConfig.init();
-            log.info("SillyConfig:" + sillyCategoryConfig.getClass().getName() + " 初始化完成");
-        }
-    }
-
-    protected void initSillyInitializable() {
-        // 开始初始化配置
-        final Set<SillyInitializable> beanSet = getBeanSet(SillyInitializable.class);
-        for (SillyInitializable sillyInitializable : beanSet) {
-            // 不对sillyConfig重新初始化！
-            if (!(sillyInitializable instanceof SillyCategoryConfig)) {
-                sillyInitializable.init();
-                if (log.isDebugEnabled()) {
-                    log.debug("SillyInitializable:" + sillyInitializable.getClass().getName() + " 初始化完成");
-                }
-            }
-        }
+        SpringSillyContext.applicationContext = applicationContext;
     }
 
 }

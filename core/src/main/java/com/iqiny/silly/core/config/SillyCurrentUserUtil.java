@@ -8,14 +8,16 @@
  */
 package com.iqiny.silly.core.config;
 
-import com.iqiny.silly.core.base.SillyInitializable;
-import com.iqiny.silly.core.base.SillyMultipleCategory;
 
 /**
  * 当前人获取工具
  */
 public interface SillyCurrentUserUtil {
 
+    boolean isAdmin();
+
+    boolean isAdmin(String userId);
+    
     String currentUserId();
 
     String userIdToName(String userId);
