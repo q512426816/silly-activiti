@@ -5,12 +5,10 @@
 <configuration>
 
     <settings>
-        <!-- 打印查询语句 -->
         <setting name="lazyLoadingEnabled" value="false" />
     </settings>
 
     <mappers>
-        <!--将操作配置文件User.xml系添加进mapper-->
         <mapper resource="iqiny/silly/mapping/activiti/MyActivitiDao.xml" />
     </mappers>
 </configuration>

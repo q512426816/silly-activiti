@@ -8,7 +8,7 @@
  */
 package com.iqiny.silly.core.base;
 
-import java.util.Set;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -24,8 +24,16 @@ public interface SillyContext {
         return getBean(SillyCategory.DEFAULT_CATEGORY, clazz);
     }
 
-    default <T> Set<T> getBeanSet(Class<T> clazz) {
-        return getBeanSet(SillyCategory.DEFAULT_CATEGORY, clazz);
+    default <T> List<T> getBeanList(Class<T> clazz) {
+        return getBeanList(SillyCategory.DEFAULT_CATEGORY, clazz);
+    }
+
+    default <T> T registerBean(Class<T> clazz) {
+        return registerBean(SillyCategory.DEFAULT_CATEGORY, clazz.getName(), clazz, null);
+    }
+
+    default <T> T registerBean(String beanName, Class<T> clazz) {
+        return registerBean(SillyCategory.DEFAULT_CATEGORY, beanName, clazz, null);
     }
 
     default <T> T registerBean(String beanName, Class<T> clazz, Consumer<Object> consumer) {
@@ -36,7 +44,9 @@ public interface SillyContext {
 
     <T> T getBean(String category, Class<T> clazz);
 
-    <T> Set<T> getBeanSet(String category, Class<T> clazz);
+    <T extends SillyOrdered> T getNextBean(SillyOrdered order,String category, Class<T> clazz);
+
+    <T> List<T> getBeanList(String category, Class<T> clazz);
 
     <T> T registerBean(String category, String beanName, Class<T> clazz, Consumer<Object> consumer);
 

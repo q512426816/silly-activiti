@@ -23,10 +23,11 @@ import com.iqiny.silly.core.config.html.SillyHtmlTagTemplate;
 import com.iqiny.silly.core.config.property.*;
 import com.iqiny.silly.core.convertor.SillyStringConvertor;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
+import com.iqiny.silly.core.engine.SillyEngineService;
 import com.iqiny.silly.core.group.SillyTaskGroupHandle;
 import com.iqiny.silly.core.resume.SillyResumeService;
 import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
-import com.iqiny.silly.core.engine.SillyEngineService;
+import com.iqiny.silly.core.savehandle.node.*;
 import com.iqiny.silly.core.service.SillyReadService;
 import com.iqiny.silly.core.service.SillyWriteService;
 import org.apache.commons.logging.Log;
@@ -168,7 +169,7 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
         // 6 初始化 傻瓜转换器
         initSillyConvertorList();
         // 7 初始化 傻瓜数据保存器
-        initSillyVariableSaveHandleList();
+        initSillySaveHandleList();
         // 8 初始化 傻瓜页面代码生成模板
         initSillyHtmlTagTemplateList();
         // 9 初始化 傻瓜服务
@@ -285,8 +286,23 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
         hookInitSillyConvertorList();
     }
 
-    protected void initSillyVariableSaveHandleList() {
+    protected void initSillySaveHandleList() {
+        registerSillyNodeSaveHandle();
         hookInitSillyVariableSaveHandleList();
+    }
+
+    private void registerSillyNodeSaveHandle() {
+        sillyContext.registerBean(SillyInternalSaveHandle.class);
+        sillyContext.registerBean(SillyMasterSaveHandle.class);
+        sillyContext.registerBean(SillyNodeDataSaveHandle.class);
+        sillyContext.registerBean(SillyNodeVariableDataSaveHandle.class);
+        sillyContext.registerBean(SillyNodeVariableExecuteSaveHandle.class);
+        sillyContext.registerBean(SillyProcessMapSaveHandle.class);
+        sillyContext.registerBean(SillyProcessStartSaveHandle.class);
+        sillyContext.registerBean(SillyProcessSubmitSaveHandle.class);
+        sillyContext.registerBean(SillyAfterCompleteSaveHandle.class);
+        sillyContext.registerBean(SillyAfterCloseSaveHandle.class);
+        sillyContext.registerBean(SillyRecordResumeSaveHandle.class);
     }
 
     protected void addSillyVariableConvertor(SillyVariableConvertor convertor) {
@@ -371,6 +387,7 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
         Map<String, SillyProcessMasterProperty> masterMap = property.getMaster();
         for (String key : masterMap.keySet()) {
             SillyProcessMasterProperty masterProperty = masterMap.get(key);
+            masterProperty.setParent(property);
             if (StringUtils.isEmpty(masterProperty.getProcessKey())) {
                 masterProperty.setProcessKey(key);
             }
@@ -378,6 +395,7 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
             Map<String, SillyProcessNodeProperty> nodeMap = masterProperty.getNode();
             for (String nodeKey : nodeMap.keySet()) {
                 SillyProcessNodeProperty nodeProperty = nodeMap.get(nodeKey);
+                nodeProperty.setParent(masterProperty);
                 if (StringUtils.isEmpty(nodeProperty.getNodeKey())) {
                     nodeProperty.setNodeKey(nodeKey);
                 }
@@ -385,6 +403,7 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
                 Map<String, SillyProcessVariableProperty> variableMap = nodeProperty.getVariable();
                 for (String variableName : variableMap.keySet()) {
                     SillyProcessVariableProperty variableProperty = variableMap.get(variableName);
+                    variableProperty.setParent(nodeProperty);
                     if (StringUtils.isEmpty(variableProperty.getVariableName())) {
                         variableProperty.setVariableName(variableName);
                     }

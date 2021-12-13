@@ -11,11 +11,13 @@ package com.iqiny.silly.core.config.property.impl;
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.core.config.html.SillyHtmlTagTemplate;
 import com.iqiny.silly.core.config.html.base.SillyBaseHtmlTagConfig;
+import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
 import com.iqiny.silly.core.config.property.SillyProcessVariableProperty;
 
 
 public class DefaultProcessVariableProperty implements SillyProcessVariableProperty<SillyBaseHtmlTagConfig> {
 
+    private SillyProcessNodeProperty parent;
     private String desc;
     private String requestEl = SillyConstant.YesOrNo.YES;
     private boolean request = true;
@@ -159,5 +161,15 @@ public class DefaultProcessVariableProperty implements SillyProcessVariablePrope
 
     public void setRequestEl(String requestEl) {
         this.requestEl = requestEl;
+    }
+
+    @Override
+    public SillyProcessNodeProperty getParent() {
+        return parent;
+    }
+
+    @Override
+    public void setParent(SillyProcessNodeProperty parent) {
+        this.parent = parent;
     }
 }

@@ -9,14 +9,11 @@
 package com.iqiny.silly.spring;
 
 import com.iqiny.silly.core.base.SillyContext;
-import com.iqiny.silly.core.base.SillyInitializable;
+import com.iqiny.silly.core.base.SillyOrdered;
 import com.iqiny.silly.core.common.SillyCoreUtil;
-import com.iqiny.silly.core.config.SillyCategoryConfig;
-import com.iqiny.silly.core.config.SillyConfigContent;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -25,7 +22,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.lang.NonNull;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -68,17 +65,18 @@ public class SpringSillyContext implements SillyContext, ApplicationContextAware
      * @return
      */
     @Override
-    public <T> Set<T> getBeanSet(String category, Class<T> clazz) {
-        Set<T> set = new LinkedHashSet<>();
+    public <T> List<T> getBeanList(String category, Class<T> clazz) {
+        List<T> beanList = new ArrayList<>();
         final Set<Map.Entry<String, T>> entries = applicationContext.getBeansOfType(clazz).entrySet();
         for (Map.Entry<String, T> entry : entries) {
             T value = entry.getValue();
             boolean available = SillyCoreUtil.available(category, value);
             if (available) {
-                set.add(value);
+                beanList.add(value);
             }
         }
-        return set;
+
+        return SillyCoreUtil.orderCollection(beanList);
     }
 
 
@@ -90,8 +88,28 @@ public class SpringSillyContext implements SillyContext, ApplicationContextAware
 
     @Override
     public <T> T getBean(String category, Class<T> clazz) {
-        Set<T> sets = getBeanSet(category, clazz);
-        return SillyCoreUtil.availableOne(category, new ArrayList<>(sets));
+        List<T> list = getBeanList(category, clazz);
+        return SillyCoreUtil.availableOne(category, list);
+    }
+
+
+    @Override
+    public <T extends SillyOrdered> T getNextBean(SillyOrdered order, String category, Class<T> clazz) {
+        List<T> list = getBeanList(category, clazz);
+        if (!list.isEmpty() && order == null) {
+            return list.get(0);
+        }
+
+        for (T t : list) {
+            if (t.order() == order.order()) {
+                if (t.hashCode() > order.hashCode()) {
+                    return t;
+                }
+            } else if (t.order() > order.order()) {
+                return t;
+            }
+        }
+        return null;
     }
 
     @Override

@@ -48,8 +48,18 @@ public class ScanSillyFactory<M extends SillyMaster, N extends SillyNode<V>, V e
     }
 
     @Override
+    public Class<M> masterClass() {
+        return masterClazz;
+    }
+
+    @Override
     public N newNode() {
         return SillyReflectUtil.newInstance(nodeClazz);
+    }
+
+    @Override
+    public Class<N> nodeClass() {
+        return nodeClazz;
     }
 
     @Override
@@ -58,8 +68,18 @@ public class ScanSillyFactory<M extends SillyMaster, N extends SillyNode<V>, V e
     }
 
     @Override
+    public Class<V> variableClass() {
+        return variableClazz;
+    }
+
+    @Override
     public R newResume() {
         return SillyReflectUtil.newInstance(resumeClazz);
+    }
+
+    @Override
+    public Class<R> resumeClass() {
+        return resumeClazz;
     }
 
     public void setMasterClazz(Class<M> masterClazz) {

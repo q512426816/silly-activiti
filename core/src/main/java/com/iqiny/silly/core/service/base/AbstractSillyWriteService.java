@@ -8,7 +8,6 @@
  */
 package com.iqiny.silly.core.service.base;
 
-import com.alibaba.fastjson.JSON;
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.SillyAssert;
@@ -18,15 +17,15 @@ import com.iqiny.silly.core.base.SillyMasterTask;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
-import com.iqiny.silly.core.config.property.SillyProcessMasterProperty;
 import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
-import com.iqiny.silly.core.config.property.SillyProcessVariableProperty;
 import com.iqiny.silly.core.config.property.SillyPropertyHandle;
 import com.iqiny.silly.core.config.property.impl.DefaultVariableSaveHandle;
 import com.iqiny.silly.core.convertor.SillyAutoConvertor;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.engine.SillyTask;
 import com.iqiny.silly.core.resume.SillyResume;
+import com.iqiny.silly.core.savehandle.SillyNodeSaveHandle;
+import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
 import com.iqiny.silly.core.service.SillyReadService;
 import com.iqiny.silly.core.service.SillyWriteService;
 import org.apache.commons.collections.MapUtils;
@@ -92,7 +91,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         final SillyTask nowTask = sillyEngineService.findTaskById(nowTaskId);
         SillyAssert.notNull(nowTask, "提交时，当前任务不存在");
         // 完成任务，返回下一步任务列表
-        List<? extends SillyTask> taskList = completeTask(master, node, varMap);
+        List<? extends SillyTask> taskList = completeTask(master, node, nowTask, varMap);
 
         afterSubmit(master, node, nowTask, taskList);
     }
@@ -306,10 +305,7 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
      * @param node   节点对象
      * @param varMap 流程参数
      */
-    protected List<? extends SillyTask> completeTask(M master, N node, Map<String, Object> varMap) {
-        SillyAssert.notEmpty(node.getTaskId(), "完成任务操作，任务ID不可为空！");
-        SillyTask task = sillyEngineService.findTaskById(node.getTaskId());
-        SillyAssert.notNull(task, "任务获取失败！");
+    protected List<? extends SillyTask> completeTask(M master, N node, SillyTask task, Map<String, Object> varMap) {
         complete(varMap, task);
         return afterCompleteTask(master, node, task);
     }
@@ -336,13 +332,6 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
             afterCompleteProcess(master, node, taskList);
         }
         return taskList;
-    }
-
-    /**
-     * 获取任务执行耗时
-     */
-    protected Long taskDueTime(SillyTask task) {
-        return sillyEngineService.getTaskDueTime(task);
     }
 
     /**
@@ -760,22 +749,19 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
     }
 
     protected M saveData(boolean submit, String taskId, Map<String, Object> saveMap) {
-        String masterIdMapKey = masterIdMapKey();
-        String masterId = MapUtils.getString(saveMap, masterIdMapKey);
-        saveMap.remove(masterIdMapKey);
+        String masterId = MapUtils.getString(saveMap, masterIdMapKey());
         String processKey = null;
         String nodeKey = null;
+        SillyPropertyHandle propertyHandle = null;
         if (StringUtils.isEmpty(taskId)) {
             // 从Map 中获取 processKey ， nodeKey
-            SillyPropertyHandle propertyHandle = getSillyPropertyHandle(masterId, saveMap);
+            propertyHandle = newSillyPropertyHandle(masterId, saveMap);
             String processKeyMapKey = propertyHandle.getStringValue(processKeyMapKey());
             String nodeKeyMapKey = propertyHandle.getStringValue(nodeKeyMapKey());
             String lastProcessKey = propertyHandle.getStringValue(processProperty().getLastProcessKey());
             processKey = MapUtils.getString(saveMap, processKeyMapKey, lastProcessKey);
             String firstNodeKey = propertyHandle.getStringValue(getLastNodeProperty(processKey).getNodeKey());
             nodeKey = MapUtils.getString(saveMap, nodeKeyMapKey, firstNodeKey);
-            saveMap.remove(processKeyMapKey);
-            saveMap.remove(nodeKeyMapKey);
         } else {
             SillyTask task = sillyEngineService.findTaskById(taskId);
             SillyAssert.notNull(task, "任务未找到" + taskId);
@@ -787,72 +773,45 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
             SillyAssert.notNull(master, "根据 masterId 获取数据失败 " + masterId);
             processKey = master.processKey();
             nodeKey = task.getTaskDefinitionKey();
+            propertyHandle = newSillyPropertyHandle(masterId, saveMap);
         }
 
-        return saveData(submit, taskId, masterId, processKey, nodeKey, saveMap);
-    }
-
-    protected M saveData(boolean submit, String taskId, String masterId, String processKey, String nodeKey, Map<String, Object> saveMap) {
-        SillyProcessMasterProperty<?> masterProperty = getMasterProperty(processKey);
         SillyProcessNodeProperty<?> nodeProperty = getNodeProperty(processKey, nodeKey);
-
-        SillyAssert.notNull(masterProperty, "masterProperty 获取失败" + processKey);
         SillyAssert.notNull(nodeProperty, "nodeProperty 获取失败" + nodeKey);
 
         // 是否启动流程 （taskId存在 必定不启动流程，submit = true 启动流程）
         boolean isStartProcess = StringUtils.isEmpty(taskId) && SillyMapUtils.getBooleanValue(saveMap, startProcessKey(), submit);
 
         saveMap.put(submitKey(), submit);
+        saveMap.put(taskIdKey(), taskId);
         saveMap.put(masterIdMapKey(), masterId);
+        saveMap.put(processKeyMapKey(), processKey);
+        saveMap.put(nodeKeyMapKey(), nodeKey);
         saveMap.put(startProcessKey(), isStartProcess);
-        SillyPropertyHandle propertyHandle = getSillyPropertyHandle(masterId, saveMap);
-        saveMap.remove(submitKey());
-        saveMap.remove(masterIdMapKey());
-        saveMap.remove(startProcessKey());
+        
+        // 其他类型归属处置
+        SillyNodeSourceData sourceData = new SillyNodeSourceData(usedCategory(), nodeProperty, propertyHandle, saveMap);
+        return saveData(sourceData);
+    }
 
-        List<V> vs = mapToVariables(submit, propertyHandle, saveMap, nodeProperty);
-        M m = makeMasterByVariables(vs);
-        m.setProcessKey(masterProperty.getProcessKey());
-        m.setProcessVersion(masterProperty.getProcessVersion());
-        m.setId(masterId);
-        N n = makeNodeByVariables(vs);
-        n.setMasterId(masterId);
-        n.setTaskId(taskId);
-        n.setNodeKey(nodeProperty.getNodeKey());
-        n.setNodeName(nodeProperty.getNodeName());
-        n.setParallelFlag(nodeProperty.isParallel() ? SillyConstant.YesOrNo.YES : SillyConstant.YesOrNo.NO);
-
-        // 取全部的信息来获取流程引擎使用的信息
-        Map<String, Object> varMap = makeActVariableMap(vs);
-        // 设置需要进行保存的变量数据
-        List<V> saveV = variableSaveHandle(m, n, vs, propertyHandle);
-        n.setVariableList(saveV);
-        // 保存数据
-        save(m, n, isStartProcess, varMap);
-        // 更新 ROOT 数据
-        updatePropertyHandleRoot(m.getId(), propertyHandle.getValues());
-
-        if (submit) {
-            // 提交流程
-            doSubmit(m, n, varMap);
+    protected M saveData(SillyNodeSourceData sourceData) {
+        SillyNodeSaveHandle nodeSaveHandle = sillyContext.getNextBean(null, usedCategory(), SillyNodeSaveHandle.class);
+        while (nodeSaveHandle != null) {
+            nodeSaveHandle = nodeSaveHandle.handle(sourceData);
         }
 
+        M m = (M) sourceData.getMaster();
+        boolean flag = updateById(m);
+        SillyAssert.isTrue(flag, "主数据更新异常");
+        // 更新 ROOT 数据
+        updatePropertyHandleRoot(m.getId());
         return m;
     }
 
-    protected List<V> variableSaveHandle(M m, N n, List<V> vs, SillyPropertyHandle propertyHandle) {
-        List<V> needSaveList = new ArrayList<>();
-        for (V v : vs) {
-            boolean needSaveFlag = batchSaveHandle(m, n, v, propertyHandle);
-            if (needSaveFlag) {
-                needSaveList.add(v);
-            }
-        }
-        return needSaveList;
-    }
 
-    protected void updatePropertyHandleRoot(String masterId, Object updateValue) {
-        updatePropertyHandleRootCache(masterId, updateValue);
+    protected void updatePropertyHandleRoot(String masterId) {
+        Object propertyHandleRoot = getPropertyHandleRootDB(masterId);
+        updatePropertyHandleRootCache(masterId, propertyHandleRoot);
     }
 
     protected void updatePropertyHandleRootCache(String masterId, Object updateValue) {
@@ -863,130 +822,6 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         sillyCache.updatePropertyHandleRootCache(usedCategory(), masterId, updateValue);
     }
 
-    /**
-     * Map 根据配置对象转 Variable 对象集合
-     */
-    public List<V> mapToVariables(boolean submit, SillyPropertyHandle sillyPropertyHandle, Map<String, Object> map, SillyProcessNodeProperty<?> nodeProperty) {
-        SillyAssert.notNull(nodeProperty, "节点配置不可为空");
-
-        List<V> list = new ArrayList<>();
-        Map<String, ? extends SillyProcessVariableProperty> variableMap = nodeProperty.getVariable();
-        Set<String> keySet = variableMap.keySet();
-
-        StringJoiner checkSj = new StringJoiner("\r\n");
-        for (String vKey : keySet) {
-            SillyProcessVariableProperty variableProperty = variableMap.get(vKey);
-            Object variableObj = map.remove(vKey);
-            String variableText = object2String(variableObj, null);
-            if (StringUtils.isEmpty(variableText)) {
-                Object defaultObject = sillyPropertyHandle.getValue(variableProperty.getDefaultText());
-                variableText = object2String(defaultObject, null);
-            }
-            // 提交才进行参数必须项校验
-            if (submit && StringUtils.isEmpty(variableText)) {
-                if (variableProperty.isRequest() && sillyPropertyHandle.getBooleanValue(variableProperty.getRequestEl())) {
-                    checkSj.add(" 参数【" + variableProperty.getDesc() + "】 不可为空 【" + vKey + "】");
-                }
-                continue;
-            }
-
-            if (variableProperty.isUpdatePropertyHandleValue()) {
-                sillyPropertyHandle.updateValue(vKey, variableText);
-            }
-            String variableName = sillyPropertyHandle.getStringValue(variableProperty.getVariableName());
-            String variableType = sillyPropertyHandle.getStringValue(variableProperty.getVariableType());
-            String belong = sillyPropertyHandle.getStringValue(variableProperty.getBelong());
-            String activitiHandler = sillyPropertyHandle.getStringValue(variableProperty.getActivitiHandler());
-            String saveHandleName = StringUtils.join(variableProperty.getSaveHandleNames(), SillyConstant.ARRAY_SPLIT_STR);
-            paramToVariableList(list,
-                    variableName,
-                    variableText,
-                    variableType,
-                    belong,
-                    activitiHandler,
-                    saveHandleName
-            );
-        }
-
-        keySet = map.keySet();
-        for (String key : keySet) {
-            if (nodeProperty.ignoreField(key)) {
-                continue;
-            }
-
-            if (!nodeProperty.isAllowOtherVariable()) {
-                if (nodeProperty.isOtherVariableThrowException()) {
-                    checkSj.add(" 不允许保存此额外变量数据【" + key + "】");
-                }
-                continue;
-            }
-
-            doVariableList(map.get(key), list, key, SillyConstant.ActivitiVariable.BELONG_VARIABLE, null);
-        }
-
-        String checkInfo = checkSj.toString();
-        SillyAssert.isEmpty(checkInfo, checkInfo);
-
-        return list;
-    }
-
-    protected String object2String(Object variableObj, String defaultStr) {
-        String variableText = defaultStr;
-        if (variableObj == null) {
-            return variableText;
-        }
-
-        if (variableObj instanceof Collection) {
-            Collection<Object> c = (Collection<Object>) variableObj;
-            if (c.isEmpty()) {
-                return variableText;
-            }
-
-            Object next = c.iterator().next();
-            if (next instanceof String) {
-                variableText = StringUtils.myJoin((Collection<String>) variableObj);
-            } else {
-                variableText = JSON.toJSONString(variableObj);
-            }
-        } else {
-            if (variableObj instanceof String) {
-                variableText = (String) variableObj;
-            } else {
-                variableText = JSON.toJSONString(variableObj);
-            }
-        }
-
-        return variableText;
-    }
-
-    public SillyProcessNodeProperty<?> getNodeProperty(SillyTask task) {
-        String processKey = sillyEngineService.getActKeyNameByProcessInstanceId(task.getProcessInstanceId());
-        String nodeKey = task.getTaskDefinitionKey();
-        return getNodeProperty(processKey, nodeKey);
-    }
-
-    public M makeMasterByVariables(List<V> vList) {
-        return doMakeObjByVariable(vList, SillyConstant.ActivitiVariable.BELONG_MASTER, masterClass());
-    }
-
-    public N makeNodeByVariables(List<V> vList) {
-        return doMakeObjByVariable(vList, SillyConstant.ActivitiVariable.BELONG_NODE, nodeClass());
-    }
-
-    protected <T> T doMakeObjByVariable(List<V> vList, String belong, Class<T> clazz) {
-        Map<String, Object> objMap = new HashMap<>();
-        for (V v : vList) {
-            String name = v.getVariableName();
-            String value = v.getVariableText();
-
-            if (Objects.equals(v.getBelong(), belong)) {
-                objMap.put(name, value);
-            }
-        }
-
-        String objJson = JSON.toJSONString(objMap);
-        return JSON.parseObject(objJson, clazz);
-    }
 
     public List<V> toVariableList(Map<String, Object> map) {
         return toVariableList(map, SillyConstant.ActivitiVariable.BELONG_VARIABLE, null);

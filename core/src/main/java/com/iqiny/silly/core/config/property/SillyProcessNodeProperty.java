@@ -52,4 +52,13 @@ public interface SillyProcessNodeProperty<VP extends SillyProcessVariablePropert
      * 忽略此参数，不存储，不校验
      */
     boolean ignoreField(String fieldName);
+
+    /**
+     * 设置父类
+     *
+     * @param property
+     */
+    void setParent(SillyProcessMasterProperty property);
+
+    SillyProcessMasterProperty getParent();
 }

@@ -153,4 +153,9 @@ public class SillyConstant {
         return SillyDateUtils.formatDate(new Date());
     }
 
+    public class Order {
+        public static final int BELONG_ROOT_ORDER = Integer.MIN_VALUE;
+        public static final int BELONG_INTERNAL_VARIABLE_ORDER = BELONG_ROOT_ORDER + 10000;
+    }
+
 }

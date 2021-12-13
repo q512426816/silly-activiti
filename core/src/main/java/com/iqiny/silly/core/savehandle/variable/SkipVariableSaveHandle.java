@@ -6,7 +6,7 @@
  *  project name：silly-core
  *  project description：top silly project pom.xml file
  */
-package com.iqiny.silly.core.savehandle;
+package com.iqiny.silly.core.savehandle.variable;
 
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
@@ -14,12 +14,12 @@ import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
 
 /**
- * 保存处理器
- * 此变量进行存储
+ * 跳过保存处理器
+ * 此变量不进行存储
  */
-public class SaveVariableSaveHandle implements SillyVariableSaveHandle {
+public class SkipVariableSaveHandle implements SillyVariableSaveHandle {
 
-    public static final String NAME = "save";
+    public static final String NAME = "skip";
 
     @Override
     public String name() {
@@ -28,6 +28,6 @@ public class SaveVariableSaveHandle implements SillyVariableSaveHandle {
 
     @Override
     public boolean handle(SillyMaster master, SillyNode node, SillyVariable variable) {
-        return true;
+        return false;
     }
 }

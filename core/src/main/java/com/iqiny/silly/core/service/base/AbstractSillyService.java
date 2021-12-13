@@ -109,10 +109,10 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         otherInit();
     }
 
-    private void setEntityClazz(SillyFactory sillyFactory) {
-        masterClass = (Class<M>) sillyFactory.newMaster().getClass();
-        nodeClass = (Class<N>) sillyFactory.newNode().getClass();
-        variableClass = (Class<V>) sillyFactory.newVariable().getClass();
+    private void setEntityClazz(SillyFactory<M, N, V, ? extends SillyResume> sillyFactory) {
+        masterClass = sillyFactory.masterClass();
+        nodeClass = sillyFactory.nodeClass();
+        variableClass = sillyFactory.variableClass();
     }
 
     protected abstract void otherInit();
@@ -156,7 +156,7 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         return sillyCache.getPropertyHandleRootCache(usedCategory(), masterId);
     }
 
-    protected SillyPropertyHandle getSillyPropertyHandle(String masterId, Map<String, Object> values) {
+    protected SillyPropertyHandle newSillyPropertyHandle(String masterId, Map<String, Object> values) {
         SillyPropertyHandle sillyPropertyHandle = getSillyConfig().newSillyPropertyHandle();
         if (StringUtils.isNotEmpty(masterId)) {
             sillyPropertyHandle.setRoot(getPropertyHandleRoot(masterId));

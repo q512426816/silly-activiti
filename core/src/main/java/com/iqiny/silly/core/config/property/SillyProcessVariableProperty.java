@@ -8,11 +8,8 @@
  */
 package com.iqiny.silly.core.config.property;
 
-import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.core.config.html.SillyHtmlTagConfig;
 import com.iqiny.silly.core.config.html.SillyHtmlTagTemplate;
-
-import java.util.List;
 
 
 public interface SillyProcessVariableProperty<C extends SillyHtmlTagConfig> {
@@ -91,6 +88,13 @@ public interface SillyProcessVariableProperty<C extends SillyHtmlTagConfig> {
 
     String getHtml();
 
+    /**
+     * 设置父类
+     *
+     * @param property
+     */
+    void setParent(SillyProcessNodeProperty property);
 
+    SillyProcessNodeProperty getParent();
 
 }

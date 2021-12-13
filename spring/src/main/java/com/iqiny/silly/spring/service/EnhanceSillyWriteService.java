@@ -33,8 +33,6 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
         String taskId = MapUtils.getString(saveMap, taskIdKey());
         Boolean submit = MapUtils.getBoolean(saveMap, submitKey(), false);
         SillyAssert.notEmpty(taskId, "任务ID不可为空");
-        saveMap.remove(taskIdKey());
-        saveMap.remove(submitKey());
         return saveData(submit, taskId, saveMap);
     }
 
@@ -43,9 +41,17 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
     public M saveOrNewMap(Map<String, Object> saveMap) {
         String taskId = MapUtils.getString(saveMap, taskIdKey());
         Boolean submit = MapUtils.getBoolean(saveMap, submitKey(), false);
-        saveMap.remove(taskIdKey());
-        saveMap.remove(submitKey());
         return saveData(submit, taskId, saveMap);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public M saveData(String taskId, Map<String, Object> saveMap) {
+        return saveData(false, taskId, saveMap);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public M submitData(String taskId, Map<String, Object> saveMap) {
+        return saveData(true, taskId, saveMap);
     }
 
     @Override
@@ -64,16 +70,6 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
     @Transactional(rollbackFor = Exception.class)
     public void forceEndProcess(String processInstanceId) {
         super.forceEndProcess(processInstanceId);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public M saveData(String taskId, Map<String, Object> saveMap) {
-        return saveData(false, taskId, saveMap);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public M submitData(String taskId, Map<String, Object> saveMap) {
-        return saveData(true, taskId, saveMap);
     }
 
 }

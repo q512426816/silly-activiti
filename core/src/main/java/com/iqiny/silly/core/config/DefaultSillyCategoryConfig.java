@@ -17,19 +17,20 @@ import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.cache.SillyCache;
 import com.iqiny.silly.core.config.html.SillyHtmlTagTemplate;
-import com.iqiny.silly.core.config.property.*;
+import com.iqiny.silly.core.config.property.SillyProcessProperty;
+import com.iqiny.silly.core.config.property.SillyPropertyHandle;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
+import com.iqiny.silly.core.engine.SillyEngineService;
 import com.iqiny.silly.core.group.SillyTaskGroupHandle;
 import com.iqiny.silly.core.resume.SillyResume;
 import com.iqiny.silly.core.resume.SillyResumeService;
 import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
-import com.iqiny.silly.core.engine.SillyEngineService;
 import com.iqiny.silly.core.service.SillyReadService;
 import com.iqiny.silly.core.service.SillyWriteService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.*;
+import java.util.Map;
 
 /**
  * 业务配置类
@@ -149,6 +150,7 @@ public class DefaultSillyCategoryConfig<M extends SillyMaster, N extends SillyNo
      * 初始化
      */
     protected void doInit() {
+
     }
 
     /**

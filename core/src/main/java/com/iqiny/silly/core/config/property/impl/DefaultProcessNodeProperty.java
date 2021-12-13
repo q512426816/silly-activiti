@@ -11,6 +11,7 @@ package com.iqiny.silly.core.config.property.impl;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.iqiny.silly.core.config.property.SillyProcessMasterProperty;
 import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
 
 import java.util.LinkedHashMap;
@@ -20,6 +21,8 @@ import java.util.Map;
 
 public class DefaultProcessNodeProperty implements SillyProcessNodeProperty<DefaultProcessVariableProperty> {
 
+
+    private SillyProcessMasterProperty parent;
     /**
      * 是否允许其他未定义的变量进行操作
      */
@@ -47,13 +50,11 @@ public class DefaultProcessNodeProperty implements SillyProcessNodeProperty<Defa
 
     private List<String> ignoreFieldNames;
 
-
     /**
      * 属性名称： 对应的配置参数
      */
     @JSONField(parseFeatures = Feature.OrderedField, serialzeFeatures = SerializerFeature.MapSortField)
     private final Map<String, DefaultProcessVariableProperty> variable = new LinkedHashMap<>();
-
 
     @Override
     public boolean isAllowOtherVariable() {
@@ -118,5 +119,15 @@ public class DefaultProcessNodeProperty implements SillyProcessNodeProperty<Defa
     public boolean ignoreField(String fieldName) {
         List<String> ignoreFieldNames = getIgnoreFieldNames();
         return ignoreFieldNames != null && ignoreFieldNames.contains(fieldName);
+    }
+
+    @Override
+    public SillyProcessMasterProperty getParent() {
+        return parent;
+    }
+
+    @Override
+    public void setParent(SillyProcessMasterProperty parent) {
+        this.parent = parent;
     }
 }

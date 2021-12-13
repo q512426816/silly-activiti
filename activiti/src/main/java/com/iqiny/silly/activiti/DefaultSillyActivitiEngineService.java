@@ -11,26 +11,18 @@ package com.iqiny.silly.activiti;
 import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.core.base.SillyMasterTask;
-import com.iqiny.silly.core.config.DefaultSillyCategoryConfig;
-import org.activiti.engine.ActivitiException;
-import org.activiti.engine.impl.db.DbSqlSessionFactory;
 import org.activiti.engine.impl.db.IbatisVariableTypeHandler;
-import org.activiti.engine.impl.util.IoUtil;
 import org.activiti.engine.impl.util.ReflectUtil;
 import org.activiti.engine.impl.variable.VariableType;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ibatis.builder.xml.XMLConfigBuilder;
-import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
-import org.apache.ibatis.session.defaults.DefaultSqlSessionFactory;
 import org.apache.ibatis.transaction.TransactionFactory;
-import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import org.apache.ibatis.type.JdbcType;
 import org.mybatis.spring.transaction.SpringManagedTransactionFactory;
 
@@ -118,7 +110,7 @@ public class DefaultSillyActivitiEngineService extends BaseSillyActivitiEngineSe
             param.put("allGroupId", allGroupId);
         }
         param.put("category", category);
-        param.put("masterId", masterId);
+        param.put("businessKey", masterId);
         param.put("userId", userId);
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
             return sqlSession.selectList(namespace() + "getDoingMasterTask", param);

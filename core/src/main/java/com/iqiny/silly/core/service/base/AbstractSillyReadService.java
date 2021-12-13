@@ -19,6 +19,7 @@ import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
+import com.iqiny.silly.core.engine.SillyTask;
 import com.iqiny.silly.core.read.SillyMasterTaskUtil;
 import com.iqiny.silly.core.service.SillyReadService;
 
@@ -210,6 +211,12 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
         return null;
     }
 
+    public SillyProcessNodeProperty<?> getNodeProperty(String taskId) {
+        SillyTask task = sillyEngineService.findTaskById(taskId);
+        String masterId = sillyEngineService.getBusinessKey(task.getProcessInstanceId());
+        M master = getMaster(masterId);
+        return getNodeProperty(master.processKey(), task.getTaskDefinitionKey());
+    }
 
     @Override
     public Object queryDoingPage(Map<String, Object> params) {

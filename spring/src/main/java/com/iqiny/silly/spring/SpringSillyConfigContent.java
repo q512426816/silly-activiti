@@ -10,30 +10,30 @@ package com.iqiny.silly.spring;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
+import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.core.base.SillyContext;
 import com.iqiny.silly.core.base.SillyInitializable;
 import com.iqiny.silly.core.base.SillyProperties;
-import com.iqiny.silly.core.common.SillyCoreUtil;
-import com.iqiny.silly.core.config.SillyCategoryConfig;
-import com.iqiny.silly.core.savehandle.DataJoinVariableSaveHandle;
-import com.iqiny.silly.core.savehandle.OverwriteVariableSaveHandle;
-import com.iqiny.silly.core.savehandle.SaveVariableSaveHandle;
-import com.iqiny.silly.core.savehandle.SkipVariableSaveHandle;
-import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.core.cache.SillyCache;
+import com.iqiny.silly.core.common.SillyCoreUtil;
 import com.iqiny.silly.core.config.BaseSillyConfigContent;
+import com.iqiny.silly.core.config.SillyCategoryConfig;
 import com.iqiny.silly.core.config.SillyCurrentUserUtil;
 import com.iqiny.silly.core.config.html.SillyHtmlTagTemplate;
 import com.iqiny.silly.core.config.property.SillyProcessProperty;
 import com.iqiny.silly.core.config.property.SillyPropertyHandle;
-import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
 import com.iqiny.silly.core.config.property.impl.DefaultVariableSaveHandle;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
+import com.iqiny.silly.core.engine.SillyEngineService;
 import com.iqiny.silly.core.group.SillyTaskCategoryGroup;
 import com.iqiny.silly.core.group.SillyTaskGroup;
 import com.iqiny.silly.core.group.SillyTaskGroupHandle;
 import com.iqiny.silly.core.resume.SillyResumeService;
-import com.iqiny.silly.core.engine.SillyEngineService;
+import com.iqiny.silly.core.savehandle.*;
+import com.iqiny.silly.core.savehandle.variable.DataJoinVariableSaveHandle;
+import com.iqiny.silly.core.savehandle.variable.OverwriteVariableSaveHandle;
+import com.iqiny.silly.core.savehandle.variable.SaveVariableSaveHandle;
+import com.iqiny.silly.core.savehandle.variable.SkipVariableSaveHandle;
 import com.iqiny.silly.core.service.SillyReadService;
 import com.iqiny.silly.core.service.SillyWriteService;
 import org.apache.commons.io.IOUtils;
@@ -41,6 +41,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -49,9 +50,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.Set;
+import java.util.List;
 
 @SuppressWarnings("all")
+@Order
 public class SpringSillyConfigContent extends BaseSillyConfigContent implements InitializingBean {
 
     private final static Log log = LogFactory.getLog(SpringSillyConfigContent.class);
@@ -112,8 +114,8 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent implements 
 
     @Override
     protected void hookSillyContextList() {
-        final Set<SillyContext> beanSet = sillyContext.getBeanSet(SillyContext.class);
-        for (SillyContext sillyContext : beanSet) {
+        final List<SillyContext> beanList = sillyContext.getBeanList(SillyContext.class);
+        for (SillyContext sillyContext : beanList) {
             addSillyContext(sillyContext);
         }
     }
@@ -125,8 +127,8 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent implements 
 
     @Override
     protected void hookInitSillyConvertorList() {
-        final Set<SillyVariableConvertor> beanSet = sillyContext.getBeanSet(SillyVariableConvertor.class);
-        for (SillyVariableConvertor convertor : beanSet) {
+        final List<SillyVariableConvertor> beanList = sillyContext.getBeanList(SillyVariableConvertor.class);
+        for (SillyVariableConvertor convertor : beanList) {
             addSillyVariableConvertor(convertor);
         }
     }
@@ -138,23 +140,23 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent implements 
         addSillyVariableSaveHandle(new DataJoinVariableSaveHandle());
         addSillyVariableSaveHandle(new SaveVariableSaveHandle());
         addSillyVariableSaveHandle(new SkipVariableSaveHandle());
-        final Set<SillyVariableSaveHandle> beanSet = sillyContext.getBeanSet(SillyVariableSaveHandle.class);
-        for (SillyVariableSaveHandle saveHandle : beanSet) {
+        final List<SillyVariableSaveHandle> beanList = sillyContext.getBeanList(SillyVariableSaveHandle.class);
+        for (SillyVariableSaveHandle saveHandle : beanList) {
             addSillyVariableSaveHandle(saveHandle);
         }
     }
 
     @Override
     protected void hookInitSillyHtmlTagTemplateList() {
-        final Set<SillyHtmlTagTemplate> beanSet = sillyContext.getBeanSet(SillyHtmlTagTemplate.class);
-        for (SillyHtmlTagTemplate htmlTagTemplate : beanSet) {
+        final List<SillyHtmlTagTemplate> beanList = sillyContext.getBeanList(SillyHtmlTagTemplate.class);
+        for (SillyHtmlTagTemplate htmlTagTemplate : beanList) {
             addSillyHtmlTagTemplate(htmlTagTemplate);
         }
     }
 
     @Override
     protected void initEngineSillyService() {
-        final Set<SillyEngineService> engineServices = sillyContext.getBeanSet(SillyEngineService.class);
+        final List<SillyEngineService> engineServices = sillyContext.getBeanList(SillyEngineService.class);
         for (SillyEngineService engineService : engineServices) {
             addSillyEngineService(engineService);
         }
@@ -162,7 +164,7 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent implements 
 
     @Override
     protected void initResumeSillyService() {
-        final Set<SillyResumeService> resumeServices = sillyContext.getBeanSet(SillyResumeService.class);
+        final List<SillyResumeService> resumeServices = sillyContext.getBeanList(SillyResumeService.class);
         for (SillyResumeService resumeService : resumeServices) {
             addSillyResumeService(resumeService);
         }
@@ -170,7 +172,7 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent implements 
 
     @Override
     protected void initReadSillyService() {
-        final Set<SillyReadService> readServices = sillyContext.getBeanSet(SillyReadService.class);
+        final List<SillyReadService> readServices = sillyContext.getBeanList(SillyReadService.class);
         for (SillyReadService readService : readServices) {
             addSillyReadService(readService);
         }
@@ -178,7 +180,7 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent implements 
 
     @Override
     protected void initWriteSillyService() {
-        final Set<SillyWriteService> writeServices = sillyContext.getBeanSet(SillyWriteService.class);
+        final List<SillyWriteService> writeServices = sillyContext.getBeanList(SillyWriteService.class);
         for (SillyWriteService writeService : writeServices) {
             addSillyWriteService(writeService);
         }
@@ -200,7 +202,7 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent implements 
 
     @Override
     protected void hookSillyCacheList() {
-        final Set<SillyCache> sillyCaches = sillyContext.getBeanSet(SillyCache.class);
+        final List<SillyCache> sillyCaches = sillyContext.getBeanList(SillyCache.class);
         for (SillyCache sillyCache : sillyCaches) {
             addSillyCache(sillyCache);
         }
@@ -208,22 +210,22 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent implements 
 
     @Override
     protected void hookSillyCurrentUserUtilList() {
-        final Set<SillyCurrentUserUtil> sillyCurrentUserUtils = sillyContext.getBeanSet(SillyCurrentUserUtil.class);
+        final List<SillyCurrentUserUtil> sillyCurrentUserUtils = sillyContext.getBeanList(SillyCurrentUserUtil.class);
         for (SillyCurrentUserUtil currentUserUtil : sillyCurrentUserUtils) {
             addSillyCurrentUserUtil(currentUserUtil);
         }
     }
 
     protected void loadSillyTaskCategoryGroup(SillyTaskGroupHandle handle) {
-        Set<SillyTaskCategoryGroup> beanSet = sillyContext.getBeanSet(SillyTaskCategoryGroup.class);
-        for (SillyTaskCategoryGroup sillyTaskCategoryGroup : beanSet) {
+        List<SillyTaskCategoryGroup> beanList = sillyContext.getBeanList(SillyTaskCategoryGroup.class);
+        for (SillyTaskCategoryGroup sillyTaskCategoryGroup : beanList) {
             handle.addCategorySillyTaskGroup(sillyTaskCategoryGroup);
         }
     }
 
     protected void loadSillyTaskGroup(SillyTaskGroupHandle handle) {
-        Set<SillyTaskGroup> beanSet = sillyContext.getBeanSet(SillyTaskGroup.class);
-        for (SillyTaskGroup sillyTaskGroup : beanSet) {
+        List<SillyTaskGroup> beanList = sillyContext.getBeanList(SillyTaskGroup.class);
+        for (SillyTaskGroup sillyTaskGroup : beanList) {
             handle.addSillyTaskGroup(sillyTaskGroup);
         }
     }
@@ -350,8 +352,8 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent implements 
 
     protected void initSillyInitializable() {
         // 开始初始化配置
-        final Set<SillyInitializable> beanSet = sillyContext.getBeanSet(SillyInitializable.class);
-        for (SillyInitializable sillyInitializable : beanSet) {
+        final List<SillyInitializable> beanList = sillyContext.getBeanList(SillyInitializable.class);
+        for (SillyInitializable sillyInitializable : beanList) {
             // 不对sillyConfig重新初始化！
             if (!(sillyInitializable instanceof SillyCategoryConfig)) {
                 sillyInitializable.init();

@@ -6,7 +6,7 @@
  *  project name：silly-core
  *  project description：top silly project pom.xml file
  */
-package com.iqiny.silly.core.savehandle;
+package com.iqiny.silly.core.savehandle.variable;
 
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.core.base.core.SillyMaster;
@@ -16,16 +16,13 @@ import com.iqiny.silly.core.config.SillyCategoryConfig;
 import com.iqiny.silly.core.config.SillyConfigUtil;
 import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
 
-import java.util.List;
-import java.util.StringJoiner;
-
 /**
- * 累加合并处理器
- * 累加合并同名变量数据
+ * 重写处理器
+ * 重写覆盖同名变量数据，将之前数据转为旧版本
  */
-public class DataJoinVariableSaveHandle implements SillyVariableSaveHandle {
+public class OverwriteVariableSaveHandle implements SillyVariableSaveHandle {
 
-    public static final String NAME = "dataJoin";
+    public static final String NAME = "overwrite";
 
     @Override
     public String name() {
@@ -36,21 +33,16 @@ public class DataJoinVariableSaveHandle implements SillyVariableSaveHandle {
     public boolean handle(SillyMaster master, SillyNode node, SillyVariable variable) {
         SillyCategoryConfig sillyCategoryConfig = SillyConfigUtil.getSillyConfig(master.usedCategory());
 
+        // 直接更新同名数据 状态为 旧版本
+        // （若有）更新之前的流程变量信息 为历史状态
         final SillyVariable whereVariable = sillyCategoryConfig.getSillyFactory().newVariable();
         whereVariable.setMasterId(node.getMasterId());
         whereVariable.setVariableName(variable.getVariableName());
-        whereVariable.setStatus(SillyConstant.ActivitiNode.STATUS_CURRENT);
-        List<SillyVariable> variableList = sillyCategoryConfig.getSillyReadService().findVariableList(whereVariable);
-      
-        // 累计变量数据
-        StringJoiner sj = new StringJoiner(SillyConstant.ARRAY_SPLIT_STR);
-        for (SillyVariable sillyVariable : variableList) {
-            sj.add(sillyVariable.getVariableText());
-        }
-
-        sj.add(variable.getVariableText());
-        variable.setVariableText(sj.toString());
-
+        final SillyVariable sillyVariable = sillyCategoryConfig.getSillyFactory().newVariable();
+        sillyVariable.setMasterId(node.getMasterId());
+        sillyVariable.setVariableName(variable.getVariableName());
+        sillyVariable.setStatus(SillyConstant.ActivitiNode.STATUS_HISTORY);
+        sillyCategoryConfig.getSillyWriteService().update(sillyVariable, whereVariable);
         return true;
     }
 }

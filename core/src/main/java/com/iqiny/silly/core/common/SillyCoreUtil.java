@@ -8,17 +8,55 @@
  */
 package com.iqiny.silly.core.common;
 
+import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.SillyReflectUtil;
 import com.iqiny.silly.core.base.SillyCategory;
 import com.iqiny.silly.core.base.SillyMultipleCategory;
+import com.iqiny.silly.core.base.SillyOrdered;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
  * 傻瓜核心包工具类
  */
 public abstract class SillyCoreUtil {
+
+    /**
+     * 排序集合
+     */
+    public static <T extends List> T orderCollection(Collection<?> collection) {
+        List<?> orderList = new ArrayList<>(collection);
+
+        orderList.sort((o1, o2) -> {
+            if (o1 instanceof SillyOrdered && o2 instanceof SillyOrdered) {
+                SillyOrdered so1 = (SillyOrdered) o1;
+                SillyOrdered so2 = (SillyOrdered) o2;
+                int a = so1.order() - so2.order();
+                if (a == 0) {
+                    a = so1.hashCode() - so2.hashCode();
+                    SillyAssert.isTrue(a != 0, "SillyOrdered 排序失败 " + so1.getClass());
+                }
+                return a > 0 ? 1 : -1;
+            }
+
+            if (o1 instanceof SillyOrdered) {
+                // SillyOrdered 实现类 优先于 非SillyOrdered实现类
+                return 1;
+            }
+
+            if (o2 instanceof SillyOrdered) {
+                // SillyOrdered 实现类 优先于 非SillyOrdered实现类
+                return -1;
+            }
+
+            return 0;
+        });
+        return (T) orderList;
+    }
 
     /**
      * 判断此对象是否可用于此分类
@@ -35,21 +73,24 @@ public abstract class SillyCoreUtil {
         if (SillyCategory.DEFAULT_CATEGORY.equals(category)) {
             return true;
         }
-        
+
         if (obj instanceof Class) {
             obj = SillyReflectUtil.newInstance((Class) obj);
         }
 
-        boolean flag = true;
         if (obj instanceof SillyMultipleCategory) {
-            flag = ((SillyMultipleCategory) obj).isSupport(category);
+            boolean flag = ((SillyMultipleCategory) obj).isSupport(category);
+            if (flag) {
+                return true;
+            }
         }
 
-        if (!flag && obj instanceof SillyCategory) {
+        if (obj instanceof SillyCategory) {
             String usedCategory = ((SillyCategory) obj).usedCategory();
-            flag = SillyCategory.DEFAULT_CATEGORY.equals(usedCategory) || Objects.equals(usedCategory, category);
+            return SillyCategory.DEFAULT_CATEGORY.equals(usedCategory) || Objects.equals(usedCategory, category);
         }
-        return flag;
+        
+        return true;
     }
 
     /**

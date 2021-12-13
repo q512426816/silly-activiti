@@ -13,12 +13,17 @@ import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.iqiny.silly.core.config.property.SillyProcessMasterProperty;
+import com.iqiny.silly.core.config.property.SillyProcessProperty;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class DefaultProcessMasterProperty implements SillyProcessMasterProperty<DefaultProcessNodeProperty> {
 
+    /**
+     * 父类
+     */
+    private SillyProcessProperty parent;
     /**
      * 流程Key
      */
@@ -69,5 +74,15 @@ public class DefaultProcessMasterProperty implements SillyProcessMasterProperty<
     @Override
     public Map<String, DefaultProcessNodeProperty> getNode() {
         return node;
+    }
+
+    @Override
+    public SillyProcessProperty getParent() {
+        return parent;
+    }
+
+    @Override
+    public void setParent(SillyProcessProperty parent) {
+        this.parent = parent;
     }
 }

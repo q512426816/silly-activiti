@@ -35,4 +35,12 @@ public interface SillyProcessMasterProperty<NP extends SillyProcessNodeProperty>
 
     void setProcessKey(String key);
 
+    /**
+     * 设置父类
+     *
+     * @param property
+     */
+    void setParent(SillyProcessProperty property);
+
+    SillyProcessProperty getParent();
 }

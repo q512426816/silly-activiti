@@ -31,12 +31,16 @@ public interface SillyFactory<M extends SillyMaster, N extends SillyNode<V>, V e
      */
     M newMaster();
 
+    Class<M> masterClass();
+
     /**
      * 创建 节点对象
      *
      * @return 节点对象
      */
     N newNode();
+
+    Class<N> nodeClass();
 
     /**
      * 创建 变量对象
@@ -45,11 +49,15 @@ public interface SillyFactory<M extends SillyMaster, N extends SillyNode<V>, V e
      */
     V newVariable();
 
+    Class<V> variableClass();
+
     /**
      * 创建 流程履历对象
      *
      * @return 流程履历对象
      */
     R newResume();
+
+    Class<R> resumeClass();
 
 }
