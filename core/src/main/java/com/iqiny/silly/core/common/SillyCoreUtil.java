@@ -70,6 +70,10 @@ public abstract class SillyCoreUtil {
      * @return
      */
     public static boolean available(String category, Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
         if (SillyCategory.DEFAULT_CATEGORY.equals(category)) {
             return true;
         }
@@ -78,8 +82,9 @@ public abstract class SillyCoreUtil {
             obj = SillyReflectUtil.newInstance((Class) obj);
         }
 
+        boolean flag = true;
         if (obj instanceof SillyMultipleCategory) {
-            boolean flag = ((SillyMultipleCategory) obj).isSupport(category);
+            flag = ((SillyMultipleCategory) obj).isSupport(category);
             if (flag) {
                 return true;
             }
@@ -89,8 +94,8 @@ public abstract class SillyCoreUtil {
             String usedCategory = ((SillyCategory) obj).usedCategory();
             return SillyCategory.DEFAULT_CATEGORY.equals(usedCategory) || Objects.equals(usedCategory, category);
         }
-        
-        return true;
+
+        return flag;
     }
 
     /**
@@ -104,17 +109,20 @@ public abstract class SillyCoreUtil {
         if (obj instanceof Class) {
             obj = SillyReflectUtil.newInstance((Class) obj);
         }
-
-        boolean flag = false;
+        
         if (obj instanceof SillyMultipleCategory) {
-            flag = ((SillyMultipleCategory) obj).isSupport(category);
-        }
-        if (!flag && obj instanceof SillyCategory) {
-            String usedCategory = ((SillyCategory) obj).usedCategory();
-            flag = Objects.equals(usedCategory, category);
+            boolean flag = ((SillyMultipleCategory) obj).isSupport(category);
+            if (flag) {
+                return true;
+            }
         }
 
-        return flag;
+        if (obj instanceof SillyCategory) {
+            String usedCategory = ((SillyCategory) obj).usedCategory();
+            return Objects.equals(usedCategory, category);
+        }
+
+        return false;
     }
 
     public static <T> T availableOrNull(String category, T t) {

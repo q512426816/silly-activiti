@@ -27,7 +27,7 @@ import java.util.Map;
  */
 public class SillyProcessStartSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyProcessMapSaveHandle.ORDER + 100;
+    public static final int ORDER = SillyVarToMasterSaveHandle.ORDER + 100;
 
     public static final String NAME = "processStart";
 
@@ -43,7 +43,7 @@ public class SillyProcessStartSaveHandle extends BaseSillyNodeSaveHandle {
 
     @Override
     protected boolean canDo(SillyNodeSourceData sourceData) {
-        return sourceData.isStartProcess();
+        return StringUtils.isEmpty(sourceData.taskId()) && sourceData.isStartProcess();
     }
 
     @Override

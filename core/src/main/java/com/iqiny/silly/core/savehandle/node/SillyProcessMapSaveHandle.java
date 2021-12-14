@@ -24,7 +24,7 @@ import java.util.Map;
  */
 public class SillyProcessMapSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyMasterSaveHandle.ORDER + 100;
+    public static final int ORDER = SillyCheckVariableFieldsSaveHandle.ORDER + 100;
 
     public static final String NAME = "processMap";
 
@@ -40,7 +40,7 @@ public class SillyProcessMapSaveHandle extends BaseSillyNodeSaveHandle {
 
     @Override
     protected boolean canDo(SillyNodeSourceData sourceData) {
-        return sourceData.getActMap() == null;
+        return sourceData.getActMap() == null && (sourceData.isSubmit() || sourceData.isStartProcess());
     }
 
     @Override

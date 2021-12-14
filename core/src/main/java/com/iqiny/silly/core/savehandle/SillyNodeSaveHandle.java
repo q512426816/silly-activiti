@@ -12,6 +12,22 @@ import com.iqiny.silly.core.base.SillyOrdered;
 
 /**
  * 傻瓜节点保存处理器
+ * <p>
+ * 默认执行顺序：
+ * 1. SillyMapToVarSaveHandle.class
+ * 2. SillyFieldCheckSaveHandle.class
+ * 3. SillyMasterSaveHandle.class
+ * 4. SillyNodeDataSaveHandle.class
+ * 5. SillyNodeVariableDataSaveHandle.class
+ * 6. SillyNodeVariableExecuteSaveHandle.class
+ * 7. SillyProcessMapSaveHandle.class
+ * 8. SillyProcessStartSaveHandle.class
+ * 9. SillyProcessSubmitSaveHandle.class
+ * 10. SillyAfterCompleteSaveHandle.class
+ * 11. SillyAfterCloseSaveHandle.class
+ * 12. SillyResumeCreateSaveHandle.class
+ * 13. SillyResumeRecordSaveHandle.class
+ * 14. SillyMasterUpdateSaveHandle.class
  */
 public interface SillyNodeSaveHandle extends SillyOrdered {
 

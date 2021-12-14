@@ -11,24 +11,18 @@ package com.iqiny.silly.core.service.base;
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.SillyAssert;
-import com.iqiny.silly.common.util.SillyMapUtils;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyMasterTask;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
-import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
 import com.iqiny.silly.core.config.property.SillyPropertyHandle;
 import com.iqiny.silly.core.config.property.impl.DefaultVariableSaveHandle;
 import com.iqiny.silly.core.convertor.SillyAutoConvertor;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.engine.SillyTask;
 import com.iqiny.silly.core.resume.SillyResume;
-import com.iqiny.silly.core.savehandle.SillyNodeSaveHandle;
-import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
 import com.iqiny.silly.core.service.SillyReadService;
-import com.iqiny.silly.core.service.SillyWriteService;
-import org.apache.commons.collections.MapUtils;
 
 import java.util.*;
 
@@ -40,7 +34,7 @@ import java.util.*;
  * @param <V> 变量
  */
 public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends SillyNode<V>, V extends SillyVariable>
-        extends AbstractSillyService<M, N, V> implements SillyWriteService<M, N, V> {
+        extends InternalSillyWriteService<M, N, V> {
 
     protected SillyReadService<M, N, V> sillyReadService;
 
@@ -249,19 +243,8 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         // 获取流程变量
         final Map<String, Object> varMap = makeActVariableMap(node);
         // 启动流程
-        if (startProcess(master, varMap)) {
-            setNodeMyTaskId(master.getId(), node);
-        }
-
-        afterOnlyStartProcess(master, node);
+        startProcess(master, varMap);
     }
-
-
-    protected void afterOnlyStartProcess(M master, N node) {
-        // 保存流程履历信息
-        saveProcessResume(node, null, node.getTaskId());
-    }
-
 
     /**
      * 重启流程 ，撤销到 启动节点
@@ -746,80 +729,6 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
     @Override
     public void forceEndProcess(String processInstanceId) {
         sillyEngineService.deleteProcessInstance(processInstanceId, "流程删除");
-    }
-
-    protected M saveData(boolean submit, String taskId, Map<String, Object> saveMap) {
-        String masterId = MapUtils.getString(saveMap, masterIdMapKey());
-        String processKey = null;
-        String nodeKey = null;
-        SillyPropertyHandle propertyHandle = null;
-        if (StringUtils.isEmpty(taskId)) {
-            // 从Map 中获取 processKey ， nodeKey
-            propertyHandle = newSillyPropertyHandle(masterId, saveMap);
-            String processKeyMapKey = propertyHandle.getStringValue(processKeyMapKey());
-            String nodeKeyMapKey = propertyHandle.getStringValue(nodeKeyMapKey());
-            String lastProcessKey = propertyHandle.getStringValue(processProperty().getLastProcessKey());
-            processKey = MapUtils.getString(saveMap, processKeyMapKey, lastProcessKey);
-            String firstNodeKey = propertyHandle.getStringValue(getLastNodeProperty(processKey).getNodeKey());
-            nodeKey = MapUtils.getString(saveMap, nodeKeyMapKey, firstNodeKey);
-        } else {
-            SillyTask task = sillyEngineService.findTaskById(taskId);
-            SillyAssert.notNull(task, "任务未找到" + taskId);
-            if (StringUtils.isEmpty(masterId)) {
-                masterId = sillyEngineService.getBusinessKey(task.getProcessInstanceId());
-                SillyAssert.notEmpty(masterId, "根据任务获取 masterId 失败 " + taskId);
-            }
-            M master = sillyReadService.getMaster(masterId);
-            SillyAssert.notNull(master, "根据 masterId 获取数据失败 " + masterId);
-            processKey = master.processKey();
-            nodeKey = task.getTaskDefinitionKey();
-            propertyHandle = newSillyPropertyHandle(masterId, saveMap);
-        }
-
-        SillyProcessNodeProperty<?> nodeProperty = getNodeProperty(processKey, nodeKey);
-        SillyAssert.notNull(nodeProperty, "nodeProperty 获取失败" + nodeKey);
-
-        // 是否启动流程 （taskId存在 必定不启动流程，submit = true 启动流程）
-        boolean isStartProcess = StringUtils.isEmpty(taskId) && SillyMapUtils.getBooleanValue(saveMap, startProcessKey(), submit);
-
-        saveMap.put(submitKey(), submit);
-        saveMap.put(taskIdKey(), taskId);
-        saveMap.put(masterIdMapKey(), masterId);
-        saveMap.put(processKeyMapKey(), processKey);
-        saveMap.put(nodeKeyMapKey(), nodeKey);
-        saveMap.put(startProcessKey(), isStartProcess);
-        
-        // 其他类型归属处置
-        SillyNodeSourceData sourceData = new SillyNodeSourceData(usedCategory(), nodeProperty, propertyHandle, saveMap);
-        return saveData(sourceData);
-    }
-
-    protected M saveData(SillyNodeSourceData sourceData) {
-        SillyNodeSaveHandle nodeSaveHandle = sillyContext.getNextBean(null, usedCategory(), SillyNodeSaveHandle.class);
-        while (nodeSaveHandle != null) {
-            nodeSaveHandle = nodeSaveHandle.handle(sourceData);
-        }
-
-        M m = (M) sourceData.getMaster();
-        boolean flag = updateById(m);
-        SillyAssert.isTrue(flag, "主数据更新异常");
-        // 更新 ROOT 数据
-        updatePropertyHandleRoot(m.getId());
-        return m;
-    }
-
-
-    protected void updatePropertyHandleRoot(String masterId) {
-        Object propertyHandleRoot = getPropertyHandleRootDB(masterId);
-        updatePropertyHandleRootCache(masterId, propertyHandleRoot);
-    }
-
-    protected void updatePropertyHandleRootCache(String masterId, Object updateValue) {
-        if (updateValue == null) {
-            return;
-        }
-
-        sillyCache.updatePropertyHandleRootCache(usedCategory(), masterId, updateValue);
     }
 
 

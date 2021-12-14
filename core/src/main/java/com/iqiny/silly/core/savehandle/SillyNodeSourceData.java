@@ -15,10 +15,12 @@ import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
 import com.iqiny.silly.core.config.property.SillyPropertyHandle;
 import com.iqiny.silly.core.engine.SillyTask;
+import com.iqiny.silly.core.resume.SillyResume;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 /**
  * 傻瓜资源数据
@@ -26,7 +28,7 @@ import java.util.Map;
 public class SillyNodeSourceData {
 
     /**
-     * 执行过的 handle
+     * 执行过的 handle Name
      */
     private final List<String> handleLinkName = new ArrayList<>();
     /**
@@ -39,8 +41,8 @@ public class SillyNodeSourceData {
      */
     private final String category;
     private final Map<String, Object> map;
-    private final SillyProcessNodeProperty<?> nodeProperty;
-    private final SillyPropertyHandle propertyHandle;
+    private SillyProcessNodeProperty<?> nodeProperty;
+    private SillyPropertyHandle propertyHandle;
 
     /**
      * 数据参数  master / node / variables
@@ -48,6 +50,11 @@ public class SillyNodeSourceData {
     private SillyMaster master;
     private SillyNode node;
     private List<? extends SillyVariable> variables;
+
+    /**
+     * 履历信息
+     */
+    private SillyResume resume;
 
     /**
      * 流程引擎变量
@@ -65,10 +72,8 @@ public class SillyNodeSourceData {
     private List<? extends SillyTask> nextTaskList;
 
 
-    public SillyNodeSourceData(String category, SillyProcessNodeProperty<?> nodeProperty, SillyPropertyHandle propertyHandle, Map<String, Object> map) {
+    public SillyNodeSourceData(String category, Map<String, Object> map) {
         this.category = category;
-        this.nodeProperty = nodeProperty;
-        this.propertyHandle = propertyHandle;
         this.map = map;
     }
 
@@ -101,6 +106,9 @@ public class SillyNodeSourceData {
     }
 
     public String taskId() {
+        if (nowTask != null) {
+            return nowTask.getId();
+        }
         return SillyMapUtils.getString(map, "taskId");
     }
 
@@ -122,6 +130,14 @@ public class SillyNodeSourceData {
 
     public SillyPropertyHandle getPropertyHandle() {
         return propertyHandle;
+    }
+
+    public void setNodeProperty(SillyProcessNodeProperty<?> nodeProperty) {
+        this.nodeProperty = nodeProperty;
+    }
+
+    public void setPropertyHandle(SillyPropertyHandle propertyHandle) {
+        this.propertyHandle = propertyHandle;
     }
 
     public SillyMaster getMaster() {
@@ -178,5 +194,21 @@ public class SillyNodeSourceData {
 
     public void setNextTaskList(List<? extends SillyTask> nextTaskList) {
         this.nextTaskList = nextTaskList;
+    }
+
+    public SillyResume getResume() {
+        return resume;
+    }
+
+    public void setResume(SillyResume resume) {
+        this.resume = resume;
+    }
+
+    public String handleLinkNameLog() {
+        StringJoiner sj = new StringJoiner(",");
+        for (int i = 0; i < handleLinkName.size(); i++) {
+            sj.add((i + 1) + ")" + handleLinkName.get(i));
+        }
+        return sj.toString();
     }
 }

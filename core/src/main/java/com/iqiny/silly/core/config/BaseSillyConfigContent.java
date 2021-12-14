@@ -292,17 +292,49 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
     }
 
     private void registerSillyNodeSaveHandle() {
-        sillyContext.registerBean(SillyInternalSaveHandle.class);
-        sillyContext.registerBean(SillyMasterSaveHandle.class);
-        sillyContext.registerBean(SillyNodeDataSaveHandle.class);
-        sillyContext.registerBean(SillyNodeVariableDataSaveHandle.class);
-        sillyContext.registerBean(SillyNodeVariableExecuteSaveHandle.class);
+        // 加载 任务及主表数据
+        sillyContext.registerBean(SillyLoadNowTaskSaveHandle.class);
+        sillyContext.registerBean(SillyLoadMasterByNewSaveHandle.class);
+        sillyContext.registerBean(SillyLoadMasterByIdSaveHandle.class);
+        sillyContext.registerBean(SillyLoadMasterByTaskSaveHandle.class);
+
+        // 生成参数读取处理器
+        sillyContext.registerBean(SillyPropertyHandleCreateSaveHandle.class);
+        sillyContext.registerBean(SillyPropertyHandleSetRootSaveHandle.class);
+
+        // 获取节点配置信息
+        sillyContext.registerBean(SillyLoadNodePropertyByTaskSaveHandle.class);
+        sillyContext.registerBean(SillyLoadNodePropertyByNotTaskSaveHandle.class);
+
+        // 提交对象Map ->转-> 数据集合varList
+        sillyContext.registerBean(SillyMapToVarSaveHandle.class);
+        sillyContext.registerBean(SillyCheckVariableFieldsSaveHandle.class);
         sillyContext.registerBean(SillyProcessMapSaveHandle.class);
+
+        // 启动流程
         sillyContext.registerBean(SillyProcessStartSaveHandle.class);
+
+        // 生成主对象/节点对象 属性
+        sillyContext.registerBean(SillyVarToMasterSaveHandle.class);
+        sillyContext.registerBean(SillyVarToNodeSaveHandle.class);
+
+        // 保存（重复数据转历史数据）节点数据 及 变量数据
+        sillyContext.registerBean(SillyNodeVariableExecuteSaveHandle.class);
+        sillyContext.registerBean(SillyNodeVariableDataSaveHandle.class);
+
+        // 流程提交
         sillyContext.registerBean(SillyProcessSubmitSaveHandle.class);
         sillyContext.registerBean(SillyAfterCompleteSaveHandle.class);
         sillyContext.registerBean(SillyAfterCloseSaveHandle.class);
-        sillyContext.registerBean(SillyRecordResumeSaveHandle.class);
+
+        // 履历记录
+        sillyContext.registerBean(SillyResumeCreateSaveHandle.class);
+        sillyContext.registerBean(SillyResumeRecordSaveHandle.class);
+
+        // 更新主表 及 root 信息
+        sillyContext.registerBean(SillyMasterUpdateSaveHandle.class);
+        sillyContext.registerBean(SillyUpdateCachePropertyHandleRootSaveHandle.class);
+
     }
 
     protected void addSillyVariableConvertor(SillyVariableConvertor convertor) {

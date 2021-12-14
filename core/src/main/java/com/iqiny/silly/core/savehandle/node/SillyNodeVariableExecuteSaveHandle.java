@@ -28,7 +28,7 @@ import java.util.Map;
  */
 public class SillyNodeVariableExecuteSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyNodeDataSaveHandle.ORDER + 100;
+    public static final int ORDER = SillyVarToNodeSaveHandle.ORDER + 100;
 
     public static final String NAME = "nodeVariableExecute";
 

@@ -23,7 +23,7 @@ import java.util.Date;
  */
 public class SillyAfterCloseSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyAfterCompleteSaveHandle.ORDER;
+    public static final int ORDER = SillyAfterCompleteSaveHandle.ORDER + 100;
 
     public static final String NAME = "afterClose";
 

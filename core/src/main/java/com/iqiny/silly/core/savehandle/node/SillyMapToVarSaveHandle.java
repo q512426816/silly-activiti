@@ -27,11 +27,11 @@ import java.util.*;
 /**
  * 内部方法处理  map 转 variableList
  */
-public class SillyInternalSaveHandle extends BaseSillyNodeSaveHandle {
+public class SillyMapToVarSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyConstant.Order.BELONG_INTERNAL_VARIABLE_ORDER;
+    public static final int ORDER = SillyLoadNodePropertyByNotTaskSaveHandle.ORDER + 100;
 
-    public static final String NAME = "internal";
+    public static final String NAME = "mapToVar";
 
     @Override
     public String name() {
@@ -50,17 +50,17 @@ public class SillyInternalSaveHandle extends BaseSillyNodeSaveHandle {
 
     @Override
     protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
-        boolean submit = sourceData.isSubmit();
+
         SillyPropertyHandle propertyHandle = sourceData.getPropertyHandle();
         SillyProcessNodeProperty<?> nodeProperty = sourceData.getNodeProperty();
         Map<String, Object> map = sourceData.getMap();
         SillyFactory sillyFactory = sillyConfig.getSillyFactory();
         // 设置变量集合数据 （map 转 variableList）
-        sourceData.setVariables(mapToVariables(submit, propertyHandle, map, nodeProperty, sillyFactory));
+        sourceData.setVariables(mapToVariables(propertyHandle, map, nodeProperty, sillyFactory));
     }
 
-    protected <V extends SillyVariable> List<V> mapToVariables(boolean submit
-            , SillyPropertyHandle sillyPropertyHandle
+    protected <V extends SillyVariable> List<V> mapToVariables(
+            SillyPropertyHandle sillyPropertyHandle
             , Map<String, Object> saveMap
             , SillyProcessNodeProperty<?> nodeProperty
             , SillyFactory sillyFactory) {
@@ -88,13 +88,6 @@ public class SillyInternalSaveHandle extends BaseSillyNodeSaveHandle {
             if (StringUtils.isEmpty(variableText)) {
                 Object defaultObject = sillyPropertyHandle.getValue(variableProperty.getDefaultText());
                 variableText = object2String(defaultObject, null);
-            }
-            // 提交才进行参数必须项校验
-            if (submit && StringUtils.isEmpty(variableText)) {
-                if (variableProperty.isRequest() && sillyPropertyHandle.getBooleanValue(variableProperty.getRequestEl())) {
-                    checkSj.add(" 参数【" + variableProperty.getDesc() + "】 不可为空 【" + vKey + "】");
-                }
-                continue;
             }
 
             if (variableProperty.isUpdatePropertyHandleValue()) {
@@ -124,7 +117,7 @@ public class SillyInternalSaveHandle extends BaseSillyNodeSaveHandle {
 
             if (!nodeProperty.isAllowOtherVariable()) {
                 if (nodeProperty.isOtherVariableThrowException()) {
-                    checkSj.add(" 不允许保存此额外变量数据【" + key + "】");
+                    checkSj.add(" 不允许保存此未定义的变量数据【" + key + "】");
                 }
                 continue;
             }

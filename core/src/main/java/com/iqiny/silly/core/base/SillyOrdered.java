@@ -14,6 +14,16 @@ package com.iqiny.silly.core.base;
 public interface SillyOrdered {
 
     /**
+     * 之前
+     */
+    int BEFORE = -1;
+
+    /**
+     * 之后
+     */
+    int AFTER = 1;
+
+    /**
      * 排序号 越小越先执行 （不可冲突）
      */
     int order();

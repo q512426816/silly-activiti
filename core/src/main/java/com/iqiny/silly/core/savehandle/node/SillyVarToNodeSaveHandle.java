@@ -25,11 +25,11 @@ import java.util.List;
 /**
  * 节点数据 生成及保存
  */
-public class SillyNodeDataSaveHandle extends BaseSillyNodeSaveHandle {
+public class SillyVarToNodeSaveHandle extends BaseSillyNodeSaveHandle {
 
     public static final int ORDER = SillyProcessStartSaveHandle.ORDER + 100;
 
-    public static final String NAME = "nodeData";
+    public static final String NAME = "varToNode";
 
     @Override
     public String name() {
@@ -43,7 +43,7 @@ public class SillyNodeDataSaveHandle extends BaseSillyNodeSaveHandle {
 
     @Override
     protected boolean canDo(SillyNodeSourceData sourceData) {
-        return sourceData.getNode() == null;
+        return canDoBelong(sourceData.getVariables(), SillyConstant.ActivitiVariable.BELONG_MASTER);
     }
 
     @Override
@@ -51,8 +51,8 @@ public class SillyNodeDataSaveHandle extends BaseSillyNodeSaveHandle {
         Class<? extends SillyNode> nodeClass = sillyConfig.getSillyFactory().nodeClass();
         List<? extends SillyVariable> vs = sourceData.getVariables();
         SillyProcessNodeProperty<?> nodeProperty = sourceData.getNodeProperty();
-
-        SillyNode n = doMakeObjByVariable(vs, SillyConstant.ActivitiVariable.BELONG_NODE, nodeClass);
+        SillyNode node = sourceData.getNode();
+        SillyNode n = doMakeObjByVariable(vs, SillyConstant.ActivitiVariable.BELONG_NODE, node, nodeClass);
         n.setMasterId(sourceData.masterId());
         n.setTaskId(sourceData.taskId());
         n.setNodeKey(nodeProperty.getNodeKey());

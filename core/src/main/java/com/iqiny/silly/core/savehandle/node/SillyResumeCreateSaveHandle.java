@@ -25,13 +25,13 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 流程 履历记录 处理器
+ * 流程 履历信息创建 处理器
  */
-public class SillyRecordResumeSaveHandle extends BaseSillyNodeSaveHandle {
+public class SillyResumeCreateSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyAfterCompleteSaveHandle.ORDER + 100;
+    public static final int ORDER = SillyAfterCloseSaveHandle.ORDER + 100;
 
-    public static final String NAME = "recordResume";
+    public static final String NAME = "resumeCreate";
 
     @Override
     public String name() {
@@ -45,15 +45,17 @@ public class SillyRecordResumeSaveHandle extends BaseSillyNodeSaveHandle {
 
     @Override
     protected boolean canDo(SillyNodeSourceData sourceData) {
-        return sourceData.isSubmit();
+        return sourceData.isSubmit() && sourceData.getResume() == null;
     }
 
     @Override
     protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
         SillyNode node = sourceData.getNode();
+        SillyAssert.notNull(node, "履历生成 节点node 数据不可为空");
         SillyTask nowTask = sourceData.getNowTask();
         List<? extends SillyTask> nextTaskList = sourceData.getNextTaskList();
-        saveProcessResume(node, nowTask, nextTaskList, sillyConfig);
+        SillyResume resume = createProcessResume(node, nowTask, nextTaskList, sillyConfig);
+        sourceData.setResume(resume);
     }
 
     /**
@@ -63,7 +65,7 @@ public class SillyRecordResumeSaveHandle extends BaseSillyNodeSaveHandle {
      * @param oldTask      当前任务
      * @param nextTaskList 下一步任务
      */
-    protected void saveProcessResume(SillyNode node, SillyTask oldTask, List<? extends SillyTask> nextTaskList, SillyCategoryConfig sillyConfig) {
+    protected SillyResume createProcessResume(SillyNode node, SillyTask oldTask, List<? extends SillyTask> nextTaskList, SillyCategoryConfig sillyConfig) {
 
         SillyEngineService engineService = sillyConfig.getSillyEngineService();
         SillyResumeService sillyResumeService = sillyConfig.getSillyResumeService();
@@ -89,11 +91,11 @@ public class SillyRecordResumeSaveHandle extends BaseSillyNodeSaveHandle {
         String handleInfo = sillyResumeService.makeResumeHandleInfo(handleType, joinNextUserIds, taskName, node.getNodeInfo());
 
         final String masterId = node.getMasterId();
-        doSaveProcessResume(masterId, handleInfo, handleType, taskKey, taskName, joinNextUserIds, dueTime, sillyFactory, sillyResumeService);
+        return doSaveProcessResume(masterId, handleInfo, handleType, taskKey, taskName, joinNextUserIds, dueTime, sillyFactory);
     }
 
-    protected void doSaveProcessResume(String masterId, String handleInfo, String handleType, String processNodeKey
-            , String processNodeName, String nextUserIds, Long dueTime, SillyFactory sillyFactory, SillyResumeService sillyResumeService) {
+    protected SillyResume doSaveProcessResume(String masterId, String handleInfo, String handleType, String processNodeKey
+            , String processNodeName, String nextUserIds, Long dueTime, SillyFactory sillyFactory) {
         SillyResume process = sillyFactory.newResume();
         SillyAssert.notEmpty(masterId, "履历保存业务主键不可为空");
         process.setProcessType(handleType);
@@ -104,8 +106,7 @@ public class SillyRecordResumeSaveHandle extends BaseSillyNodeSaveHandle {
         process.setProcessNodeName(processNodeName);
         process.setNextUserId(nextUserIds);
         process.setConsumeTime(dueTime);
-        // 插入流程履历
-        sillyResumeService.insert(process);
+        return process;
     }
 
     protected Set<String> nextProcess(List<? extends SillyTask> taskList, SillyEngineService engineService) {
