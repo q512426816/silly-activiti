@@ -12,8 +12,11 @@ import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyMasterTask;
 import com.iqiny.silly.core.base.core.SillyMaster;
+import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.config.SillyCategoryConfig;
-import com.iqiny.silly.core.config.SillyCurrentUserUtil;
+import com.iqiny.silly.core.config.SillyConfigUtil;
+import com.iqiny.silly.core.config.property.SillyProcessMasterProperty;
+import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
 import com.iqiny.silly.core.engine.SillyEngineService;
 import com.iqiny.silly.core.engine.SillyTask;
 import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
@@ -27,7 +30,7 @@ import java.util.Map;
  */
 public class SillyProcessStartSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyVarToMasterSaveHandle.ORDER + 100;
+    public static final int ORDER = SillyVarToProcessMapSaveHandle.ORDER + 100;
 
     public static final String NAME = "processStart";
 
@@ -43,46 +46,55 @@ public class SillyProcessStartSaveHandle extends BaseSillyNodeSaveHandle {
 
     @Override
     protected boolean canDo(SillyNodeSourceData sourceData) {
-        return StringUtils.isEmpty(sourceData.taskId()) && sourceData.isStartProcess();
+        boolean flag = sourceData.getNowTask() == null && sourceData.isStartProcess()
+                && sourceData.getMaster() != null && StringUtils.isNotEmpty(sourceData.masterId())
+                && StringUtils.isEmpty(sourceData.getMaster().getProcessId());
+        if (!flag) {
+            return false;
+        }
+        String category = sourceData.getCategory();
+        SillyCategoryConfig sillyConfig = SillyConfigUtil.getSillyConfig(category);
+        SillyEngineService engineService = sillyConfig.getSillyEngineService();
+        final List<? extends SillyTask> taskList = engineService.findTaskByMasterId(sourceData.masterId());
+        if (taskList != null && !taskList.isEmpty()) {
+            return false;
+        }
+
+        return true;
     }
 
     @Override
     protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
         String category = sourceData.getCategory();
         SillyMaster master = sourceData.getMaster();
+        SillyNode node = sourceData.getNode();
+        SillyAssert.notNull(node, "节点数据未能获取");
+        SillyProcessNodeProperty<?> nodeProperty = sourceData.getNodeProperty();
+        SillyProcessMasterProperty masterProperty = nodeProperty.getParent();
+        master.setProcessKey(masterProperty.getProcessKey());
+        master.setProcessVersion(masterProperty.getProcessVersion());
         SillyEngineService engineService = sillyConfig.getSillyEngineService();
-        SillyCurrentUserUtil currentUserUtil = sillyConfig.getSillyCurrentUserUtil();
 
-        boolean startFlag = startProcess(master, sourceData.getActMap(),
-                engineService, currentUserUtil);
+        boolean startFlag = doStartProcess(master, sourceData.getActMap(), engineService, node.getNodeUserId());
 
         if (startFlag && sourceData.isSubmit()) {
             // 设置当前任务ID
-            SillyMasterTask task = engineService.getOneTask(category, currentUserUtil.currentUserId(), master.getId());
-            SillyAssert.notNull(task, "未找到您需要处置的任务" + category);
-            sourceData.setTaskId(task.getTaskId());
+            SillyMasterTask masterTask = engineService.getOneTask(category, node.getNodeUserId(), master.getId());
+            SillyAssert.notNull(masterTask, "未找到您需要处置的任务" + category);
+            SillyTask nowTask = engineService.findTaskById(masterTask.getTaskId());
+            SillyAssert.notNull(nowTask, "未找到任务" + masterTask.getTaskId());
+            sourceData.setNowTask(nowTask);
+            node.setTaskId(nowTask.getId());
         }
     }
 
-    protected boolean startProcess(SillyMaster master, Map<String, Object> varMap, SillyEngineService engineService, SillyCurrentUserUtil currentUserUtil) {
-        // 验证主表是否存在流程实例，若存在则不重复启动流程实例
-        if (StringUtils.isNotEmpty(master.getProcessId())) {
-            return false;
-        }
-
-        final List<? extends SillyTask> taskList = engineService.findTaskByMasterId(master.getId());
-        if (taskList != null && !taskList.isEmpty()) {
-            return false;
-        }
-        return doStartProcess(master, varMap, engineService, currentUserUtil);
-    }
-
-    protected boolean doStartProcess(SillyMaster master, Map<String, Object> varMap, SillyEngineService engineService, SillyCurrentUserUtil currentUserUtil) {
+    protected boolean doStartProcess(SillyMaster master, Map<String, Object> varMap, SillyEngineService engineService, String currentUserId) {
         // 流程启动  返回任务ID
         String processInstanceId = engineService.start(master, varMap);
         master.setProcessId(processInstanceId);
         master.setStartDate(new Date());
-        master.setStartUserId(currentUserUtil.currentUserId());
+        master.setStartUserId(currentUserId);
+        master.setStatus(master.startStatus());
         return StringUtils.isNotEmpty(processInstanceId);
     }
 

@@ -306,23 +306,41 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
         sillyContext.registerBean(SillyLoadNodePropertyByTaskSaveHandle.class);
         sillyContext.registerBean(SillyLoadNodePropertyByNotTaskSaveHandle.class);
 
+        // 创建节点对象信息
+        sillyContext.registerBean(SillyLoadNodeInfoSaveHandle.class);
+
         // 提交对象Map ->转-> 数据集合varList
         sillyContext.registerBean(SillyMapToVarSaveHandle.class);
         sillyContext.registerBean(SillyCheckVariableFieldsSaveHandle.class);
-        sillyContext.registerBean(SillyProcessMapSaveHandle.class);
+
+        // 生成流程变量数据
+        sillyContext.registerBean(SillyVarToProcessMapSaveHandle.class);
 
         // 启动流程
         sillyContext.registerBean(SillyProcessStartSaveHandle.class);
 
-        // 生成主对象/节点对象 属性
+        // 根据varList 生成 主对象属性  节点对象属性
         sillyContext.registerBean(SillyVarToMasterSaveHandle.class);
         sillyContext.registerBean(SillyVarToNodeSaveHandle.class);
 
-        // 保存（重复数据转历史数据）节点数据 及 变量数据
-        sillyContext.registerBean(SillyNodeVariableExecuteSaveHandle.class);
-        sillyContext.registerBean(SillyNodeVariableDataSaveHandle.class);
+        // 节点数据 及 变量数据 转 历史数据
+        sillyContext.registerBean(SillyVariableToHistorySaveHandle.class);
+        sillyContext.registerBean(SillyNodeToHistorySaveHandle.class);
+
+        // 节点数据 保存
+        sillyContext.registerBean(SillyNodeInsertSaveHandle.class);
+
+        // 节点变量数据设置 及 变量 variableSaveHandle 执行 (变量数量 可能变少)
+        sillyContext.registerBean(SillyNodeVariableHandleSaveHandle.class);
+
+        // 节点变量数据设置 及 变量 variableConvertor 执行  (变量数量 可能变多)
+        sillyContext.registerBean(SillyNodeVariableConvertorSaveHandle.class);
+
+        // 节点变量数据 保存
+        sillyContext.registerBean(SillyNodeVariableInsertSaveHandle.class);
 
         // 流程提交
+        sillyContext.registerBean(SillyMasterUpdateBeforeSubmitSaveHandle.class);
         sillyContext.registerBean(SillyProcessSubmitSaveHandle.class);
         sillyContext.registerBean(SillyAfterCompleteSaveHandle.class);
         sillyContext.registerBean(SillyAfterCloseSaveHandle.class);

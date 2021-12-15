@@ -10,7 +10,6 @@ package com.iqiny.silly.core.savehandle.node;
 
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.exception.SillyException;
-import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.config.SillyCategoryConfig;
@@ -19,19 +18,16 @@ import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
 import com.iqiny.silly.core.service.SillyWriteService;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
- * 节点变量 保存处理
+ * 节点变量 数据保存处理
  */
-public class SillyNodeVariableDataSaveHandle extends BaseSillyNodeSaveHandle {
+public class SillyNodeVariableInsertSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyNodeVariableExecuteSaveHandle.ORDER + 100;
+    public static final int ORDER = SillyNodeVariableConvertorSaveHandle.ORDER + 100;
 
-    public static final String NAME = "nodeVariableData";
+    public static final String NAME = "nodeVariableInsert";
 
     @Override
     public String name() {
@@ -45,47 +41,20 @@ public class SillyNodeVariableDataSaveHandle extends BaseSillyNodeSaveHandle {
 
     @Override
     protected boolean canDo(SillyNodeSourceData sourceData) {
-        return sourceData.getNode() != null;
+        SillyNode node = sourceData.getNode();
+        return node != null && node.getVariableList() != null;
     }
 
     @Override
     protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
         SillyNode node = sourceData.getNode();
         Map<String, SillyVariableConvertor> convertorMap = sillyConfig.getSillyConvertorMap();
-
+        SillyWriteService writeService = sillyConfig.getSillyWriteService();
         // 保存 节点变量表数据
-        saveNodeInfo(node, convertorMap, sillyConfig.getSillyFactory(), sillyConfig.getSillyWriteService());
-    }
-
-    protected void saveNodeInfo(SillyNode node, Map<String, SillyVariableConvertor> convertorMap, SillyFactory sillyFactory, SillyWriteService writeService) {
-        if (node == null) {
-            return;
-        }
-        // （若有）更新之前的流程信息 为历史状态
-        updateToHistory(node, sillyFactory, writeService);
         doInsertVariable(node, convertorMap, writeService);
     }
 
-    private void updateToHistory(SillyNode node, SillyFactory sillyFactory, SillyWriteService writeService) {
-
-        // （若有）更新之前的流程变量信息 为历史状态
-        final SillyVariable whereVariable = sillyFactory.newVariable();
-        whereVariable.setMasterId(node.getMasterId());
-        whereVariable.setNodeKey(node.getNodeKey());
-
-        boolean isParallel = SillyConstant.ActivitiParallel.IS_PARALLEL.equals(node.getParallelFlag());
-        if (isParallel) {
-            whereVariable.setTaskId(node.getTaskId());
-        }
-        SillyVariable sillyVariable = sillyFactory.newVariable();
-        sillyVariable.setMasterId(node.getMasterId());
-        sillyVariable.setNodeKey(node.getNodeKey());
-        sillyVariable.setTaskId(node.getTaskId());
-        sillyVariable.setStatus(SillyConstant.ActivitiNode.STATUS_HISTORY);
-        writeService.update(sillyVariable, whereVariable);
-    }
-
-    private <V extends SillyVariable> void doInsertVariable(SillyNode node, Map<String, SillyVariableConvertor> convertorMap, SillyWriteService writeService) {
+    protected <V extends SillyVariable> void doInsertVariable(SillyNode node, Map<String, SillyVariableConvertor> convertorMap, SillyWriteService writeService) {
         // 保存变量
         List<V> variableList = node.getVariableList();
         if (variableList == null) {

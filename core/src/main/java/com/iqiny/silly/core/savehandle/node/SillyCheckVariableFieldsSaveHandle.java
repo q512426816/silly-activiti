@@ -57,11 +57,13 @@ public class SillyCheckVariableFieldsSaveHandle extends BaseSillyNodeSaveHandle 
         Map<String, ? extends SillyProcessVariableProperty> variableMap = nodeProperty.getVariable();
         StringJoiner checkSj = new StringJoiner("\r\n");
         for (SillyVariable variable : variables) {
+            if (StringUtils.isNotEmpty(variable.getVariableText())) {
+                continue;
+            }
+
             SillyProcessVariableProperty variableProperty = variableMap.get(variable.getVariableName());
-            if (StringUtils.isEmpty(variable.getVariableText())) {
-                if (variableProperty.isRequest() && propertyHandle.getBooleanValue(variableProperty.getRequestEl())) {
-                    checkSj.add(" 参数【" + variableProperty.getDesc() + "】 值不可为空 【" + variable.getVariableName() + "】");
-                }
+            if (variableProperty.isRequest() && propertyHandle.getBooleanValue(variableProperty.getRequestEl())) {
+                checkSj.add(" 参数【" + variableProperty.getDesc() + "】 值不可为空 【" + variable.getVariableName() + "】");
             }
         }
 

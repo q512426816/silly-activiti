@@ -43,13 +43,21 @@ public abstract class InternalSillyWriteService<M extends SillyMaster, N extends
 
     protected M saveData(SillyNodeSourceData sourceData) {
         SillyNodeSaveHandle nodeSaveHandle = sillyContext.getNextBean(null, usedCategory(), SillyNodeSaveHandle.class);
+        long allUseTime = 0;
         while (nodeSaveHandle != null) {
+            long startTime = System.currentTimeMillis();
+            String handleName = nodeSaveHandle.name();
             nodeSaveHandle = nodeSaveHandle.handle(sourceData);
+            long useTime = System.currentTimeMillis() - startTime;
+            if (log.isDebugEnabled()) {
+                log.debug("nodeSaveHandle【" + handleName + "】处置耗时：" + useTime + "ms");
+            }
+            allUseTime += useTime;
         }
 
         M master = (M) sourceData.getMaster();
-        log.info("masterId:" + master.getId() + " taskId:" + sourceData.taskId()
-                + " 数据执行链信息 ==>" + sourceData.handleLinkNameLog());
+        log.info("masterId:【" + master.getId() + "】 taskId:【" + sourceData.taskId()
+                + "】 数据执行链信息 ==> " + sourceData.handleLinkNameLog() + " 总耗时：" + allUseTime + "ms");
 
         return master;
     }

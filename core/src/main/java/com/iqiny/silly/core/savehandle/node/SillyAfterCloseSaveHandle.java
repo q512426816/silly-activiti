@@ -17,6 +17,7 @@ import com.iqiny.silly.core.config.SillyCurrentUserUtil;
 import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * 流程 任务处置完成后(流程结束) 处理器
@@ -39,7 +40,7 @@ public class SillyAfterCloseSaveHandle extends BaseSillyNodeSaveHandle {
 
     @Override
     protected boolean canDo(SillyNodeSourceData sourceData) {
-        return sourceData.getNowTask() != null &&
+        return sourceData.isSubmit() && sourceData.getNowTask() != null &&
                 (sourceData.getNextTaskList() == null || sourceData.getNextTaskList().isEmpty());
     }
 
@@ -55,10 +56,10 @@ public class SillyAfterCloseSaveHandle extends BaseSillyNodeSaveHandle {
      * 流程结束之后的回调
      */
     protected void afterCloseProcess(SillyMaster master, SillyNode node, SillyCurrentUserUtil currentUserUtil) {
-        if (StringUtils.isEmpty(master.getStatus())) {
+
+        String status = master.getStatus();
+        if (StringUtils.isEmpty(status) || Objects.equals(master.doingStatus(), status)) {
             master.setStatus(master.endStatus());
-        }
-        if (StringUtils.isEmpty(master.getTaskName())) {
             master.setTaskName("流程结束");
         }
 

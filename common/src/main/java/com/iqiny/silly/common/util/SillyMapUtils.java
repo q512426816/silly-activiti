@@ -31,6 +31,9 @@ public class SillyMapUtils extends MapUtils {
     }
 
     public static Map<String, Object> beanToMap(Object beanObj, String... ignor) {
+        if (beanObj instanceof Map) {
+            return (Map<String, Object>) beanObj;
+        }
         return beanToMap(beanObj, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"), ignor);
     }
 

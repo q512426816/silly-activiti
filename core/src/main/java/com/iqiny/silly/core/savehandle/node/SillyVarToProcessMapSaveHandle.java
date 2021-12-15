@@ -20,13 +20,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 流程变量处理
+ * varList 转 流程变量 处理
  */
-public class SillyProcessMapSaveHandle extends BaseSillyNodeSaveHandle {
+public class SillyVarToProcessMapSaveHandle extends BaseSillyNodeSaveHandle {
 
     public static final int ORDER = SillyCheckVariableFieldsSaveHandle.ORDER + 100;
 
-    public static final String NAME = "processMap";
+    public static final String NAME = "varToProcessMap";
 
     @Override
     public String name() {

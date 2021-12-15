@@ -24,13 +24,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 节点变量 执行变量 saveHandle
+ * 节点变量 执行变量 saveHandle 并设置 node 的 variables 数据
  */
-public class SillyNodeVariableExecuteSaveHandle extends BaseSillyNodeSaveHandle {
+public class SillyNodeVariableHandleSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyVarToNodeSaveHandle.ORDER + 100;
+    public static final int ORDER = SillyNodeInsertSaveHandle.ORDER + 100;
 
-    public static final String NAME = "nodeVariableExecute";
+    public static final String NAME = "nodeVariableHandle";
 
     @Override
     public String name() {
@@ -45,7 +45,7 @@ public class SillyNodeVariableExecuteSaveHandle extends BaseSillyNodeSaveHandle 
     @Override
     protected boolean canDo(SillyNodeSourceData sourceData) {
         SillyNode node = sourceData.getNode();
-        return node != null && node.getVariableList() == null;
+        return node != null && node.getVariableList() != null;
     }
 
     @Override
@@ -53,16 +53,18 @@ public class SillyNodeVariableExecuteSaveHandle extends BaseSillyNodeSaveHandle 
 
         SillyMaster master = sourceData.getMaster();
         SillyNode node = sourceData.getNode();
-        List<? extends SillyVariable> variables = sourceData.getVariables();
         SillyPropertyHandle propertyHandle = sourceData.getPropertyHandle();
 
         Map<String, SillyVariableSaveHandle> handleMap = sillyConfig.getSillyVariableSaveHandleMap();
-        List<? extends SillyVariable> sillyVariables = variableSaveHandle(master, node, variables, propertyHandle, handleMap);
+        List<? extends SillyVariable> sillyVariables = variableSaveHandle(master, node, propertyHandle, handleMap);
         node.setVariableList(sillyVariables);
     }
 
-    protected <V extends SillyVariable> List<V> variableSaveHandle(SillyMaster master, SillyNode node, List<V> vs
-            , SillyPropertyHandle propertyHandle, Map<String, SillyVariableSaveHandle> handleMap) {
+    protected <V extends SillyVariable> List<? extends SillyVariable> variableSaveHandle(
+            SillyMaster master, SillyNode node, SillyPropertyHandle propertyHandle,
+            Map<String, SillyVariableSaveHandle> handleMap) {
+        
+        List<V> vs = node.getVariableList();
         List<V> needSaveList = new ArrayList<>();
         for (V v : vs) {
             boolean needSaveFlag = batchSaveHandle(master, node, v, propertyHandle, handleMap);

@@ -41,6 +41,10 @@ public class SillyNodeSourceData {
      */
     private final String category;
     private final Map<String, Object> map;
+
+    /**
+     * 协助处理工具
+     */
     private SillyProcessNodeProperty<?> nodeProperty;
     private SillyPropertyHandle propertyHandle;
 
@@ -205,9 +209,9 @@ public class SillyNodeSourceData {
     }
 
     public String handleLinkNameLog() {
-        StringJoiner sj = new StringJoiner(",");
+        StringJoiner sj = new StringJoiner(" ->");
         for (int i = 0; i < handleLinkName.size(); i++) {
-            sj.add((i + 1) + ")" + handleLinkName.get(i));
+            sj.add("【(" + (i + 1) + ")" + handleLinkName.get(i) + "】");
         }
         return sj.toString();
     }

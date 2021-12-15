@@ -37,7 +37,7 @@ public class SillyLoadNowTaskSaveHandle extends BaseSillyNodeSaveHandle {
 
     @Override
     protected boolean canDo(SillyNodeSourceData sourceData) {
-        return StringUtils.isNotEmpty(sourceData.taskId());
+        return sourceData.getNowTask() == null && StringUtils.isNotEmpty(sourceData.taskId());
     }
 
     @Override

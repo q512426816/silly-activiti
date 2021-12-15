@@ -14,6 +14,7 @@ import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyFactory;
+import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.config.SillyCategoryConfig;
 import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
@@ -29,7 +30,7 @@ import java.util.*;
  */
 public class SillyMapToVarSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyLoadNodePropertyByNotTaskSaveHandle.ORDER + 100;
+    public static final int ORDER = SillyLoadNodeInfoSaveHandle.ORDER + 100;
 
     public static final String NAME = "mapToVar";
 
@@ -50,13 +51,17 @@ public class SillyMapToVarSaveHandle extends BaseSillyNodeSaveHandle {
 
     @Override
     protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+        SillyNode node = sourceData.getNode();
+        SillyAssert.notNull(node, "当前处置节点数据未能获取");
 
         SillyPropertyHandle propertyHandle = sourceData.getPropertyHandle();
         SillyProcessNodeProperty<?> nodeProperty = sourceData.getNodeProperty();
         Map<String, Object> map = sourceData.getMap();
         SillyFactory sillyFactory = sillyConfig.getSillyFactory();
         // 设置变量集合数据 （map 转 variableList）
-        sourceData.setVariables(mapToVariables(propertyHandle, map, nodeProperty, sillyFactory));
+        List<? extends SillyVariable> sillyVariables = mapToVariables(propertyHandle, map, nodeProperty, sillyFactory);
+        sourceData.setVariables(sillyVariables);
+        node.setVariableList(sillyVariables);
     }
 
     protected <V extends SillyVariable> List<V> mapToVariables(

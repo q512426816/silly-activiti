@@ -9,20 +9,19 @@
 package com.iqiny.silly.core.savehandle.node;
 
 import com.iqiny.silly.common.exception.SillyException;
-import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.config.SillyCategoryConfig;
 import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
 import com.iqiny.silly.core.service.SillyWriteService;
 
 /**
- * 主数据 创建 当任务ID 及 主表ID 都不存在时 创建新空白的主数据
+ * 主数据 更新 （流程提交之前保存，防止事务异常丢失数据）
  */
-public class SillyLoadMasterByNewSaveHandle extends BaseSillyNodeSaveHandle {
+public class SillyMasterUpdateBeforeSubmitSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyLoadNowTaskSaveHandle.ORDER + 100;
+    public static final int ORDER = SillyNodeVariableInsertSaveHandle.ORDER + 100;
 
-    public static final String NAME = "loadMasterByNew";
+    public static final String NAME = "masterUpdateBeforeSubmit";
 
     @Override
     public String name() {
@@ -36,24 +35,18 @@ public class SillyLoadMasterByNewSaveHandle extends BaseSillyNodeSaveHandle {
 
     @Override
     protected boolean canDo(SillyNodeSourceData sourceData) {
-        return StringUtils.isEmpty(sourceData.masterId()) && StringUtils.isEmpty(sourceData.taskId());
+        return sourceData.getMaster() != null && sourceData.isSubmit();
     }
 
     @Override
     protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
         SillyMaster master = sourceData.getMaster();
-        if (master == null) {
-            master = sillyConfig.getSillyFactory().newMaster();
-        }
         // 保存 主表数据
         SillyWriteService writeService = sillyConfig.getSillyWriteService();
-        // 插入主表
-        boolean saveFlag = writeService.insert(master);
+        boolean saveFlag = writeService.updateById(master);
         if (!saveFlag) {
-            throw new SillyException("主信息保存发生异常！");
+            throw new SillyException("主信息更新发生异常！");
         }
-
-        sourceData.setMaster(master);
     }
 
 }

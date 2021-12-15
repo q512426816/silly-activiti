@@ -21,6 +21,7 @@ import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
 
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -67,15 +68,14 @@ public class SillyAfterCompleteSaveHandle extends BaseSillyNodeSaveHandle {
             throw new SillyException("通过任务流程实例ID获取主表数据ID异常！");
         }
 
-        if (StringUtils.isEmpty(master.getTaskName())) {
-            master.setTaskName(makeTaskName(taskList));
-        }
-        if (StringUtils.isEmpty(master.getHandleUserName())) {
-            master.setHandleUserName(userIdsToName(nextProcess(taskList, engineService), currentUserUtil));
-        }
-        if (StringUtils.isEmpty(master.getStatus())) {
+        master.setTaskName(makeTaskName(taskList));
+        master.setHandleUserName(userIdsToName(nextProcess(taskList, engineService), currentUserUtil));
+
+        String status = master.getStatus();
+        if (StringUtils.isEmpty(status) || Objects.equals(master.startStatus(), status)) {
             master.setStatus(master.doingStatus());
         }
+        
         if (StringUtils.isEmpty(node.getHandleType())) {
             node.setHandleType(SillyConstant.SillyResumeType.PROCESS_TYPE_NEXT);
         }
