@@ -50,7 +50,7 @@ public interface SillyTaskCategoryGroup extends SillyCategory {
     String getGroupName();
 
     /**
-     * 获取此 分组名称
+     * 获取此 分组实际名称
      */
     String getGroupName(String groupId);
 

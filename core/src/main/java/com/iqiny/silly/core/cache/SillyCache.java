@@ -8,6 +8,8 @@
  */
 package com.iqiny.silly.core.cache;
 
+import java.util.Map;
+
 /**
  * 傻瓜缓存对象
  */
@@ -26,11 +28,11 @@ public interface SillyCache {
     /**
      * 更新参数处理器ROOT对象缓存
      */
-    void updatePropertyHandleRootCache(String usedCategory, String masterId, Object updateValue);
+    void updatePropertyHandleRootCache(String usedCategory, String masterId, Map<String, Object> updateValue);
 
     /**
      * 获取参数处理器ROOT对象缓存
      */
-    <T> T getPropertyHandleRootCache(String usedCategory, String masterId);
+    Map<String, Object> getPropertyHandleRootCache(String usedCategory, String masterId);
 
 }

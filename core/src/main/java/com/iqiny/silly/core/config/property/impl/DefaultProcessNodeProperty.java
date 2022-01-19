@@ -13,10 +13,12 @@ import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.iqiny.silly.core.config.property.SillyProcessMasterProperty;
 import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
+import com.iqiny.silly.core.config.property.option.SillyProcessNodeOptionProperty;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 public class DefaultProcessNodeProperty implements SillyProcessNodeProperty<DefaultProcessVariableProperty> {
@@ -55,6 +57,12 @@ public class DefaultProcessNodeProperty implements SillyProcessNodeProperty<Defa
      */
     @JSONField(parseFeatures = Feature.OrderedField, serialzeFeatures = SerializerFeature.MapSortField)
     private final Map<String, DefaultProcessVariableProperty> variable = new LinkedHashMap<>();
+
+    /**
+     * 操作KEY： 对应的配置参数
+     */
+    @JSONField(parseFeatures = Feature.OrderedField, serialzeFeatures = SerializerFeature.MapSortField)
+    private final Map<String, Object> option = new LinkedHashMap<>();
 
     @Override
     public boolean isAllowOtherVariable() {
@@ -127,7 +135,22 @@ public class DefaultProcessNodeProperty implements SillyProcessNodeProperty<Defa
     }
 
     @Override
+    public Map<String, SillyProcessNodeOptionProperty> getSillyOption() {
+        Map<String, SillyProcessNodeOptionProperty> sillyOption = new LinkedHashMap<>();
+        Set<Map.Entry<String, Object>> entries = option.entrySet();
+        for (Map.Entry<String, Object> entry : entries) {
+            Object value = entry.getValue();
+            if (value instanceof SillyProcessNodeOptionProperty) {
+                SillyProcessNodeOptionProperty optionProperty = (SillyProcessNodeOptionProperty) value;
+                sillyOption.put(optionProperty.key(), optionProperty);
+            }
+        }
+        return sillyOption;
+    }
+
+    @Override
     public void setParent(SillyProcessMasterProperty parent) {
         this.parent = parent;
     }
+
 }

@@ -22,61 +22,82 @@ import java.util.Map;
 /**
  * 查询参数
  */
-public class QueryUtil<T> {
+public class DefaultSillyQueryUtil implements IQueryUtil {
 
     /**
      * 当前页码
      */
-    public static final String PAGE = "pageNo";
+    protected String pageNo(){
+        return "pageNo";
+    }
+
     /**
      * 每页显示记录数
      */
-    public static final String LIMIT = "rows";
+    protected String limit(){
+        return "rows";
+    }
+
     /**
      * 排序字段
      */
-    public static final String ORDER_FIELD = "sidx";
+    protected String orderField(){
+        return "sidx";
+    }
+
     /**
      * 排序方式
      */
-    public static final String ORDER = "sord";
+    protected String orderName(){
+        return "sord";
+    }
+
     /**
      * 升序
      */
-    public static final String ASC = "asc";
+    protected String asc(){
+        return "ASC";
+    }
+
     /**
      * 降序
      */
-    public static final String DESC = "desc";
-    
-
-    public IPage<T> getPage(Map<String, Object> params) {
-        String order = (String) params.get(ORDER);
-        return this.getPage(params, null, ASC.equalsIgnoreCase(order));
+    protected String desc(){
+        return "DESC";
     }
 
-    public IPage<T> getPage(Map<String, Object> params, String defaultOrderField, boolean isAsc) {
+    /**
+     * 默认排序字段
+     */
+    protected String defaultOrderField(){
+        return null;
+    }
+
+
+    @Override
+    public <T> IPage<T> getPage(Map<String, Object> params) {
+        String order = (String) params.get(orderName());
+        return this.getPage(params, defaultOrderField(), asc().equalsIgnoreCase(order));
+    }
+
+    public <T> IPage<T> getPage(Map<String, Object> params, String defaultOrderField, boolean isAsc) {
         //分页参数
         long curPage = 1;
         long limit = 10;
 
-        if (params.get(PAGE) != null) {
-            curPage = Long.parseLong(params.get(PAGE).toString());
+        if (params.get(pageNo()) != null) {
+            curPage = Long.parseLong(params.get(pageNo()).toString());
         }
-        if (params.get(LIMIT) != null) {
-            limit = Long.parseLong(params.get(LIMIT).toString());
+        if (params.get(limit()) != null) {
+            limit = Long.parseLong(params.get(limit()).toString());
         }
 
         //分页对象
         Page<T> page = new Page<>(curPage, limit);
-
-        //分页参数
-        params.put(PAGE, page);
-
         //排序字段
         //防止SQL注入（因为sidx、order是通过拼接SQL实现排序的，会有SQL注入风险）
         List<String> orderFields = new ArrayList<>();
-        final Object orderFieldObj = params.get(ORDER_FIELD);
+        final Object orderFieldObj = params.get(orderField());
         if (orderFieldObj instanceof String) {
             orderFields.add(SQLFilter.sqlInject((String) orderFieldObj));
         } else if (orderFieldObj instanceof Collection) {
@@ -111,7 +132,7 @@ public class QueryUtil<T> {
         return page;
     }
 
-    private void addOrder(Page<T> page, String orderField, boolean isAsc) {
+    private <T> void addOrder(Page<T> page, String orderField, boolean isAsc) {
         if (isAsc) {
             page.addOrder(OrderItem.asc(orderField));
         } else {

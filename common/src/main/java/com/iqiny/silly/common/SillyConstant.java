@@ -33,6 +33,10 @@ public class SillyConstant {
          * 历史状态数据
          */
         public static final String STATUS_HISTORY = "20";
+        /**
+         * 隐藏状态数据 （不可见）
+         */
+        public static final String STATUS_HIDE = "30";
 
         // ===================================== ACTIVITI_CONVERTOR ==============================================
         /**
@@ -61,6 +65,10 @@ public class SillyConstant {
          * 流程变量 归属变量表
          */
         public static final String BELONG_VARIABLE = "variable";
+        /**
+         * 流程变量 归属隐藏 （默认不查询 状态 30）
+         */
+        public static final String BELONG_HIDE = "hide";
 
     }
 

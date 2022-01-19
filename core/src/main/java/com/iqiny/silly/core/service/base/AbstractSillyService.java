@@ -18,20 +18,26 @@ import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.cache.SillyCache;
-import com.iqiny.silly.core.config.SillyCurrentUserUtil;
 import com.iqiny.silly.core.config.SillyCategoryConfig;
 import com.iqiny.silly.core.config.SillyConfigUtil;
-import com.iqiny.silly.core.config.property.*;
+import com.iqiny.silly.core.config.SillyCurrentUserUtil;
+import com.iqiny.silly.core.config.property.SillyProcessMasterProperty;
+import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
+import com.iqiny.silly.core.config.property.SillyProcessProperty;
+import com.iqiny.silly.core.config.property.SillyPropertyHandle;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
+import com.iqiny.silly.core.engine.SillyEngineService;
 import com.iqiny.silly.core.engine.SillyTask;
 import com.iqiny.silly.core.group.SillyTaskGroupHandle;
 import com.iqiny.silly.core.resume.SillyResume;
 import com.iqiny.silly.core.resume.SillyResumeService;
+import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
 import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
-import com.iqiny.silly.core.engine.SillyEngineService;
 import com.iqiny.silly.core.service.SillyService;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 默认抽象方法
@@ -138,31 +144,43 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
         return sillyVariableSaveHandle;
     }
 
-    protected Object getPropertyHandleRoot(String masterId) {
-        Object root = getPropertyHandleRootCache(masterId);
+    protected Map<String, Object> getPropertyHandleRoot(String masterId) {
+        Map<String, Object> root = getPropertyHandleRootCache(masterId);
         if (root == null) {
             root = getPropertyHandleRootDB(masterId);
+            updateHandleRootCache(masterId, root);
         }
         return root;
     }
 
 
-    protected Object getPropertyHandleRootDB(String masterId) {
+    protected Map<String, Object> getPropertyHandleRootDB(String masterId) {
         List<V> nodeList = getSillyConfig().getSillyReadService().getVariableList(masterId, null);
         return getSillyConfig().getSillyReadService().variableList2Map(nodeList);
     }
 
-    protected Object getPropertyHandleRootCache(String masterId) {
+    protected Map<String, Object> getPropertyHandleRootCache(String masterId) {
+        if (sillyCache == null) {
+            return null;
+        }
+
         return sillyCache.getPropertyHandleRootCache(usedCategory(), masterId);
     }
 
+    protected void updateHandleRootCache(String masterId, Map<String, Object> root) {
+        if (sillyCache == null) {
+            return;
+        }
+
+        sillyCache.updatePropertyHandleRootCache(usedCategory(), masterId, root);
+    }
+
     protected SillyPropertyHandle newSillyPropertyHandle(String masterId, Map<String, Object> values) {
-        SillyPropertyHandle sillyPropertyHandle = getSillyConfig().newSillyPropertyHandle();
+        SillyNodeSourceData sourceData = new SillyNodeSourceData(usedCategory(), values);
+        SillyPropertyHandle sillyPropertyHandle = getSillyConfig().newSillyPropertyHandle(sourceData);
         if (StringUtils.isNotEmpty(masterId)) {
             sillyPropertyHandle.setRoot(getPropertyHandleRoot(masterId));
         }
-        sillyPropertyHandle.setSillyContext(sillyContext);
-        sillyPropertyHandle.setValues(new HashMap<>(values));
         return sillyPropertyHandle;
     }
 
@@ -171,19 +189,11 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
     }
 
     public SillyProcessNodeProperty<?> getNodeProperty(String processKey, String nodeKey) {
-        SillyProcessMasterProperty<?> masterProperty = getMasterProperty(processKey);
-        SillyAssert.notNull(masterProperty, "配置未找到 processKey：" + processKey);
-        SillyProcessNodeProperty<?> nodeProperty = masterProperty.getNode().get(nodeKey);
-        SillyAssert.notNull(nodeProperty, "配置未找到 nodeKey：" + nodeKey);
-        return nodeProperty;
+        return getSillyConfig().getNodeProperty(processKey, nodeKey);
     }
 
     public SillyProcessMasterProperty<?> getMasterProperty(String processKey) {
-        SillyProcessProperty<?> property = processProperty();
-        SillyAssert.notNull(property, "配置未找到 category：" + usedCategory());
-        SillyProcessMasterProperty<?> masterProperty = property.getMaster().get(processKey);
-        SillyAssert.notNull(masterProperty, "配置未找到 processKey：" + processKey);
-        return masterProperty;
+        return getSillyConfig().getMasterProperty(processKey);
     }
 
     /**

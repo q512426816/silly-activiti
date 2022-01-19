@@ -30,7 +30,6 @@ public abstract class SillyCoreUtil {
      */
     public static <T extends List> T orderCollection(Collection<?> collection) {
         List<?> orderList = new ArrayList<>(collection);
-
         orderList.sort((o1, o2) -> {
             if (o1 instanceof SillyOrdered && o2 instanceof SillyOrdered) {
                 SillyOrdered so1 = (SillyOrdered) o1;
@@ -109,7 +108,7 @@ public abstract class SillyCoreUtil {
         if (obj instanceof Class) {
             obj = SillyReflectUtil.newInstance((Class) obj);
         }
-        
+
         if (obj instanceof SillyMultipleCategory) {
             boolean flag = ((SillyMultipleCategory) obj).isSupport(category);
             if (flag) {

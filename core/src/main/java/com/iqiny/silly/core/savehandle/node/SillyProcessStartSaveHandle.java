@@ -21,6 +21,7 @@ import com.iqiny.silly.core.engine.SillyEngineService;
 import com.iqiny.silly.core.engine.SillyTask;
 import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,7 @@ public class SillyProcessStartSaveHandle extends BaseSillyNodeSaveHandle {
 
     public static final int ORDER = SillyVarToProcessMapSaveHandle.ORDER + 100;
 
-    public static final String NAME = "processStart";
+    public static final String NAME = "silly_13_processStart";
 
     @Override
     public String name() {
@@ -64,7 +65,7 @@ public class SillyProcessStartSaveHandle extends BaseSillyNodeSaveHandle {
     }
 
     @Override
-    protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+    protected void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
         String category = sourceData.getCategory();
         SillyMaster master = sourceData.getMaster();
         SillyNode node = sourceData.getNode();
@@ -77,13 +78,14 @@ public class SillyProcessStartSaveHandle extends BaseSillyNodeSaveHandle {
 
         boolean startFlag = doStartProcess(master, sourceData.getActMap(), engineService, node.getNodeUserId());
 
-        if (startFlag && sourceData.isSubmit()) {
+        if (startFlag) {
             // 设置当前任务ID
             SillyMasterTask masterTask = engineService.getOneTask(category, node.getNodeUserId(), master.getId());
             SillyAssert.notNull(masterTask, "未找到您需要处置的任务" + category);
             SillyTask nowTask = engineService.findTaskById(masterTask.getTaskId());
             SillyAssert.notNull(nowTask, "未找到任务" + masterTask.getTaskId());
             sourceData.setNowTask(nowTask);
+            sourceData.setNowTaskList(new ArrayList<>());
             node.setTaskId(nowTask.getId());
         }
     }

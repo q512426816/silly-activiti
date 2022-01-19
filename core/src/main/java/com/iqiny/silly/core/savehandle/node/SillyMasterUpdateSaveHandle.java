@@ -21,7 +21,7 @@ public class SillyMasterUpdateSaveHandle extends BaseSillyNodeSaveHandle {
 
     public static final int ORDER = SillyResumeRecordSaveHandle.ORDER + 100;
 
-    public static final String NAME = "masterUpdate";
+    public static final String NAME = "silly_28_masterUpdate";
 
     @Override
     public String name() {
@@ -39,7 +39,7 @@ public class SillyMasterUpdateSaveHandle extends BaseSillyNodeSaveHandle {
     }
 
     @Override
-    protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+    protected void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
         SillyMaster master = sourceData.getMaster();
         // 保存 主表数据
         SillyWriteService writeService = sillyConfig.getSillyWriteService();

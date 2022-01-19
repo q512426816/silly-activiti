@@ -20,7 +20,7 @@ public class SillyResumeRecordSaveHandle extends BaseSillyNodeSaveHandle {
 
     public static final int ORDER = SillyResumeCreateSaveHandle.ORDER + 100;
 
-    public static final String NAME = "resumeRecord";
+    public static final String NAME = "silly_27_resumeRecord";
 
     @Override
     public String name() {
@@ -38,7 +38,7 @@ public class SillyResumeRecordSaveHandle extends BaseSillyNodeSaveHandle {
     }
 
     @Override
-    protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+    protected void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
         SillyResume resume = sourceData.getResume();
         // 插入流程履历
         SillyResumeService sillyResumeService = sillyConfig.getSillyResumeService();

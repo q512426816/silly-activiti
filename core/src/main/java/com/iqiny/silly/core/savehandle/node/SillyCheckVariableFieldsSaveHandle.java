@@ -28,7 +28,7 @@ public class SillyCheckVariableFieldsSaveHandle extends BaseSillyNodeSaveHandle 
 
     public static final int ORDER = SillyMapToVarSaveHandle.ORDER + 100;
 
-    public static final String NAME = "checkVariableFields";
+    public static final String NAME = "silly_11_checkVariableFields";
 
     @Override
     public String name() {
@@ -46,7 +46,7 @@ public class SillyCheckVariableFieldsSaveHandle extends BaseSillyNodeSaveHandle 
     }
 
     @Override
-    protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+    protected void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
         SillyPropertyHandle propertyHandle = sourceData.getPropertyHandle();
         SillyProcessNodeProperty<?> nodeProperty = sourceData.getNodeProperty();
         List<? extends SillyVariable> variables = sourceData.getVariables();
@@ -63,7 +63,12 @@ public class SillyCheckVariableFieldsSaveHandle extends BaseSillyNodeSaveHandle 
 
             SillyProcessVariableProperty variableProperty = variableMap.get(variable.getVariableName());
             if (variableProperty.isRequest() && propertyHandle.getBooleanValue(variableProperty.getRequestEl())) {
-                checkSj.add(" 参数【" + variableProperty.getDesc() + "】 值不可为空 【" + variable.getVariableName() + "】");
+                String message = propertyHandle.getStringValue(variableProperty.getRequestMessage());
+                if (StringUtils.isNotEmpty(message)) {
+                    checkSj.add(message);
+                } else {
+                    checkSj.add(" 参数【" + variableProperty.getDesc() + "】 值不可为空 【" + variable.getVariableName() + "】");
+                }
             }
         }
 

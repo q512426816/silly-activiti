@@ -20,6 +20,7 @@ public class DefaultProcessVariableProperty implements SillyProcessVariablePrope
     private SillyProcessNodeProperty parent;
     private String desc;
     private String requestEl = SillyConstant.YesOrNo.YES;
+    private String requestMessage;
     private boolean request = true;
     private boolean updatePropertyHandleValue = true;
     private String[] saveHandleNames = new String[]{DefaultVariableSaveHandle.NAME};
@@ -28,6 +29,7 @@ public class DefaultProcessVariableProperty implements SillyProcessVariablePrope
     private String variableName;
     private String defaultText;
     private String belong;
+    private String userGroupVariableName;
 
     private String htmlType;
     private SillyBaseHtmlTagConfig htmlConfig;
@@ -50,6 +52,15 @@ public class DefaultProcessVariableProperty implements SillyProcessVariablePrope
 
     public void setRequest(boolean request) {
         this.request = request;
+    }
+
+    @Override
+    public String getRequestMessage() {
+        return requestMessage;
+    }
+
+    public void setRequestMessage(String requestMessage) {
+        this.requestMessage = requestMessage;
     }
 
     @Override
@@ -104,6 +115,7 @@ public class DefaultProcessVariableProperty implements SillyProcessVariablePrope
         return defaultText;
     }
 
+    @Override
     public void setDefaultText(String defaultText) {
         this.defaultText = defaultText;
     }
@@ -171,5 +183,15 @@ public class DefaultProcessVariableProperty implements SillyProcessVariablePrope
     @Override
     public void setParent(SillyProcessNodeProperty parent) {
         this.parent = parent;
+    }
+
+    @Override
+    public String getUserGroupVariableName() {
+        return userGroupVariableName;
+    }
+
+    @Override
+    public void setUserGroupVariableName(String userGroupVariableName) {
+        this.userGroupVariableName = userGroupVariableName;
     }
 }

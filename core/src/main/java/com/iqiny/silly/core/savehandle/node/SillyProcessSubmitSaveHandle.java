@@ -15,7 +15,6 @@ import com.iqiny.silly.core.engine.SillyEngineService;
 import com.iqiny.silly.core.engine.SillyTask;
 import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,9 +22,9 @@ import java.util.Map;
  */
 public class SillyProcessSubmitSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyMasterUpdateBeforeSubmitSaveHandle.ORDER + 100;
+    public static final int ORDER = SillyNodeVariableInsertSaveHandle.ORDER + 100;
 
-    public static final String NAME = "processSubmit";
+    public static final String NAME = "silly_22_processSubmit";
 
     @Override
     public String name() {
@@ -43,7 +42,7 @@ public class SillyProcessSubmitSaveHandle extends BaseSillyNodeSaveHandle {
     }
 
     @Override
-    protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+    protected void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
 
         SillyEngineService engineService = sillyConfig.getSillyEngineService();
         // 当前任务
@@ -57,9 +56,6 @@ public class SillyProcessSubmitSaveHandle extends BaseSillyNodeSaveHandle {
         Map<String, Object> actMap = sourceData.getActMap();
         engineService.complete(nowTask, node.getNodeUserId(), actMap);
 
-        final String actProcessId = nowTask.getProcessInstanceId();
-        List<? extends SillyTask> taskList = engineService.findTaskByProcessInstanceId(actProcessId);
-        sourceData.setNextTaskList(taskList);
     }
 
 }

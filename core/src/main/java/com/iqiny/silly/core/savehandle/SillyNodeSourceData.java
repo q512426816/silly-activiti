@@ -17,10 +17,7 @@ import com.iqiny.silly.core.config.property.SillyPropertyHandle;
 import com.iqiny.silly.core.engine.SillyTask;
 import com.iqiny.silly.core.resume.SillyResume;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.StringJoiner;
+import java.util.*;
 
 /**
  * 傻瓜资源数据
@@ -35,6 +32,16 @@ public class SillyNodeSourceData {
      * 执行过的 handle
      */
     private final List<SillyNodeSaveHandle> handleLink = new ArrayList<>();
+
+    /**
+     * 忽略的处置器名称
+     */
+    private final Set<String> ignoreHandleName = new LinkedHashSet<>();
+
+    /**
+     * 处置锚点, 下一步范围开始
+     */
+    private final Stack<SillyNodeSaveHandle> anchorPoint = new Stack<>();
 
     /**
      * 创建参数
@@ -71,9 +78,19 @@ public class SillyNodeSourceData {
     private SillyTask nowTask;
 
     /**
-     * 下一步任务信息
+     * 当前未完成的 全部任务信息
+     */
+    private List<? extends SillyTask> nowTaskList;
+
+    /**
+     * 全部的下一步任务信息
      */
     private List<? extends SillyTask> nextTaskList;
+
+    /**
+     * 新增的 下一步任务信息
+     */
+    private List<? extends SillyTask> newNextTaskList;
 
 
     public SillyNodeSourceData(String category, Map<String, Object> map) {
@@ -176,8 +193,8 @@ public class SillyNodeSourceData {
         this.actMap = actMap;
     }
 
-    public boolean executed(String name) {
-        return handleLinkName.contains(name);
+    public boolean ignoreHandle(String name) {
+        return ignoreHandleName.contains(name);
     }
 
     public List<SillyNodeSaveHandle> getHandleLink() {
@@ -200,12 +217,43 @@ public class SillyNodeSourceData {
         this.nextTaskList = nextTaskList;
     }
 
+    public List<? extends SillyTask> getNowTaskList() {
+        return nowTaskList;
+    }
+
+    public void setNowTaskList(List<? extends SillyTask> nowTaskList) {
+        this.nowTaskList = nowTaskList;
+    }
+
+    public List<? extends SillyTask> getNewNextTaskList() {
+        return newNextTaskList;
+    }
+
+    public void setNewNextTaskList(List<? extends SillyTask> newNextTaskList) {
+        this.newNextTaskList = newNextTaskList;
+    }
+
     public SillyResume getResume() {
         return resume;
     }
 
     public void setResume(SillyResume resume) {
         this.resume = resume;
+    }
+
+    public SillyNodeSaveHandle popAnchorPoint() {
+        if (anchorPoint.isEmpty()) {
+            return null;
+        }
+        return anchorPoint.pop();
+    }
+
+    public void pushAnchorPoint(SillyNodeSaveHandle anchorPoint) {
+        this.anchorPoint.push(anchorPoint);
+    }
+
+    public void addIgnoreHandleName(String name) {
+        ignoreHandleName.add(name);
     }
 
     public String handleLinkNameLog() {

@@ -25,25 +25,34 @@ public abstract class BaseSillyNodeSaveHandle implements SillyNodeSaveHandle {
         SillyCategoryConfig sillyConfig = SillyConfigUtil.getSillyConfig(category);
         boolean canHandleFlag = canHandle(sourceData);
         if (canHandleFlag) {
-            saveHandle(sillyConfig, sourceData);
-            sourceData.record(this);
+            doHandle(sillyConfig, sourceData);
         }
-        return next(sillyConfig);
+        return next(sillyConfig, sourceData);
+    }
+
+    protected void doHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+        handle(sillyConfig, sourceData);
+        sourceData.record(this);
     }
 
     /**
      * 未执行过的 NAME  且 子类实现的判定通过
      */
     protected boolean canHandle(SillyNodeSourceData sourceData) {
-        return !sourceData.executed(name()) && canDo(sourceData);
+        return !sourceData.ignoreHandle(name()) && canDo(sourceData);
     }
 
-    protected SillyNodeSaveHandle next(SillyCategoryConfig sillyConfig) {
-        return sillyConfig.getSillyContext().getNextBean(this, sillyConfig.usedCategory(), SillyNodeSaveHandle.class);
+    protected SillyNodeSaveHandle next(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+        SillyNodeSaveHandle handle = sourceData.popAnchorPoint();
+        if (handle == null) {
+            handle = this;
+        }
+
+        return sillyConfig.getSillyContext().getNextBean(handle, sourceData.getCategory(), SillyNodeSaveHandle.class);
     }
 
     protected abstract boolean canDo(SillyNodeSourceData sourceData);
 
-    protected abstract void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData);
+    protected abstract void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData);
 
 }

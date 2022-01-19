@@ -14,17 +14,16 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.core.toolkit.GlobalConfigUtils;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
+import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.mybatisplus.baseentity.BaseMySillyMaster;
 import com.iqiny.silly.mybatisplus.baseentity.BaseMySillyNode;
 import com.iqiny.silly.mybatisplus.baseentity.BaseMySillyVariable;
+import com.iqiny.silly.mybatisplus.handle.SillyMasterConvertorReadHandle;
 import com.iqiny.silly.mybatisplus.service.BaseMySillyReadService;
 import org.apache.ibatis.session.SqlSession;
 import org.mybatis.spring.SqlSessionUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringJoiner;
+import java.util.*;
 
 
 public class DefaultMySillyReadService<M extends BaseMySillyMaster<M>, N extends BaseMySillyNode<N, V>, V extends BaseMySillyVariable<V>>
@@ -61,7 +60,14 @@ public class DefaultMySillyReadService<M extends BaseMySillyMaster<M>, N extends
         map.put("page", page);
         SqlSession sqlSession = SqlHelper.sqlSession(this.masterClass());
         try {
-            page.setRecords(sqlSession.selectList(SqlHelper.table(masterClass()).getSqlStatement(SqlMethod.SELECT_MAPS_PAGE.getMethod()), map));
+            List<Map<String, Object>> records = new ArrayList<>();
+            List<? extends SillyMaster> masterList = sqlSession.selectList(SqlHelper.table(masterClass()).getSqlStatement(SqlMethod.SELECT_PAGE.getMethod()), map);
+            SillyMasterConvertorReadHandle convertorReadHandle = sillyContext.getBean(usedCategory(), SillyMasterConvertorReadHandle.class);
+            for (SillyMaster master : masterList) {
+                Map<String, Object> masterMap = convertorReadHandle.handle(master);
+                records.add(masterMap);
+            }
+            page.setRecords(records);
         } finally {
             SqlSessionUtils.closeSqlSession(sqlSession, GlobalConfigUtils.currentSessionFactory(masterClass()));
         }

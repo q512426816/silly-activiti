@@ -29,9 +29,9 @@ import java.util.Set;
  */
 public class SillyAfterCompleteSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyProcessSubmitSaveHandle.ORDER + 100;
+    public static final int ORDER = SillyLoadNextTaskSaveHandle.ORDER + 100;
 
-    public static final String NAME = "afterComplete";
+    public static final String NAME = "silly_24_afterComplete";
 
     @Override
     public String name() {
@@ -49,7 +49,7 @@ public class SillyAfterCompleteSaveHandle extends BaseSillyNodeSaveHandle {
     }
 
     @Override
-    protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+    protected void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
         SillyMaster master = sourceData.getMaster();
         SillyNode node = sourceData.getNode();
         List<? extends SillyTask> nextTaskList = sourceData.getNextTaskList();

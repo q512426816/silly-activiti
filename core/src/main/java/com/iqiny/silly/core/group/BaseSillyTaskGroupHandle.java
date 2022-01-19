@@ -16,6 +16,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class BaseSillyTaskGroupHandle implements SillyTaskGroupHandle {
 
+    public static final String GROUP_USER_ID_PREFIX = "group_user_id_prefix@@";
+    
     protected final Map<String, List<SillyTaskCategoryGroup>> CATEGORY_GROUP_MAP = new ConcurrentHashMap<>();
     protected final Map<String, SillyTaskGroup> GROUP_MAP = new ConcurrentHashMap<>();
 

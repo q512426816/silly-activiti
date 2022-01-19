@@ -31,7 +31,7 @@ public class SillyResumeCreateSaveHandle extends BaseSillyNodeSaveHandle {
 
     public static final int ORDER = SillyAfterCloseSaveHandle.ORDER + 100;
 
-    public static final String NAME = "resumeCreate";
+    public static final String NAME = "silly_26_resumeCreate";
 
     @Override
     public String name() {
@@ -45,15 +45,18 @@ public class SillyResumeCreateSaveHandle extends BaseSillyNodeSaveHandle {
 
     @Override
     protected boolean canDo(SillyNodeSourceData sourceData) {
-        return sourceData.isSubmit() && sourceData.getResume() == null;
+        return (sourceData.isSubmit() || sourceData.isStartProcess()) && sourceData.getResume() == null;
     }
 
     @Override
-    protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+    protected void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
         SillyNode node = sourceData.getNode();
         SillyAssert.notNull(node, "履历生成 节点node 数据不可为空");
         SillyTask nowTask = sourceData.getNowTask();
-        List<? extends SillyTask> nextTaskList = sourceData.getNextTaskList();
+        List<? extends SillyTask> nextTaskList = sourceData.getNewNextTaskList();
+        if (nextTaskList == null) {
+            nextTaskList = sourceData.getNextTaskList();
+        }
         SillyResume resume = createProcessResume(node, nowTask, nextTaskList, sillyConfig);
         sourceData.setResume(resume);
     }
@@ -111,6 +114,10 @@ public class SillyResumeCreateSaveHandle extends BaseSillyNodeSaveHandle {
 
     protected Set<String> nextProcess(List<? extends SillyTask> taskList, SillyEngineService engineService) {
         Set<String> userIds = new LinkedHashSet<>();
+        if (taskList == null) {
+            return userIds;
+        }
+
         for (SillyTask task : taskList) {
             final List<String> taskUserIds = engineService.getTaskUserIds(task);
             if (taskUserIds != null && !taskUserIds.isEmpty()) {

@@ -23,7 +23,7 @@ public class SillyVariableToHistorySaveHandle extends BaseSillyNodeSaveHandle {
 
     public static final int ORDER = SillyNodeVariableHandleSaveHandle.ORDER + 100;
 
-    public static final String NAME = "variableToHistory";
+    public static final String NAME = "silly_16_variableToHistory";
 
     @Override
     public String name() {
@@ -41,7 +41,7 @@ public class SillyVariableToHistorySaveHandle extends BaseSillyNodeSaveHandle {
     }
 
     @Override
-    protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+    protected void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
         SillyNode node = sourceData.getNode();
         // 保存 节点变量表数据
         updateToHistory(node, sillyConfig.getSillyFactory(), sillyConfig.getSillyWriteService());

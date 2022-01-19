@@ -25,9 +25,7 @@ import com.iqiny.silly.core.config.property.SillyPropertyHandle;
 import com.iqiny.silly.core.config.property.impl.DefaultVariableSaveHandle;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.engine.SillyEngineService;
-import com.iqiny.silly.core.group.SillyTaskCategoryGroup;
-import com.iqiny.silly.core.group.SillyTaskGroup;
-import com.iqiny.silly.core.group.SillyTaskGroupHandle;
+import com.iqiny.silly.core.group.*;
 import com.iqiny.silly.core.resume.SillyResumeService;
 import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
 import com.iqiny.silly.core.savehandle.variable.DataJoinVariableSaveHandle;
@@ -70,6 +68,8 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent implements 
 
     protected Class<? extends SillyPropertyHandle> propertyHandleClazz;
 
+    protected Class<? extends SillyTaskCategoryGroup> defaultTaskCategoryGroupClazz;
+
     private String[] categories;
 
     private boolean loadCategoryFlag = false;
@@ -89,6 +89,7 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent implements 
         this.defaultReadServiceClazz = sillyProperties.getDefaultReadServiceClazz();
         this.processPropertyClazz = sillyProperties.getProcessPropertyClazz();
         this.propertyHandleClazz = sillyProperties.getPropertyHandleClazz();
+        this.defaultTaskCategoryGroupClazz = sillyProperties.getDefaultTaskCategoryGroupClazz();
         this.categories = sillyProperties.getCategories();
     }
 
@@ -193,7 +194,7 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent implements 
 
     @Override
     protected SillyTaskGroupHandle loadSillyTaskGroupHandle() {
-        SillyTaskGroupHandle handle = sillyContext.getBean(SillyTaskGroupHandle.class);
+        SillyTaskGroupHandle handle = sillyContext.getBeanOrRegister(SillyTaskGroupHandle.class, DefaultSillyTaskGroupHandle.class);
         loadSillyTaskGroup(handle);
         loadSillyTaskCategoryGroup(handle);
         SillyAssert.notNull(handle, "任务组处理器未能正确加载");
@@ -334,6 +335,21 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent implements 
             addSillyEngineService(service);
         }
         return service;
+    }
+
+    @Override
+    public SillyTaskCategoryGroup getSillyTaskCategoryGroup(String category
+            , String variableName, String groupName, String userVariableName) {
+        return getSillyContext(category).getBeanOrRegister(
+                SpringSillyContext.getSillyTaskCategoryGroupBeanName(category, variableName, groupName),
+                defaultTaskCategoryGroupClazz,
+                bdb -> {
+                    SillyAssert.isTrue(bdb instanceof BeanDefinitionBuilder, "bdb类型错误" + bdb.getClass());
+                    ((BeanDefinitionBuilder) bdb).addPropertyValue("category", category);
+                    ((BeanDefinitionBuilder) bdb).addPropertyValue("variableName", variableName);
+                    ((BeanDefinitionBuilder) bdb).addPropertyValue("groupName", groupName);
+                    ((BeanDefinitionBuilder) bdb).addPropertyValue("userVariableName", userVariableName);
+                });
     }
 
     @Override

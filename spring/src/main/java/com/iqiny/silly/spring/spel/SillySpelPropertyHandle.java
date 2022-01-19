@@ -9,6 +9,7 @@
 package com.iqiny.silly.spring.spel;
 
 import com.iqiny.silly.common.SillyConstant;
+import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyContext;
@@ -78,7 +79,15 @@ public class SillySpelPropertyHandle implements SillyPropertyHandle {
     protected Object doGetSpelValue(String expression) {
         ExpressionParser parser = new SpelExpressionParser();
         Expression exp = parser.parseExpression(expression);
-        return exp.getValue(getContext());
+        try {
+            return exp.getValue(getContext());
+        } catch (Exception e) {
+            if (e.getCause() != null) {
+                throw new SillyException(e.getCause().getMessage(), e);
+            } else {
+                throw new SillyException("SPEL解析异常 " + e.getMessage(), e);
+            }
+        }
     }
 
     @Override

@@ -30,7 +30,7 @@ public class SillyNodeVariableHandleSaveHandle extends BaseSillyNodeSaveHandle {
 
     public static final int ORDER = SillyNodeInsertSaveHandle.ORDER + 100;
 
-    public static final String NAME = "nodeVariableHandle";
+    public static final String NAME = "silly_19_nodeVariableHandle";
 
     @Override
     public String name() {
@@ -49,7 +49,7 @@ public class SillyNodeVariableHandleSaveHandle extends BaseSillyNodeSaveHandle {
     }
 
     @Override
-    protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+    protected void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
 
         SillyMaster master = sourceData.getMaster();
         SillyNode node = sourceData.getNode();
@@ -63,7 +63,7 @@ public class SillyNodeVariableHandleSaveHandle extends BaseSillyNodeSaveHandle {
     protected <V extends SillyVariable> List<? extends SillyVariable> variableSaveHandle(
             SillyMaster master, SillyNode node, SillyPropertyHandle propertyHandle,
             Map<String, SillyVariableSaveHandle> handleMap) {
-        
+
         List<V> vs = node.getVariableList();
         List<V> needSaveList = new ArrayList<>();
         for (V v : vs) {
@@ -92,7 +92,9 @@ public class SillyNodeVariableHandleSaveHandle extends BaseSillyNodeSaveHandle {
         for (String saveHandleName : saveHandleNameArr) {
             String stringValue = propertyHandle.getStringValue(saveHandleName.trim());
             if (StringUtils.isNotEmpty(stringValue)) {
-                lastFlag = handleMap.get(stringValue).handle(master, node, variables);
+                SillyVariableSaveHandle saveHandle = handleMap.get(stringValue);
+                SillyAssert.notNull(saveHandle, "此saveHandle未定义" + stringValue);
+                lastFlag = saveHandle.handle(master, node, variables);
             }
         }
         return lastFlag;

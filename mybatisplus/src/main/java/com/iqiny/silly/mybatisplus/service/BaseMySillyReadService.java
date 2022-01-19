@@ -13,7 +13,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.collect.Lists;
-import com.iqiny.silly.spring.service.EnhanceSillyReadService;
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyMasterTask;
@@ -21,7 +20,8 @@ import com.iqiny.silly.core.read.SillyMasterTaskUtil;
 import com.iqiny.silly.mybatisplus.baseentity.BaseMySillyMaster;
 import com.iqiny.silly.mybatisplus.baseentity.BaseMySillyNode;
 import com.iqiny.silly.mybatisplus.baseentity.BaseMySillyVariable;
-import com.iqiny.silly.mybatisplus.utils.QueryUtil;
+import com.iqiny.silly.mybatisplus.utils.IQueryUtil;
+import com.iqiny.silly.spring.service.EnhanceSillyReadService;
 
 import java.util.*;
 
@@ -146,7 +146,8 @@ public abstract class BaseMySillyReadService<M extends BaseMySillyMaster<M>, N e
     }
 
     protected IPage<Map<String, Object>> makeNewPage(Map<String, Object> params) {
-        return new QueryUtil<Map<String, Object>>().getPage(params);
+        IQueryUtil queryUtil = sillyContext.getBean(usedCategory(), IQueryUtil.class);
+        return queryUtil.getPage(params);
     }
 
     protected abstract IPage<Map<String, Object>> doQueryPage(IPage<Map<String, Object>> page, Map<String, Object> params);

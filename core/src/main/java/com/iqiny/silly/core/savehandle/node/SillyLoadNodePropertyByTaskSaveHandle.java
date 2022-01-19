@@ -8,13 +8,10 @@
  */
 package com.iqiny.silly.core.savehandle.node;
 
-import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.config.SillyCategoryConfig;
-import com.iqiny.silly.core.config.property.SillyProcessMasterProperty;
 import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
-import com.iqiny.silly.core.config.property.SillyProcessProperty;
 import com.iqiny.silly.core.engine.SillyTask;
 import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
 
@@ -23,9 +20,9 @@ import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
  */
 public class SillyLoadNodePropertyByTaskSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyPropertyHandleSetRootSaveHandle.ORDER + 100;
+    public static final int ORDER = SillyPropertyHandleCreateSaveHandle.ORDER + 100;
 
-    public static final String NAME = "loadNodePropertyByTask";
+    public static final String NAME = "silly_07_loadNodePropertyByTask";
 
     @Override
     public String name() {
@@ -43,29 +40,13 @@ public class SillyLoadNodePropertyByTaskSaveHandle extends BaseSillyNodeSaveHand
     }
 
     @Override
-    protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+    protected void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
         SillyTask nowTask = sourceData.getNowTask();
         SillyMaster master = sourceData.getMaster();
         String processKey = master.processKey();
         String nodeKey = nowTask.getTaskDefinitionKey();
-        SillyProcessNodeProperty<?> nodeProperty = getNodeProperty(processKey, nodeKey, sillyConfig);
+        SillyProcessNodeProperty<?> nodeProperty = sillyConfig.getNodeProperty(processKey, nodeKey);
         sourceData.setNodeProperty(nodeProperty);
-    }
-
-    protected SillyProcessNodeProperty<?> getNodeProperty(String processKey, String nodeKey, SillyCategoryConfig sillyConfig) {
-        SillyProcessMasterProperty<?> masterProperty = getMasterProperty(processKey, sillyConfig);
-        SillyAssert.notNull(masterProperty, "配置未找到 processKey：" + processKey);
-        SillyProcessNodeProperty<?> nodeProperty = masterProperty.getNode().get(nodeKey);
-        SillyAssert.notNull(nodeProperty, "配置未找到 nodeKey：" + nodeKey);
-        return nodeProperty;
-    }
-
-    protected SillyProcessMasterProperty<?> getMasterProperty(String processKey, SillyCategoryConfig sillyConfig) {
-        SillyProcessProperty<?> property = sillyConfig.getSillyProcessProperty();
-        SillyAssert.notNull(property, "配置未找到 category：" + sillyConfig.usedCategory());
-        SillyProcessMasterProperty<?> masterProperty = property.getMaster().get(processKey);
-        SillyAssert.notNull(masterProperty, "配置未找到 processKey：" + processKey);
-        return masterProperty;
     }
 
 }

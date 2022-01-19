@@ -10,26 +10,32 @@ package com.iqiny.silly.core.config;
 
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.SillyReflectUtil;
+import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyContext;
 import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.cache.SillyCache;
-import com.iqiny.silly.core.config.html.SillyHtmlTagTemplate;
+import com.iqiny.silly.core.config.property.SillyProcessMasterProperty;
+import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
 import com.iqiny.silly.core.config.property.SillyProcessProperty;
 import com.iqiny.silly.core.config.property.SillyPropertyHandle;
+import com.iqiny.silly.core.config.property.valuesfield.SillyPropertyValuesField;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.engine.SillyEngineService;
 import com.iqiny.silly.core.group.SillyTaskGroupHandle;
 import com.iqiny.silly.core.resume.SillyResume;
 import com.iqiny.silly.core.resume.SillyResumeService;
+import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
 import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
 import com.iqiny.silly.core.service.SillyReadService;
 import com.iqiny.silly.core.service.SillyWriteService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -66,11 +72,6 @@ public class DefaultSillyCategoryConfig<M extends SillyMaster, N extends SillyNo
      * 流程变量 类型转换器
      */
     protected Map<String, SillyVariableSaveHandle> sillyVariableSaveHandleMap;
-
-    /**
-     * HTML代码生成模板
-     */
-    protected Map<String, SillyHtmlTagTemplate> sillyHtmlTagTemplateMap;
 
     /**
      * 傻瓜工厂工厂
@@ -200,7 +201,7 @@ public class DefaultSillyCategoryConfig<M extends SillyMaster, N extends SillyNo
         this.sillyContext = sillyContext;
         return this;
     }
-    
+
     @Override
     public Class<? extends SillyPropertyHandle> getPropertyHandleClazz() {
         return propertyHandleClazz;
@@ -269,19 +270,25 @@ public class DefaultSillyCategoryConfig<M extends SillyMaster, N extends SillyNo
     }
 
     @Override
-    public SillyHtmlTagTemplate getHtmlTemplate(String htmlType) {
-        return sillyHtmlTagTemplateMap.get(htmlType);
-    }
+    public SillyPropertyHandle newSillyPropertyHandle(SillyNodeSourceData sourceData) {
+        SillyPropertyHandle propertyHandle = SillyReflectUtil.newInstance(getPropertyHandleClazz());
+        SillyContext sillyContext = getSillyContext();
+        propertyHandle.setSillyContext(sillyContext);
+        List<SillyPropertyValuesField> beanList = sillyContext.getBeanList(getCategory(), SillyPropertyValuesField.class);
+        HashMap<String, Object> valuesMap = new HashMap<>(256);
+        for (SillyPropertyValuesField rootField : beanList) {
+            valuesMap.put(rootField.fieldName(), rootField.value(sourceData));
+        }
+        valuesMap.putAll(sourceData.getMap());
+        propertyHandle.setValues(valuesMap);
 
-    @Override
-    public SillyCategoryConfig<M, N, V> setHtmlTemplateMap(Map<String, SillyHtmlTagTemplate> sillyHtmlTagTemplateMap) {
-        this.sillyHtmlTagTemplateMap = sillyHtmlTagTemplateMap;
-        return this;
-    }
-
-    @Override
-    public SillyPropertyHandle newSillyPropertyHandle() {
-        return SillyReflectUtil.newInstance(getPropertyHandleClazz());
+        String masterId = sourceData.masterId();
+        if (StringUtils.isNotEmpty(masterId)) {
+            SillyReadService sillyReadService = getSillyReadService();
+            Map<String, Object> root = sillyReadService.queryRoot(masterId);
+            propertyHandle.setRoot(root);
+        }
+        return propertyHandle;
     }
 
     @Override
@@ -359,5 +366,32 @@ public class DefaultSillyCategoryConfig<M extends SillyMaster, N extends SillyNo
     public DefaultSillyCategoryConfig setSillyCache(SillyCache sillyCache) {
         this.sillyCache = sillyCache;
         return this;
+    }
+
+    @Override
+    public SillyProcessMasterProperty<?> getMasterProperty(String processKey) {
+        SillyProcessProperty<?> property = getSillyProcessProperty();
+        SillyAssert.notNull(property, "配置未找到 category：" + usedCategory());
+        if(StringUtils.isEmpty(processKey)){
+            processKey = property.getLastProcessKey();
+        }
+        SillyProcessMasterProperty<?> masterProperty = property.getMaster().get(processKey);
+        SillyAssert.notNull(masterProperty, "配置未找到 processKey：" + processKey);
+        return masterProperty;
+    }
+
+    @Override
+    public SillyProcessNodeProperty<?> getNodeProperty(String processKey, String nodeKey) {
+        SillyProcessMasterProperty<?> masterProperty = getMasterProperty(processKey);
+        SillyAssert.notNull(masterProperty, "配置未找到 processKey：" + processKey);
+
+        if (StringUtils.isEmpty(nodeKey)) {
+            // 没设置 nodeKey 则获取第一个节点
+            nodeKey = masterProperty.getNode().keySet().iterator().next();
+        }
+
+        SillyProcessNodeProperty<?> nodeProperty = masterProperty.getNode().get(nodeKey);
+        SillyAssert.notNull(nodeProperty, "配置未找到 nodeKey：" + nodeKey);
+        return nodeProperty;
     }
 }

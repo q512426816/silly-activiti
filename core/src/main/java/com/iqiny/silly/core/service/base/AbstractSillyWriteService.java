@@ -687,15 +687,19 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
     @Override
     public void changeUser(String taskId, String userId, String reason) {
         final SillyTask task = sillyEngineService.findTaskById(taskId);
+        String assignee = task.getAssignee();
+        String currentUserId = sillyCurrentUserUtil.currentUserId();
+        SillyAssert.isTrue(Objects.equals(assignee, currentUserId) || sillyCurrentUserUtil.isAdmin(currentUserId),
+                "您非当前任务责任人，任务不可流转");
         final String masterId = sillyEngineService.getBusinessKey(task.getProcessInstanceId());
         // 变更人员
         sillyEngineService.changeUser(taskId, userId);
+        // 记录履历
+        String handleInfo = this.sillyResumeService.makeResumeHandleInfo(SillyConstant.SillyResumeType.PROCESS_TYPE_FLOW, userId, task.getName(), reason);
+        doSaveProcessResume(masterId, handleInfo, SillyConstant.SillyResumeType.PROCESS_TYPE_FLOW, task.getTaskDefinitionKey(), task.getName(), userId, null);
         // 获取任务处置人员
         final List<String> userIds = sillyEngineService.getTaskUserIds(task);
         final String joinUserIds = StringUtils.myJoin(userIds, SillyConstant.ARRAY_SPLIT_STR);
-        // 记录履历
-        String handleInfo = this.sillyResumeService.makeResumeHandleInfo(SillyConstant.SillyResumeType.PROCESS_TYPE_FLOW, joinUserIds, task.getName(), reason);
-        doSaveProcessResume(masterId, handleInfo, SillyConstant.SillyResumeType.PROCESS_TYPE_FLOW, task.getTaskDefinitionKey(), task.getName(), joinUserIds, null);
         // 更新主表信息
         final M master = sillyFactory.newMaster();
         master.setId(masterId);

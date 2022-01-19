@@ -11,6 +11,7 @@ package com.iqiny.silly.activiti;
 import com.iqiny.silly.core.base.SillyMasterTask;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
+import com.iqiny.silly.core.group.BaseSillyTaskGroupHandle;
 import com.iqiny.silly.core.service.base.AbstractSillyService;
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.exception.SillyException;
@@ -44,8 +45,6 @@ import java.util.*;
 public abstract class BaseSillyActivitiEngineService
         extends AbstractSillyService<SillyMaster, SillyNode<SillyVariable>, SillyVariable>
         implements SillyEngineService<SillyActivitiTask> {
-
-    public static final String GROUP_USER_ID_PREFIX = "group_user_id_prefix@@";
 
     protected RuntimeService runtimeService;
     protected HistoryService historyService;
@@ -194,7 +193,7 @@ public abstract class BaseSillyActivitiEngineService
                 String groupId = link.getGroupId();
                 String userId = link.getUserId();
                 if (StringUtils.isNotEmpty(groupId)) {
-                    ids.add(GROUP_USER_ID_PREFIX + groupId);
+                    ids.add(BaseSillyTaskGroupHandle.GROUP_USER_ID_PREFIX + groupId);
                 } else if (StringUtils.isNotEmpty(userId)) {
                     ids.add(userId);
                 }

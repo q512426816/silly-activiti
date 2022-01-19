@@ -43,6 +43,7 @@ public class SpringSillyContext implements SillyContext, ApplicationContextAware
     private final static String SILLY_READ_SERVICE_PREFIX = "SillyReadService";
     private final static String SILLY_WRITE_SERVICE_PREFIX = "SillyWriteService";
     private final static String SILLY_ENGINE_SERVICE_PREFIX = "SillyEngineService";
+    private final static String SILLY_TASK_CATEGORY_GROUP_PREFIX = "SillyTaskCategoryGroup";
 
 
     public static String getSillyReadServiceBeanName(String category) {
@@ -57,6 +58,10 @@ public class SpringSillyContext implements SillyContext, ApplicationContextAware
         return SILLY_ENGINE_SERVICE_PREFIX + category;
     }
 
+    public static String getSillyTaskCategoryGroupBeanName(String category, String variableName, String groupName) {
+        return SILLY_TASK_CATEGORY_GROUP_PREFIX + category + variableName + groupName;
+    }
+
     /**
      * 获取Bean 同时会在容器中寻找相应Bean 注册到Spring环境中
      *
@@ -67,13 +72,16 @@ public class SpringSillyContext implements SillyContext, ApplicationContextAware
     @Override
     public <T> List<T> getBeanList(String category, Class<T> clazz) {
         List<T> beanList = new ArrayList<>();
-        final Set<Map.Entry<String, T>> entries = applicationContext.getBeansOfType(clazz).entrySet();
-        for (Map.Entry<String, T> entry : entries) {
-            T value = entry.getValue();
-            boolean available = SillyCoreUtil.available(category, value);
-            if (available) {
-                beanList.add(value);
+        try {
+            final Set<Map.Entry<String, T>> entries = applicationContext.getBeansOfType(clazz).entrySet();
+            for (Map.Entry<String, T> entry : entries) {
+                T value = entry.getValue();
+                boolean available = SillyCoreUtil.available(category, value);
+                if (available) {
+                    beanList.add(value);
+                }
             }
+        } catch (BeansException ignore) {
         }
 
         return SillyCoreUtil.orderCollection(beanList);
@@ -82,8 +90,12 @@ public class SpringSillyContext implements SillyContext, ApplicationContextAware
 
     @Override
     public <T> T getBean(String category, String beanName) {
-        Object bean = applicationContext.getBean(beanName);
-        return (T) SillyCoreUtil.availableOrNull(category, bean);
+        try {
+            Object bean = applicationContext.getBean(beanName);
+            return (T) SillyCoreUtil.availableOrNull(category, bean);
+        } catch (BeansException ignore) {
+        }
+        return null;
     }
 
     @Override

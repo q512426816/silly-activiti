@@ -32,7 +32,7 @@ public class SillyMapToVarSaveHandle extends BaseSillyNodeSaveHandle {
 
     public static final int ORDER = SillyLoadNodeInfoSaveHandle.ORDER + 100;
 
-    public static final String NAME = "mapToVar";
+    public static final String NAME = "silly_10_mapToVar";
 
     @Override
     public String name() {
@@ -50,7 +50,7 @@ public class SillyMapToVarSaveHandle extends BaseSillyNodeSaveHandle {
     }
 
     @Override
-    protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+    protected void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
         SillyNode node = sourceData.getNode();
         SillyAssert.notNull(node, "当前处置节点数据未能获取");
 
@@ -90,7 +90,7 @@ public class SillyMapToVarSaveHandle extends BaseSillyNodeSaveHandle {
             SillyProcessVariableProperty variableProperty = variableMap.get(vKey);
             Object variableObj = map.remove(vKey);
             String variableText = object2String(variableObj, null);
-            if (StringUtils.isEmpty(variableText)) {
+            if (StringUtils.isEmpty(variableText) && variableProperty.getDefaultText() != null) {
                 Object defaultObject = sillyPropertyHandle.getValue(variableProperty.getDefaultText());
                 variableText = object2String(defaultObject, null);
             }

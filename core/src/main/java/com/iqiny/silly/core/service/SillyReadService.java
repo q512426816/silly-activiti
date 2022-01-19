@@ -8,7 +8,6 @@
  */
 package com.iqiny.silly.core.service;
 
-import com.iqiny.silly.core.base.SillyCategory;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
@@ -130,5 +129,13 @@ public interface SillyReadService<M extends SillyMaster, N extends SillyNode<V>,
      * @return
      */
     Map<String, Object> variableList2Map(List<V> variables);
+
+    /**
+     * 查询一条数据
+     *
+     * @param id
+     * @return
+     */
+    Map<String, Object> queryRoot(String id);
 
 }

@@ -25,7 +25,7 @@ public class SillyNodeInsertSaveHandle extends BaseSillyNodeSaveHandle {
 
     public static final int ORDER = SillyNodeToHistorySaveHandle.ORDER + 100;
 
-    public static final String NAME = "nodeInsert";
+    public static final String NAME = "silly_18_nodeInsert";
 
     @Override
     public String name() {
@@ -43,7 +43,7 @@ public class SillyNodeInsertSaveHandle extends BaseSillyNodeSaveHandle {
     }
 
     @Override
-    protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+    protected void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
         SillyNode node = sourceData.getNode();
         SillyWriteService writeService = sillyConfig.getSillyWriteService();
         SillyCurrentUserUtil currentUserUtil = sillyConfig.getSillyCurrentUserUtil();

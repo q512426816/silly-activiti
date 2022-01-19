@@ -8,6 +8,8 @@
  */
 package com.iqiny.silly.core.config.property;
 
+import com.iqiny.silly.core.config.property.option.SillyProcessNodeOptionProperty;
+
 import java.util.Map;
 
 
@@ -55,10 +57,14 @@ public interface SillyProcessNodeProperty<VP extends SillyProcessVariablePropert
 
     /**
      * 设置父类
-     *
-     * @param property
      */
     void setParent(SillyProcessMasterProperty property);
 
     SillyProcessMasterProperty getParent();
+
+    /**
+     * 设置操作
+     */
+    Map<String, SillyProcessNodeOptionProperty> getSillyOption();
+    
 }

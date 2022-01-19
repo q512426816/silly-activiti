@@ -9,8 +9,6 @@
 package com.iqiny.silly.starter;
 
 import com.iqiny.silly.activiti.DefaultSillyActivitiEngineService;
-import com.iqiny.silly.core.engine.SillyEngineService;
-import com.iqiny.silly.spring.spel.SillySpelPropertyHandle;
 import com.iqiny.silly.core.base.SillyProperties;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
@@ -18,11 +16,15 @@ import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.config.property.SillyProcessProperty;
 import com.iqiny.silly.core.config.property.SillyPropertyHandle;
 import com.iqiny.silly.core.config.property.impl.DefaultProcessProperty;
+import com.iqiny.silly.core.engine.SillyEngineService;
+import com.iqiny.silly.core.group.DefaultSillyTaskCategoryGroup;
+import com.iqiny.silly.core.group.SillyTaskCategoryGroup;
 import com.iqiny.silly.core.resume.SillyResume;
 import com.iqiny.silly.core.service.SillyReadService;
 import com.iqiny.silly.core.service.SillyWriteService;
 import com.iqiny.silly.mybatisplus.service.impl.DefaultMySillyReadService;
 import com.iqiny.silly.mybatisplus.service.impl.DefaultMySillyWriteService;
+import com.iqiny.silly.spring.spel.SillySpelPropertyHandle;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -56,6 +58,8 @@ public class StarterSillyProperties implements SillyProperties {
     private Class<? extends SillyWriteService> defaultWriteServiceClazz = DefaultMySillyWriteService.class;
 
     private Class<? extends SillyEngineService> defaultEngineServiceClazz = DefaultSillyActivitiEngineService.class;
+
+    private Class<? extends SillyTaskCategoryGroup> defaultTaskCategoryGroupClazz = DefaultSillyTaskCategoryGroup.class;
 
     @Override
     public String getProcessPattern() {
@@ -163,5 +167,14 @@ public class StarterSillyProperties implements SillyProperties {
 
     public void setDefaultEngineServiceClazz(Class<? extends SillyEngineService> defaultEngineServiceClazz) {
         this.defaultEngineServiceClazz = defaultEngineServiceClazz;
+    }
+
+    @Override
+    public Class<? extends SillyTaskCategoryGroup> getDefaultTaskCategoryGroupClazz() {
+        return defaultTaskCategoryGroupClazz;
+    }
+
+    public void setDefaultTaskCategoryGroupClazz(Class<? extends SillyTaskCategoryGroup> defaultTaskCategoryGroupClazz) {
+        this.defaultTaskCategoryGroupClazz = defaultTaskCategoryGroupClazz;
     }
 }

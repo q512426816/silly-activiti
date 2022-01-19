@@ -26,7 +26,7 @@ public class SillyVarToProcessMapSaveHandle extends BaseSillyNodeSaveHandle {
 
     public static final int ORDER = SillyCheckVariableFieldsSaveHandle.ORDER + 100;
 
-    public static final String NAME = "varToProcessMap";
+    public static final String NAME = "silly_12_varToProcessMap";
 
     @Override
     public String name() {
@@ -44,7 +44,7 @@ public class SillyVarToProcessMapSaveHandle extends BaseSillyNodeSaveHandle {
     }
 
     @Override
-    protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+    protected void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
         Map<String, SillyVariableConvertor> convertorMap = sillyConfig.getSillyConvertorMap();
         Map<String, Object> actMap = makeActVariableMap(sourceData.getVariables(), convertorMap);
         sourceData.setActMap(actMap);

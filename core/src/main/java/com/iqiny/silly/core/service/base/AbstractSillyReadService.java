@@ -21,6 +21,7 @@ import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.engine.SillyTask;
 import com.iqiny.silly.core.read.SillyMasterTaskUtil;
+import com.iqiny.silly.core.readhandle.SillyMasterReadHandle;
 import com.iqiny.silly.core.service.SillyReadService;
 
 import java.util.*;
@@ -137,8 +138,8 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
             try {
                 SillyProcessNodeProperty<?> nodeProperty = getNodeProperty(master.processKey(), variable.getNodeKey());
                 if (nodeProperty.isParallel()) {
-                    Map<String, Map<String, Object>> nodeMap = parallelMap.putIfAbsent(variable.getNodeKey(), new LinkedHashMap<>());
-                    Map<String, Object> taskMap = nodeMap.putIfAbsent(variable.getTaskId(), new LinkedHashMap<>());
+                    Map<String, Map<String, Object>> nodeMap = parallelMap.computeIfAbsent(variable.getNodeKey(), k -> new LinkedHashMap<>());
+                    Map<String, Object> taskMap = nodeMap.computeIfAbsent(variable.getTaskId(), k -> new LinkedHashMap<>());
                     sillyHandler.convert(taskMap, variable.getVariableName(), variable.getVariableText());
                 }
             } catch (SillyException ignore) {
@@ -150,6 +151,11 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
             variableMap.put(parallelMapKey(), parallelMap);
         }
         return variableMap;
+    }
+
+    @Override
+    public Map<String, Object> queryRoot(String id) {
+        return getPropertyHandleRoot(id);
     }
 
     public String parallelMapKey() {
@@ -287,10 +293,20 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
             }
             otherSetTaskRecord(record, masterTaskUtil);
         }
+
+        handleRecordInfo(record);
         setOneRecordInfo(record);
     }
 
+    protected void handleRecordInfo(Map<String, Object> record) {
+        List<SillyMasterReadHandle> beanList = sillyContext.getBeanList(usedCategory(), SillyMasterReadHandle.class);
+        for (SillyMasterReadHandle readHandle : beanList) {
+            readHandle.handle(record);
+        }
+    }
+
     protected void setOneRecordInfo(Map<String, Object> record) {
+
     }
 
     protected void convertorRecordValue(String convertorName, Map<String, Object> record, String field) {

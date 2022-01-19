@@ -13,17 +13,19 @@ import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.config.SillyCategoryConfig;
 import com.iqiny.silly.core.config.SillyConfigUtil;
 import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
+import com.iqiny.silly.core.service.SillyReadService;
 
 import java.util.List;
+import java.util.Map;
 
 /**
- * 内部方法 生成 SillyPropertyHandle
+ * 内部方法 更新ROOT
  */
 public class SillyUpdateCachePropertyHandleRootSaveHandle extends BaseSillyNodeSaveHandle {
 
     public static final int ORDER = SillyMasterUpdateSaveHandle.ORDER + 100;
 
-    public static final String NAME = "updateCachePropertyHandleRoot";
+    public static final String NAME = "silly_29_updateCachePropertyHandleRoot";
 
     @Override
     public String name() {
@@ -43,27 +45,27 @@ public class SillyUpdateCachePropertyHandleRootSaveHandle extends BaseSillyNodeS
     }
 
     @Override
-    protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+    protected void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
         String masterId = sourceData.masterId();
         updatePropertyHandleRoot(masterId, sillyConfig);
     }
 
     protected void updatePropertyHandleRoot(String masterId, SillyCategoryConfig sillyConfig) {
-        Object propertyHandleRoot = getPropertyHandleRootDB(masterId, sillyConfig);
+        Map<String, Object> propertyHandleRoot = getPropertyHandleRootDB(masterId, sillyConfig);
         updatePropertyHandleRootCache(masterId, propertyHandleRoot, sillyConfig);
     }
 
-    protected Object getPropertyHandleRootDB(String masterId, SillyCategoryConfig sillyConfig) {
-        List<? extends SillyVariable> nodeList = sillyConfig.getSillyReadService().getVariableList(masterId, null);
-        return sillyConfig.getSillyReadService().variableList2Map(nodeList);
+    protected Map<String, Object> getPropertyHandleRootDB(String masterId, SillyCategoryConfig sillyConfig) {
+        SillyReadService sillyReadService = sillyConfig.getSillyReadService();
+        List<? extends SillyVariable> nodeList = sillyReadService.getVariableList(masterId, null);
+        return sillyReadService.variableList2Map(nodeList);
     }
 
 
-    protected void updatePropertyHandleRootCache(String masterId, Object updateValue, SillyCategoryConfig sillyConfig) {
+    protected void updatePropertyHandleRootCache(String masterId, Map<String, Object> updateValue, SillyCategoryConfig sillyConfig) {
         if (updateValue == null) {
             return;
         }
-
         sillyConfig.getSillyCache().updatePropertyHandleRootCache(sillyConfig.usedCategory(), masterId, updateValue);
     }
 

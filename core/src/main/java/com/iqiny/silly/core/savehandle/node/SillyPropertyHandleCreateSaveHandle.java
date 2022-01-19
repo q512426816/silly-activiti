@@ -12,9 +12,6 @@ import com.iqiny.silly.core.config.SillyCategoryConfig;
 import com.iqiny.silly.core.config.property.SillyPropertyHandle;
 import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * 内部方法 生成 SillyPropertyHandle
  */
@@ -22,7 +19,7 @@ public class SillyPropertyHandleCreateSaveHandle extends BaseSillyNodeSaveHandle
 
     public static final int ORDER = SillyLoadMasterByTaskSaveHandle.ORDER + 100;
 
-    public static final String NAME = "propertyHandleCreate";
+    public static final String NAME = "silly_05_propertyHandleCreate";
 
     @Override
     public String name() {
@@ -40,16 +37,9 @@ public class SillyPropertyHandleCreateSaveHandle extends BaseSillyNodeSaveHandle
     }
 
     @Override
-    protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
-        SillyPropertyHandle propertyHandle = newSillyPropertyHandle(sourceData.getMap(), sillyConfig);
+    protected void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+        SillyPropertyHandle propertyHandle = sillyConfig.newSillyPropertyHandle(sourceData);
         sourceData.setPropertyHandle(propertyHandle);
-    }
-
-    protected SillyPropertyHandle newSillyPropertyHandle(Map<String, Object> values, SillyCategoryConfig sillyConfig) {
-        SillyPropertyHandle sillyPropertyHandle = sillyConfig.newSillyPropertyHandle();
-        sillyPropertyHandle.setSillyContext(sillyConfig.getSillyContext());
-        sillyPropertyHandle.setValues(new HashMap<>(values));
-        return sillyPropertyHandle;
     }
 
 }

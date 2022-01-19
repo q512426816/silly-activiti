@@ -22,7 +22,7 @@ public class SillyLoadMasterByIdSaveHandle extends BaseSillyNodeSaveHandle {
 
     public static final int ORDER = SillyLoadMasterByNewSaveHandle.ORDER + 100;
 
-    public static final String NAME = "loadMasterById";
+    public static final String NAME = "silly_03_loadMasterById";
 
     @Override
     public String name() {
@@ -40,7 +40,7 @@ public class SillyLoadMasterByIdSaveHandle extends BaseSillyNodeSaveHandle {
     }
 
     @Override
-    protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+    protected void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
         SillyReadService sillyReadService = sillyConfig.getSillyReadService();
         String masterId = sourceData.masterId();
         SillyMaster master = sillyReadService.getMaster(masterId);

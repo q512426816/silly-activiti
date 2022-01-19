@@ -26,7 +26,7 @@ public class SillyAfterCloseSaveHandle extends BaseSillyNodeSaveHandle {
 
     public static final int ORDER = SillyAfterCompleteSaveHandle.ORDER + 100;
 
-    public static final String NAME = "afterClose";
+    public static final String NAME = "silly_25_afterClose";
 
     @Override
     public String name() {
@@ -45,7 +45,7 @@ public class SillyAfterCloseSaveHandle extends BaseSillyNodeSaveHandle {
     }
 
     @Override
-    protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+    protected void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
         SillyMaster master = sourceData.getMaster();
         SillyNode node = sourceData.getNode();
         SillyCurrentUserUtil currentUserUtil = sillyConfig.getSillyCurrentUserUtil();

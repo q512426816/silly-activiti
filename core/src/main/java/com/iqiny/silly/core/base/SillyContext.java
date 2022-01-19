@@ -24,6 +24,24 @@ public interface SillyContext {
         return getBean(SillyCategory.DEFAULT_CATEGORY, clazz);
     }
 
+    default <T> T getBeanOrRegister(Class<T> clazz, Class<? extends T> registerClazz) {
+        T bean = getBean(SillyCategory.DEFAULT_CATEGORY, clazz);
+        if (bean != null) {
+            return bean;
+        }
+
+        return registerBean(registerClazz);
+    }
+
+    default <T> T getBeanOrRegister(String beanName, Class<T> registerClazz, Consumer<Object> consumer) {
+        T bean = getBean(SillyCategory.DEFAULT_CATEGORY, beanName);
+        if (bean != null) {
+            return bean;
+        }
+
+        return registerBean(beanName, registerClazz, consumer);
+    }
+
     default <T> List<T> getBeanList(Class<T> clazz) {
         return getBeanList(SillyCategory.DEFAULT_CATEGORY, clazz);
     }
@@ -44,7 +62,7 @@ public interface SillyContext {
 
     <T> T getBean(String category, Class<T> clazz);
 
-    <T extends SillyOrdered> T getNextBean(SillyOrdered order,String category, Class<T> clazz);
+    <T extends SillyOrdered> T getNextBean(SillyOrdered order, String category, Class<T> clazz);
 
     <T> List<T> getBeanList(String category, Class<T> clazz);
 

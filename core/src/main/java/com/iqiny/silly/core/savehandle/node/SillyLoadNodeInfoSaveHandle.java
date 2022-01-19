@@ -24,7 +24,7 @@ public class SillyLoadNodeInfoSaveHandle extends BaseSillyNodeSaveHandle {
 
     public static final int ORDER = SillyLoadNodePropertyByNotTaskSaveHandle.ORDER + 100;
 
-    public static final String NAME = "loadNodeInfo";
+    public static final String NAME = "silly_09_loadNodeInfo";
 
     @Override
     public String name() {
@@ -42,7 +42,7 @@ public class SillyLoadNodeInfoSaveHandle extends BaseSillyNodeSaveHandle {
     }
 
     @Override
-    protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+    protected void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
         SillyProcessNodeProperty<?> nodeProperty = sourceData.getNodeProperty();
         SillyAssert.notNull(nodeProperty, "创建node对象，节点配置信息获取失败");
         SillyNode n = sillyConfig.getSillyFactory().newNode();
@@ -52,7 +52,9 @@ public class SillyLoadNodeInfoSaveHandle extends BaseSillyNodeSaveHandle {
         n.setNodeKey(nodeProperty.getNodeKey());
         n.setNodeName(nodeProperty.getNodeName());
         n.setParallelFlag(nodeProperty.isParallel() ? SillyConstant.YesOrNo.YES : SillyConstant.YesOrNo.NO);
-        n.setStatus(SillyConstant.ActivitiNode.STATUS_CURRENT);
+        if (n.getStatus() == null) {
+            n.setStatus(SillyConstant.ActivitiNode.STATUS_CURRENT);
+        }
         n.setNodeDate(new Date());
         n.setNodeUserId(sillyConfig.getSillyCurrentUserUtil().currentUserId());
         sourceData.setNode(n);

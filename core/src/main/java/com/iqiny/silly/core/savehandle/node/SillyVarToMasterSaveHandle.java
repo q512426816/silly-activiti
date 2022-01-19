@@ -21,7 +21,7 @@ public class SillyVarToMasterSaveHandle<T extends SillyMaster> extends BaseSilly
 
     public static final int ORDER = SillyVarToProcessMapSaveHandle.ORDER + 100;
 
-    public static final String NAME = "varToMaster";
+    public static final String NAME = "silly_14_varToMaster";
 
     @Override
     public String name() {
@@ -45,7 +45,7 @@ public class SillyVarToMasterSaveHandle<T extends SillyMaster> extends BaseSilly
     }
 
     @Override
-    protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+    protected void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
         SillyMaster master = sourceData.getMaster();
         SillyMaster m = doMakeObjByVariable(sourceData, master);
 

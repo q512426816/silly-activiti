@@ -15,15 +15,17 @@ import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.cache.SillyCache;
-import com.iqiny.silly.core.config.html.SillyHtmlTagTemplate;
+import com.iqiny.silly.core.config.property.SillyProcessMasterProperty;
+import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
 import com.iqiny.silly.core.config.property.SillyProcessProperty;
 import com.iqiny.silly.core.config.property.SillyPropertyHandle;
-import com.iqiny.silly.core.resume.SillyResume;
-import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
-import com.iqiny.silly.core.group.SillyTaskGroupHandle;
-import com.iqiny.silly.core.resume.SillyResumeService;
 import com.iqiny.silly.core.engine.SillyEngineService;
+import com.iqiny.silly.core.group.SillyTaskGroupHandle;
+import com.iqiny.silly.core.resume.SillyResume;
+import com.iqiny.silly.core.resume.SillyResumeService;
+import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
+import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
 import com.iqiny.silly.core.service.SillyReadService;
 import com.iqiny.silly.core.service.SillyWriteService;
 
@@ -140,13 +142,10 @@ public interface SillyCategoryConfig<M extends SillyMaster, N extends SillyNode<
 
     SillyCategoryConfig<M, N, V> setSillyCache(SillyCache sillyCache);
 
-    /**
-     * 傻瓜页面模板生成工具
-     */
-    SillyHtmlTagTemplate getHtmlTemplate(String htmlType);
+    SillyPropertyHandle newSillyPropertyHandle(SillyNodeSourceData sourceData);
 
-    SillyCategoryConfig<M, N, V> setHtmlTemplateMap(Map<String, SillyHtmlTagTemplate> sillyHtmlTagTemplateMap);
+    SillyProcessMasterProperty<?> getMasterProperty(String processKey);
 
-    SillyPropertyHandle newSillyPropertyHandle();
+    SillyProcessNodeProperty<?> getNodeProperty(String processKey, String nodeKey);
 
 }

@@ -8,6 +8,7 @@
  */
 package com.iqiny.silly.core.convertor;
 
+import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.core.base.core.SillyVariable;
 
 import java.util.ArrayList;
@@ -20,9 +21,11 @@ import java.util.Map;
  */
 public class SillyStringConvertor implements SillyVariableConvertor<String> {
 
+    public static final String NAME = SillyConstant.ActivitiNode.CONVERTOR_STRING;
+
     @Override
     public String name() {
-        return "string";
+        return NAME;
     }
 
     @Override

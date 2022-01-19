@@ -36,7 +36,6 @@ public abstract class InternalSillyWriteService<M extends SillyMaster, N extends
         saveMap.put(taskIdKey(), taskId);
         saveMap.put(startProcessKey(), isStartProcess);
 
-        // 其他类型归属处置
         SillyNodeSourceData sourceData = new SillyNodeSourceData(usedCategory(), saveMap);
         return saveData(sourceData);
     }

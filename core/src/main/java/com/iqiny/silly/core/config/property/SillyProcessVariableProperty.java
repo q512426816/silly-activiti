@@ -11,15 +11,12 @@ package com.iqiny.silly.core.config.property;
 import com.iqiny.silly.core.config.html.SillyHtmlTagConfig;
 import com.iqiny.silly.core.config.html.SillyHtmlTagTemplate;
 
-
 public interface SillyProcessVariableProperty<C extends SillyHtmlTagConfig> {
-
 
     /**
      * 变量描述
      */
     String getDesc();
-
 
     /**
      * 是否必填表达式
@@ -32,6 +29,11 @@ public interface SillyProcessVariableProperty<C extends SillyHtmlTagConfig> {
     default boolean isRequest() {
         return true;
     }
+
+    /**
+     * 必填提示信息
+     */
+    String getRequestMessage();
 
     /**
      * 数据处理保存的处理方法 （方法名称）
@@ -57,9 +59,10 @@ public interface SillyProcessVariableProperty<C extends SillyHtmlTagConfig> {
      * 默认值（字符串）
      */
     String getDefaultText();
+    void setDefaultText(String defaultText);
 
     /**
-     * 变量归属对象 master / node / variable
+     * 变量归属对象 master / node / variable / userGroup
      */
     String getBelong();
 
@@ -96,5 +99,12 @@ public interface SillyProcessVariableProperty<C extends SillyHtmlTagConfig> {
     void setParent(SillyProcessNodeProperty property);
 
     SillyProcessNodeProperty getParent();
+
+    /**
+     * 分组变量名称
+     */
+    String getUserGroupVariableName();
+
+    void setUserGroupVariableName(String userGroupVariableName);
 
 }

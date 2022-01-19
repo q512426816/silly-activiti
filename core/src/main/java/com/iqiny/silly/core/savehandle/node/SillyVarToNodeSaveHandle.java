@@ -24,7 +24,7 @@ public class SillyVarToNodeSaveHandle<T extends SillyNode> extends BaseSillyNode
 
     public static final int ORDER = SillyProcessStartSaveHandle.ORDER + 100;
 
-    public static final String NAME = "varToNode";
+    public static final String NAME = "silly_15_varToNode";
 
     @Override
     public String name() {
@@ -48,7 +48,7 @@ public class SillyVarToNodeSaveHandle<T extends SillyNode> extends BaseSillyNode
     }
 
     @Override
-    protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+    protected void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
 
         SillyNode node = sourceData.getNode();
         final List<? extends SillyVariable> variableList = node.getVariableList();

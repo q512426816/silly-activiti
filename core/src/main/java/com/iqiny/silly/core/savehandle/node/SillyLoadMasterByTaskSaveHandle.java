@@ -23,7 +23,7 @@ public class SillyLoadMasterByTaskSaveHandle extends BaseSillyNodeSaveHandle {
 
     public static final int ORDER = SillyLoadMasterByIdSaveHandle.ORDER + 100;
 
-    public static final String NAME = "loadMasterByTask";
+    public static final String NAME = "silly_04_loadMasterByTask";
 
     @Override
     public String name() {
@@ -41,7 +41,7 @@ public class SillyLoadMasterByTaskSaveHandle extends BaseSillyNodeSaveHandle {
     }
 
     @Override
-    protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+    protected void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
         SillyTask nowTask = sourceData.getNowTask();
         SillyEngineService sillyEngineService = sillyConfig.getSillyEngineService();
         SillyReadService sillyReadService = sillyConfig.getSillyReadService();

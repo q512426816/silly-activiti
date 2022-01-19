@@ -29,7 +29,7 @@ public class SillyNodeVariableConvertorSaveHandle extends BaseSillyNodeSaveHandl
 
     public static final int ORDER = SillyNodeVariableHandleSaveHandle.ORDER + 100;
 
-    public static final String NAME = "nodeVariableConvertor";
+    public static final String NAME = "silly_20_nodeVariableConvertor";
 
     @Override
     public String name() {
@@ -48,7 +48,7 @@ public class SillyNodeVariableConvertorSaveHandle extends BaseSillyNodeSaveHandl
     }
 
     @Override
-    protected void saveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
+    protected void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
         SillyNode node = sourceData.getNode();
         Map<String, SillyVariableConvertor> convertorMap = sillyConfig.getSillyConvertorMap();
         List<? extends SillyVariable> variables = convertorVariable(node, convertorMap);

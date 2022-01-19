@@ -18,12 +18,13 @@ import com.iqiny.silly.core.base.SillyFactory;
 import com.iqiny.silly.core.base.SillyProperties;
 import com.iqiny.silly.core.cache.SillyCache;
 import com.iqiny.silly.core.common.SillyCoreUtil;
+import com.iqiny.silly.core.config.html.SillyHtmlAutoTag;
 import com.iqiny.silly.core.config.html.SillyHtmlTagConfig;
 import com.iqiny.silly.core.config.html.SillyHtmlTagTemplate;
 import com.iqiny.silly.core.config.property.*;
-import com.iqiny.silly.core.convertor.SillyStringConvertor;
-import com.iqiny.silly.core.convertor.SillyVariableConvertor;
+import com.iqiny.silly.core.convertor.*;
 import com.iqiny.silly.core.engine.SillyEngineService;
+import com.iqiny.silly.core.group.SillyTaskCategoryGroup;
 import com.iqiny.silly.core.group.SillyTaskGroupHandle;
 import com.iqiny.silly.core.resume.SillyResumeService;
 import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
@@ -283,6 +284,8 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
 
     protected void initSillyConvertorList() {
         addSillyVariableConvertor(new SillyStringConvertor());
+        addSillyVariableConvertor(new SillyDateConvertor());
+        addSillyVariableConvertor(new SillyDateTimeConvertor());
         hookInitSillyConvertorList();
     }
 
@@ -300,7 +303,6 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
 
         // 生成参数读取处理器
         sillyContext.registerBean(SillyPropertyHandleCreateSaveHandle.class);
-        sillyContext.registerBean(SillyPropertyHandleSetRootSaveHandle.class);
 
         // 获取节点配置信息
         sillyContext.registerBean(SillyLoadNodePropertyByTaskSaveHandle.class);
@@ -340,8 +342,10 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
         sillyContext.registerBean(SillyNodeVariableInsertSaveHandle.class);
 
         // 流程提交
-        sillyContext.registerBean(SillyMasterUpdateBeforeSubmitSaveHandle.class);
         sillyContext.registerBean(SillyProcessSubmitSaveHandle.class);
+
+        // 提交之后的 处置
+        sillyContext.registerBean(SillyLoadNextTaskSaveHandle.class);
         sillyContext.registerBean(SillyAfterCompleteSaveHandle.class);
         sillyContext.registerBean(SillyAfterCloseSaveHandle.class);
 
@@ -464,17 +468,47 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
                         variableProperty.setBelong(SillyConstant.ActivitiVariable.BELONG_VARIABLE);
                     }
 
-                    if (StringUtils.isNotEmpty(variableProperty.getHtmlType())) {
-                        setVariablePropertyHtmlConfig(category, variableProperty);
-                    }
+                    registerSillyTaskCategoryGroup(category, variableProperty);
+                    setVariablePropertyHtmlConfig(category, variableProperty);
                 }
 
             }
         }
     }
 
+    /**
+     * 注册 变量 任务业务分组工具
+     *
+     * @param category
+     * @param variableProperty
+     */
+    protected void registerSillyTaskCategoryGroup(String category, SillyProcessVariableProperty variableProperty) {
+        String userGroupVariableName = variableProperty.getUserGroupVariableName();
+        if (StringUtils.isEmpty(userGroupVariableName)) {
+            return;
+        }
+
+        String variableName = variableProperty.getVariableName();
+        if (StringUtils.isEmpty(variableProperty.getDefaultText())) {
+            variableProperty.setDefaultText("${#" + variableName + "}");
+        }
+
+        getSillyTaskCategoryGroup(category, variableName, variableProperty.getDesc(), userGroupVariableName);
+    }
+
+    /**
+     * 配置HTML信息
+     *
+     * @param category
+     * @param variableProperty
+     */
     protected void setVariablePropertyHtmlConfig(String category, SillyProcessVariableProperty variableProperty) {
-        SillyHtmlTagTemplate htmlTemplate = getHtmlTemplate(category, variableProperty.getHtmlType());
+
+        SillyHtmlTagTemplate htmlTemplate = getHtmlTemplate(category, variableProperty);
+        if (htmlTemplate == null && variableProperty.getHtmlType() == null) {
+            return;
+        }
+
         SillyAssert.notNull(htmlTemplate, "htmlConfig 未找到 " + variableProperty.getHtmlType());
         variableProperty.setHtmlTemplate(htmlTemplate);
 
@@ -490,7 +524,7 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
             htmlConfig.setLabel(variableProperty.getDesc());
         }
         if (htmlConfig.getTagName() == null) {
-            htmlConfig.setLabel(htmlTemplate.getHtmlType());
+            htmlConfig.setTagName(htmlTemplate.getHtmlType());
         }
         if (htmlConfig.isRequest() == null) {
             htmlConfig.setRequest(variableProperty.isRequest());
@@ -578,26 +612,29 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
         return available ? sillyTaskGroupHandle : null;
     }
 
-    public Map<String, SillyHtmlTagTemplate> getSillyHtmlTagTemplateMap(String category) {
-        Map<String, SillyHtmlTagTemplate> map = sillyCategoryHtmlTagTemplateMap.get(category);
-        if (map != null) {
-            return map;
-        }
-
-        sillyCategoryHtmlTagTemplateMap.put(category, new HashMap<>());
-        SillyCoreUtil.availableThen(category, sillyHtmlTagTemplateList, (v) -> {
-            sillyCategoryHtmlTagTemplateMap.get(category).put(v.getHtmlType(), v);
-        });
-        return sillyCategoryHtmlTagTemplateMap.get(category);
-    }
+    public abstract SillyTaskCategoryGroup getSillyTaskCategoryGroup(String category, String variableName, String groupName, String userVariableName);
 
     public SillyCache getSillyCache(String category) {
         return SillyCoreUtil.availableOne(category, sillyCacheList);
     }
 
-    public SillyHtmlTagTemplate getHtmlTemplate(String category, String htmlType) {
-        Map<String, SillyHtmlTagTemplate> sillyHtmlTagTemplateMap = getSillyHtmlTagTemplateMap(category);
-        return sillyHtmlTagTemplateMap.get(htmlType);
+    public SillyHtmlTagTemplate getHtmlTemplate(String category, SillyProcessVariableProperty variableProperty) {
+        String htmlType = variableProperty.getHtmlType();
+        List<SillyHtmlTagTemplate> beanList = sillyContext.getBeanList(category, SillyHtmlTagTemplate.class);
+
+        for (SillyHtmlTagTemplate tagTemplate : beanList) {
+            if (tagTemplate.getHtmlType().equals(htmlType)) {
+                return tagTemplate;
+            }
+
+            if (tagTemplate instanceof SillyHtmlAutoTag) {
+                SillyHtmlAutoTag autoTag = (SillyHtmlAutoTag) tagTemplate;
+                if (autoTag.support(variableProperty)) {
+                    return tagTemplate;
+                }
+            }
+        }
+        return null;
     }
 
     @Override
@@ -630,8 +667,7 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
                 .setSillyResumeService(getSillyResumeService(category))
                 .setSillyReadService(getSillyReadService(category))
                 .setSillyWriteService(getSillyWriteService(category))
-                .setSillyCache(getSillyCache(category))
-                .setHtmlTemplateMap(getSillyHtmlTagTemplateMap(category));
+                .setSillyCache(getSillyCache(category));
         return sillyCategoryConfig;
     }
 
