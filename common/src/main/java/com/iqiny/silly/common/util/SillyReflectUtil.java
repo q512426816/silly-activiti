@@ -27,6 +27,23 @@ public class SillyReflectUtil {
         }
     }
 
+    public static <C extends Class<?>> C classForName(String className) {
+        try {
+            return (C) Class.forName(className);
+        } catch (Exception e) {
+            throw SillyException.newInstance("class 未能找到！" + e.getMessage(), e);
+        }
+    }
+
+    public static <M> M newInstance(String className) {
+        try {
+            Class<?> clazz = Class.forName(className);
+            return (M) clazz.getConstructor().newInstance();
+        } catch (Exception e) {
+            throw SillyException.newInstance("实例化对象失败！" + e.getMessage(), e);
+        }
+    }
+
     /**
      * copyright  com.baomidou.mybatisplus.core.toolkit.getSuperClassGenericType
      *

@@ -110,7 +110,13 @@ public class SillySpelPropertyHandle implements SillyPropertyHandle {
         if (StringUtils.isEmpty(expression)) {
             return false;
         }
-        if (Objects.equals(getValue(expression), SillyConstant.YesOrNo.YES)) {
+
+        Object value = getValue(expression);
+        if (value instanceof Boolean) {
+            return (boolean) value;
+        }
+
+        if (Objects.equals(value, SillyConstant.YesOrNo.YES)) {
             return true;
         }
         return Boolean.parseBoolean(expression);

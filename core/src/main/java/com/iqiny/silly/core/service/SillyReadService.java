@@ -11,6 +11,7 @@ package com.iqiny.silly.core.service;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
+import com.iqiny.silly.core.config.property.option.SillyProcessNodeOptionProperty;
 
 import java.util.List;
 import java.util.Map;
@@ -137,5 +138,13 @@ public interface SillyReadService<M extends SillyMaster, N extends SillyNode<V>,
      * @return
      */
     Map<String, Object> queryRoot(String id);
+
+    /**
+     * 当前任务可操作配置
+     *
+     * @param taskId
+     * @return
+     */
+    List<SillyProcessNodeOptionProperty> option(String taskId, String masterId);
 
 }

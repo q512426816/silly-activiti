@@ -198,4 +198,11 @@ public interface SillyEngineService<T extends SillyTask> extends SillyService {
      * @param userId
      */
     void deleteUser(String taskId, String userId);
+
+    /**
+     * 删除任务
+     * @param taskId
+     */
+    void deleteTask(String taskId);
+
 }

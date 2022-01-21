@@ -28,7 +28,7 @@ public interface SillyProcessNodeProperty<VP extends SillyProcessVariablePropert
     }
 
     /**
-     * 此节点是否为并行节点
+     * 此节点是否为并行节点 (是否覆盖当前节点数据)
      */
     boolean isParallel();
 
@@ -61,6 +61,11 @@ public interface SillyProcessNodeProperty<VP extends SillyProcessVariablePropert
     void setParent(SillyProcessMasterProperty property);
 
     SillyProcessMasterProperty getParent();
+
+    /**
+     * 设置操作
+     */
+    Map<String, Map<String, Object>> getOption();
 
     /**
      * 设置操作

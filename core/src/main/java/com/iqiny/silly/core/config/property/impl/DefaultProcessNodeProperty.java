@@ -8,17 +8,20 @@
  */
 package com.iqiny.silly.core.config.property.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.iqiny.silly.common.util.SillyAssert;
+import com.iqiny.silly.common.util.SillyMapUtils;
+import com.iqiny.silly.common.util.SillyReflectUtil;
+import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.config.property.SillyProcessMasterProperty;
 import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
 import com.iqiny.silly.core.config.property.option.SillyProcessNodeOptionProperty;
+import com.iqiny.silly.core.config.property.option.impl.*;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 public class DefaultProcessNodeProperty implements SillyProcessNodeProperty<DefaultProcessVariableProperty> {
@@ -62,7 +65,28 @@ public class DefaultProcessNodeProperty implements SillyProcessNodeProperty<Defa
      * 操作KEY： 对应的配置参数
      */
     @JSONField(parseFeatures = Feature.OrderedField, serialzeFeatures = SerializerFeature.MapSortField)
-    private final Map<String, Object> option = new LinkedHashMap<>();
+    private final Map<String, Map<String, Object>> option = new LinkedHashMap<>();
+
+    /**
+     * 操作KEY： 对应的配置参数
+     */
+    @JSONField(serialize = false)
+    private Map<String, SillyProcessNodeOptionProperty> sillyOption;
+
+    /**
+     * 操作KEY： className
+     */
+    @JSONField(parseFeatures = Feature.OrderedField, serialzeFeatures = SerializerFeature.MapSortField)
+    private Map<String, String> optionClassNameMap = new HashMap<>();
+
+    private String defaultOptionClassName = DefaultSillyProcessNodeOptionProperty.class.getName();
+
+    {
+        optionClassNameMap.putIfAbsent(SillyProcessNodeSaveOptionProperty.KEY, SillyProcessNodeSaveOptionProperty.class.getName());
+        optionClassNameMap.putIfAbsent(SillyProcessNodeSumbitOptionProperty.KEY, SillyProcessNodeSumbitOptionProperty.class.getName());
+        optionClassNameMap.putIfAbsent(SillyProcessNodeRejectOptionProperty.KEY, SillyProcessNodeRejectOptionProperty.class.getName());
+        optionClassNameMap.putIfAbsent(SillyProcessNodeFlowOptionProperty.KEY, SillyProcessNodeFlowOptionProperty.class.getName());
+    }
 
     @Override
     public boolean isAllowOtherVariable() {
@@ -135,22 +159,41 @@ public class DefaultProcessNodeProperty implements SillyProcessNodeProperty<Defa
     }
 
     @Override
-    public Map<String, SillyProcessNodeOptionProperty> getSillyOption() {
-        Map<String, SillyProcessNodeOptionProperty> sillyOption = new LinkedHashMap<>();
-        Set<Map.Entry<String, Object>> entries = option.entrySet();
-        for (Map.Entry<String, Object> entry : entries) {
-            Object value = entry.getValue();
-            if (value instanceof SillyProcessNodeOptionProperty) {
-                SillyProcessNodeOptionProperty optionProperty = (SillyProcessNodeOptionProperty) value;
-                sillyOption.put(optionProperty.key(), optionProperty);
-            }
-        }
-        return sillyOption;
+    public void setParent(SillyProcessMasterProperty parent) {
+        this.parent = parent;
     }
 
     @Override
-    public void setParent(SillyProcessMasterProperty parent) {
-        this.parent = parent;
+    public Map<String, Map<String, Object>> getOption() {
+        return option;
+    }
+
+    @Override
+    public Map<String, SillyProcessNodeOptionProperty> getSillyOption() {
+        if (sillyOption == null) {
+            sillyOption = new LinkedHashMap<>();
+            Set<Map.Entry<String, Map<String, Object>>> entries = option.entrySet();
+            for (Map.Entry<String, Map<String, Object>> entry : entries) {
+                String key = entry.getKey();
+                Map<String, Object> value = entry.getValue();
+                String className = SillyMapUtils.getString(value, "className");
+                if (StringUtils.isEmpty(className)) {
+                    className = optionClassNameMap.get(key);
+
+                    if (StringUtils.isEmpty(className) && StringUtils.isNotEmpty(defaultOptionClassName)) {
+                        value.putIfAbsent("key", key);
+                        className = defaultOptionClassName;
+                    }
+                }
+
+                SillyAssert.notEmpty(className, "操作配置ClassName 未设置" + key);
+                String json = JSON.toJSONString(value);
+                Class<SillyProcessNodeOptionProperty> nClass = SillyReflectUtil.classForName(className);
+                SillyProcessNodeOptionProperty optionProperty = JSON.parseObject(json, nClass);
+                sillyOption.put(optionProperty.getKey(), optionProperty);
+            }
+        }
+        return sillyOption;
     }
 
 }

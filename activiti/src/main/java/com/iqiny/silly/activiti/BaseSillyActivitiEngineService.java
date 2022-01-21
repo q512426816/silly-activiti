@@ -8,24 +8,24 @@
  */
 package com.iqiny.silly.activiti;
 
-import com.iqiny.silly.core.base.SillyMasterTask;
-import com.iqiny.silly.core.base.core.SillyNode;
-import com.iqiny.silly.core.base.core.SillyVariable;
-import com.iqiny.silly.core.group.BaseSillyTaskGroupHandle;
-import com.iqiny.silly.core.service.base.AbstractSillyService;
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.StringUtils;
+import com.iqiny.silly.core.base.SillyMasterTask;
 import com.iqiny.silly.core.base.core.SillyMaster;
+import com.iqiny.silly.core.base.core.SillyNode;
+import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.engine.SillyEngineService;
 import com.iqiny.silly.core.engine.SillyTask;
+import com.iqiny.silly.core.group.BaseSillyTaskGroupHandle;
+import com.iqiny.silly.core.service.base.AbstractSillyService;
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.delegate.Expression;
-import org.activiti.engine.history.HistoricActivityInstance;
 import org.activiti.engine.history.HistoricProcessInstance;
+import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.impl.RepositoryServiceImpl;
 import org.activiti.engine.impl.bpmn.behavior.UserTaskActivityBehavior;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
@@ -166,17 +166,12 @@ public abstract class BaseSillyActivitiEngineService
 
     @Override
     public Long getTaskDueTime(SillyTask task) {
-        if (task == null || StringUtils.isEmpty(task.getId()) || StringUtils.isEmpty(task.getExecutionId())) {
+        if (task == null || StringUtils.isEmpty(task.getId())) {
             return 0L;
         }
-        final List<HistoricActivityInstance> list = historyService.createHistoricActivityInstanceQuery()
-                .executionId(task.getExecutionId()).orderByHistoricActivityInstanceEndTime().desc().list();
-        for (HistoricActivityInstance instance : list) {
-            if (Objects.equals(instance.getTaskId(), task.getId())) {
-                return instance.getDurationInMillis();
-            }
-        }
-        return null;
+
+        HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery().taskId(task.getId()).singleResult();
+        return historicTaskInstance.getDurationInMillis();
     }
 
     @Override
@@ -352,4 +347,8 @@ public abstract class BaseSillyActivitiEngineService
         taskService.deleteCandidateUser(taskId, userId);
     }
 
+    @Override
+    public void deleteTask(String taskId) {
+        taskService.deleteTask(taskId);
+    }
 }

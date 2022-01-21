@@ -372,7 +372,7 @@ public class DefaultSillyCategoryConfig<M extends SillyMaster, N extends SillyNo
     public SillyProcessMasterProperty<?> getMasterProperty(String processKey) {
         SillyProcessProperty<?> property = getSillyProcessProperty();
         SillyAssert.notNull(property, "配置未找到 category：" + usedCategory());
-        if(StringUtils.isEmpty(processKey)){
+        if (StringUtils.isEmpty(processKey)) {
             processKey = property.getLastProcessKey();
         }
         SillyProcessMasterProperty<?> masterProperty = property.getMaster().get(processKey);
@@ -392,6 +392,8 @@ public class DefaultSillyCategoryConfig<M extends SillyMaster, N extends SillyNo
 
         SillyProcessNodeProperty<?> nodeProperty = masterProperty.getNode().get(nodeKey);
         SillyAssert.notNull(nodeProperty, "配置未找到 nodeKey：" + nodeKey);
+
         return nodeProperty;
     }
+
 }

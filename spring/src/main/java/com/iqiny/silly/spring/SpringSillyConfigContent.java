@@ -25,13 +25,13 @@ import com.iqiny.silly.core.config.property.SillyPropertyHandle;
 import com.iqiny.silly.core.config.property.impl.DefaultVariableSaveHandle;
 import com.iqiny.silly.core.convertor.SillyVariableConvertor;
 import com.iqiny.silly.core.engine.SillyEngineService;
-import com.iqiny.silly.core.group.*;
+import com.iqiny.silly.core.group.DefaultSillyTaskGroupHandle;
+import com.iqiny.silly.core.group.SillyTaskCategoryGroup;
+import com.iqiny.silly.core.group.SillyTaskGroup;
+import com.iqiny.silly.core.group.SillyTaskGroupHandle;
 import com.iqiny.silly.core.resume.SillyResumeService;
 import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
-import com.iqiny.silly.core.savehandle.variable.DataJoinVariableSaveHandle;
-import com.iqiny.silly.core.savehandle.variable.OverwriteVariableSaveHandle;
-import com.iqiny.silly.core.savehandle.variable.SaveVariableSaveHandle;
-import com.iqiny.silly.core.savehandle.variable.SkipVariableSaveHandle;
+import com.iqiny.silly.core.savehandle.variable.*;
 import com.iqiny.silly.core.service.SillyReadService;
 import com.iqiny.silly.core.service.SillyWriteService;
 import org.apache.commons.io.IOUtils;
@@ -141,6 +141,7 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent implements 
         addSillyVariableSaveHandle(new DataJoinVariableSaveHandle());
         addSillyVariableSaveHandle(new SaveVariableSaveHandle());
         addSillyVariableSaveHandle(new SkipVariableSaveHandle());
+        addSillyVariableSaveHandle(new DeleteOtherTaskVariableSaveHandle());
         final List<SillyVariableSaveHandle> beanList = sillyContext.getBeanList(SillyVariableSaveHandle.class);
         for (SillyVariableSaveHandle saveHandle : beanList) {
             addSillyVariableSaveHandle(saveHandle);

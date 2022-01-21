@@ -14,7 +14,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.core.toolkit.GlobalConfigUtils;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
+import com.iqiny.silly.common.util.SillyReflectUtil;
 import com.iqiny.silly.core.base.core.SillyMaster;
+import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
+import com.iqiny.silly.core.config.property.SillyPropertyHandle;
+import com.iqiny.silly.core.config.property.option.SillyProcessNodeOptionProperty;
 import com.iqiny.silly.mybatisplus.baseentity.BaseMySillyMaster;
 import com.iqiny.silly.mybatisplus.baseentity.BaseMySillyNode;
 import com.iqiny.silly.mybatisplus.baseentity.BaseMySillyVariable;
@@ -22,6 +26,7 @@ import com.iqiny.silly.mybatisplus.handle.SillyMasterConvertorReadHandle;
 import com.iqiny.silly.mybatisplus.service.BaseMySillyReadService;
 import org.apache.ibatis.session.SqlSession;
 import org.mybatis.spring.SqlSessionUtils;
+import org.springframework.beans.BeanUtils;
 
 import java.util.*;
 
@@ -76,5 +81,22 @@ public class DefaultMySillyReadService<M extends BaseMySillyMaster<M>, N extends
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    @Override
+    public List<SillyProcessNodeOptionProperty> option(String taskId, String masterId) {
+        List<SillyProcessNodeOptionProperty> list = new ArrayList<>();
+        SillyProcessNodeProperty<?> nodeProperty = getNodeProperty(taskId);
+        SillyPropertyHandle propertyHandle = newSillyPropertyHandle(masterId, new HashMap<>());
+        Map<String, SillyProcessNodeOptionProperty> sillyOption = nodeProperty.getSillyOption();
+        Set<Map.Entry<String, SillyProcessNodeOptionProperty>> entries = sillyOption.entrySet();
+        for (Map.Entry<String, SillyProcessNodeOptionProperty> entry : entries) {
+            SillyProcessNodeOptionProperty value = entry.getValue();
+            SillyProcessNodeOptionProperty optionProperty = SillyReflectUtil.newInstance(value.getClass());
+            BeanUtils.copyProperties(value, optionProperty);
+            optionProperty.setHandle(propertyHandle);
+            list.add(optionProperty);
+        }
+        return list;
     }
 }
