@@ -707,6 +707,41 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
         updateById(master);
     }
 
+
+    @Override
+    public void reject(String taskId, String nodeKey, String reason, String userId) {
+        // 获取当前任务信息
+        SillyTask task = sillyEngineService.findTaskById(taskId);
+        // 获取主对象信息
+        final String masterId = sillyEngineService.getBusinessKey(task.getProcessInstanceId());
+        M master = sillyReadService.getMaster(masterId);
+        SillyAssert.notNull(master, "主数据对象获取失败，驳回异常");
+        // 流程引擎驳回操作
+        List<? extends SillyTask> taskList = sillyEngineService.changeTask(task, nodeKey, userId);
+
+        master.setTaskName(makeTaskName(taskList));
+        // 下一步处置人 ID集合
+        Set<String> nextUserIds = nextProcess(taskList);
+        master.setHandleUserName(userIdsToName(nextUserIds));
+
+        String userStr = StringUtils.myJoin(nextUserIds);
+        // 记录履历
+        String handleInfo = sillyResumeService.makeResumeHandleInfo(SillyConstant.SillyResumeType.PROCESS_TYPE_BACK, userStr, task.getName(), reason);
+        SillyResume process = sillyFactory.newResume();
+        process.setProcessType(SillyConstant.SillyResumeType.PROCESS_TYPE_BACK);
+        process.setBusinessId(masterId);
+        process.setBusinessType(usedCategory());
+        process.setHandleInfo(handleInfo);
+        process.setProcessNodeKey(task.getTaskDefinitionKey());
+        process.setProcessNodeName(task.getName());
+        process.setNextUserId(userStr);
+        Long taskDueTime = sillyEngineService.getTaskDueTime(task);
+        process.setConsumeTime(taskDueTime);
+        // 插入流程履历
+        sillyResumeService.insert(process);
+        this.updateById(master);
+    }
+
     /**
      * 删除主表及关闭工作流
      *

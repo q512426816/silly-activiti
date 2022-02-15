@@ -10,6 +10,9 @@ package com.iqiny.silly.core.config.property.option.impl;
 
 import com.iqiny.silly.core.config.property.option.BaseSillyProcessNodeOptionProperty;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 保存操作配置信息
  */
@@ -26,6 +29,8 @@ public class SillyProcessNodeFlowOptionProperty extends BaseSillyProcessNodeOpti
     private boolean hide = false;
 
     private String hideEl = null;
+
+    private Map<String, Object> searchData = new HashMap<>();
 
     @Override
     public String getKey() {
@@ -72,4 +77,11 @@ public class SillyProcessNodeFlowOptionProperty extends BaseSillyProcessNodeOpti
         this.url = url;
     }
 
+    public Map<String, Object> getSearchData() {
+        return searchData;
+    }
+
+    public void setSearchData(Map<String, Object> searchData) {
+        this.searchData = searchData;
+    }
 }

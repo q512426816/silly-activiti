@@ -62,6 +62,12 @@ public abstract class EnhanceSillyWriteService<M extends SillyMaster, N extends 
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public void reject(String taskId, String nodeKey, String reason, String userId) {
+        super.reject(taskId, nodeKey, reason, userId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void delete(String masterId, String processInstanceId) {
         super.delete(masterId, processInstanceId);
     }

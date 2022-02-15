@@ -141,7 +141,6 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent implements 
         addSillyVariableSaveHandle(new DataJoinVariableSaveHandle());
         addSillyVariableSaveHandle(new SaveVariableSaveHandle());
         addSillyVariableSaveHandle(new SkipVariableSaveHandle());
-        addSillyVariableSaveHandle(new DeleteOtherTaskVariableSaveHandle());
         final List<SillyVariableSaveHandle> beanList = sillyContext.getBeanList(SillyVariableSaveHandle.class);
         for (SillyVariableSaveHandle saveHandle : beanList) {
             addSillyVariableSaveHandle(saveHandle);

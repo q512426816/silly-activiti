@@ -19,10 +19,7 @@ import com.iqiny.silly.core.engine.SillyEngineService;
 import com.iqiny.silly.core.engine.SillyTask;
 import com.iqiny.silly.core.group.BaseSillyTaskGroupHandle;
 import com.iqiny.silly.core.service.base.AbstractSillyService;
-import org.activiti.engine.HistoryService;
-import org.activiti.engine.RepositoryService;
-import org.activiti.engine.RuntimeService;
-import org.activiti.engine.TaskService;
+import org.activiti.engine.*;
 import org.activiti.engine.delegate.Expression;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
@@ -32,7 +29,6 @@ import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.impl.pvm.PvmTransition;
 import org.activiti.engine.impl.pvm.ReadOnlyProcessDefinition;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
-import org.activiti.engine.impl.pvm.process.TransitionImpl;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.IdentityLink;
 import org.activiti.engine.task.Task;
@@ -46,6 +42,7 @@ public abstract class BaseSillyActivitiEngineService
         extends AbstractSillyService<SillyMaster, SillyNode<SillyVariable>, SillyVariable>
         implements SillyEngineService<SillyActivitiTask> {
 
+    protected ManagementService managementService;
     protected RuntimeService runtimeService;
     protected HistoryService historyService;
     protected TaskService taskService;
@@ -53,6 +50,7 @@ public abstract class BaseSillyActivitiEngineService
 
     @Override
     public void otherInit() {
+        this.managementService = sillyContext.getBean(ManagementService.class);
         this.runtimeService = sillyContext.getBean(RuntimeService.class);
         this.historyService = sillyContext.getBean(HistoryService.class);
         this.taskService = sillyContext.getBean(TaskService.class);
@@ -110,7 +108,7 @@ public abstract class BaseSillyActivitiEngineService
     }
 
     @Override
-    public synchronized List<SillyActivitiTask> changeTask(SillyTask task, String nodeKey, String userId) {
+    public List<SillyActivitiTask> changeTask(SillyTask task, String nodeKey, String userId) {
         String processInstanceId = task.getProcessInstanceId();
         String taskId = task.getId();
         if (StringUtils.isEmpty(taskId) || StringUtils.isEmpty(processInstanceId)) {
@@ -118,10 +116,19 @@ public abstract class BaseSillyActivitiEngineService
         }
         // 目标节点
         ActivityImpl pointActivity = findActivitiImpl(taskId, nodeKey);
-        Map<String, Object> value = makeUserVarMap(pointActivity, userId);
+
+        Map<String, Object> value = new HashMap<>();
+        if (StringUtils.isEmpty(userId)) {
+            value = makeUserVarMap(pointActivity, userId);
+        }
+
         // 当前节点
         ActivityImpl currActivity = findActivitiImpl(taskId, null);
-        // 清空当前流向
+
+        managementService.executeCommand(
+                new RejectToAnyWhereTaskCmd(task.getExecutionId(), pointActivity, value, currActivity, findProcessDefinitionEntityByTaskId(taskId))
+        );
+       /* // 清空当前流向
         List<PvmTransition> oriPvmTransitionList = clearTransition(currActivity);
         // 创建新流向
         TransitionImpl newTransition = currActivity.createOutgoingTransition();
@@ -132,7 +139,7 @@ public abstract class BaseSillyActivitiEngineService
         // 删除目标节点新流入
         pointActivity.getIncomingTransitions().remove(newTransition);
         // 还原以前流向
-        restoreTransition(currActivity, oriPvmTransitionList);
+        restoreTransition(currActivity, oriPvmTransitionList);*/
         return findTaskByProcessInstanceId(processInstanceId);
     }
 

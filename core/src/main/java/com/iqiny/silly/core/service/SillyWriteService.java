@@ -8,7 +8,6 @@
  */
 package com.iqiny.silly.core.service;
 
-import com.iqiny.silly.core.base.SillyCategory;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
@@ -49,6 +48,14 @@ public interface SillyWriteService<M extends SillyMaster, N extends SillyNode<V>
      * @param reason
      */
     void changeUser(String taskId, String userId, String reason);
+
+    /**
+     * 任务节点驳回
+     * @param taskId 当前任务 id
+     * @param nodeKey 驳回到的节点 KEY
+     * @param reason 原因
+     */
+    void reject(String taskId, String nodeKey, String reason, String userId);
 
     /**
      * 删除主表及关闭工作流
