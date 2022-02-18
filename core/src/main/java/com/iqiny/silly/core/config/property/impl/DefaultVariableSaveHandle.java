@@ -8,10 +8,9 @@
  */
 package com.iqiny.silly.core.config.property.impl;
 
-import com.iqiny.silly.core.base.core.SillyMaster;
-import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
-import com.iqiny.silly.core.config.property.SillyPropertyHandle;
+import com.iqiny.silly.core.config.SillyCategoryConfig;
+import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
 import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
 
 /**
@@ -27,7 +26,8 @@ public class DefaultVariableSaveHandle implements SillyVariableSaveHandle {
     }
 
     @Override
-    public boolean handle(SillyMaster master, SillyNode node, SillyVariable variable, SillyPropertyHandle propertyHandle) {
-        return variable != null;
+    public boolean handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData, SillyVariable variables) {
+        return variables != null;
     }
+
 }
