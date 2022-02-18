@@ -35,6 +35,7 @@ import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
 import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
 import com.iqiny.silly.core.service.SillyService;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -176,6 +177,10 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
     }
 
     protected SillyPropertyHandle newSillyPropertyHandle(String masterId, Map<String, Object> values) {
+        if (values == null) {
+            values = new HashMap<>();
+        }
+        values.putIfAbsent("id", masterId);
         SillyNodeSourceData sourceData = new SillyNodeSourceData(usedCategory(), values);
         SillyPropertyHandle sillyPropertyHandle = getSillyConfig().newSillyPropertyHandle(sourceData);
         if (StringUtils.isNotEmpty(masterId)) {

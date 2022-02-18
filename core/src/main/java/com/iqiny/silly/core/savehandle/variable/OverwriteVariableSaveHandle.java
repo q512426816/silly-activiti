@@ -9,11 +9,9 @@
 package com.iqiny.silly.core.savehandle.variable;
 
 import com.iqiny.silly.common.SillyConstant;
-import com.iqiny.silly.core.base.core.SillyMaster;
-import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.config.SillyCategoryConfig;
-import com.iqiny.silly.core.config.SillyConfigUtil;
+import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
 import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
 
 /**
@@ -30,19 +28,20 @@ public class OverwriteVariableSaveHandle implements SillyVariableSaveHandle {
     }
 
     @Override
-    public boolean handle(SillyMaster master, SillyNode node, SillyVariable variable) {
-        SillyCategoryConfig sillyCategoryConfig = SillyConfigUtil.getSillyConfig(master.usedCategory());
+    public boolean handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData, SillyVariable variable) {
 
+        final String masterId = sourceData.masterId();
+        final String variableName = variable.getVariableName();
         // 直接更新同名数据 状态为 旧版本
         // （若有）更新之前的流程变量信息 为历史状态
-        final SillyVariable whereVariable = sillyCategoryConfig.getSillyFactory().newVariable();
-        whereVariable.setMasterId(node.getMasterId());
-        whereVariable.setVariableName(variable.getVariableName());
-        final SillyVariable sillyVariable = sillyCategoryConfig.getSillyFactory().newVariable();
-        sillyVariable.setMasterId(node.getMasterId());
-        sillyVariable.setVariableName(variable.getVariableName());
+        final SillyVariable whereVariable = sillyConfig.getSillyFactory().newVariable();
+        whereVariable.setMasterId(masterId);
+        whereVariable.setVariableName(variableName);
+        final SillyVariable sillyVariable = sillyConfig.getSillyFactory().newVariable();
+        sillyVariable.setMasterId(masterId);
+        sillyVariable.setVariableName(variableName);
         sillyVariable.setStatus(SillyConstant.ActivitiNode.STATUS_HISTORY);
-        sillyCategoryConfig.getSillyWriteService().update(sillyVariable, whereVariable);
+        sillyConfig.getSillyWriteService().update(sillyVariable, whereVariable);
         return true;
     }
 }

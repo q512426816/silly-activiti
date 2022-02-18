@@ -78,7 +78,7 @@ public class SillyProcessNodeRejectOptionProperty extends BaseSillyProcessNodeOp
     }
 
     public Map<String, Object> getData() {
-        return data;
+        return handleValue(data);
     }
 
     public void setData(Map<String, Object> data) {

@@ -8,9 +8,9 @@
  */
 package com.iqiny.silly.core.savehandle.variable;
 
-import com.iqiny.silly.core.base.core.SillyMaster;
-import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
+import com.iqiny.silly.core.config.SillyCategoryConfig;
+import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
 import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
 
 /**
@@ -27,7 +27,7 @@ public class SkipVariableSaveHandle implements SillyVariableSaveHandle {
     }
 
     @Override
-    public boolean handle(SillyMaster master, SillyNode node, SillyVariable variable) {
+    public boolean handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData, SillyVariable variable) {
         return false;
     }
 }

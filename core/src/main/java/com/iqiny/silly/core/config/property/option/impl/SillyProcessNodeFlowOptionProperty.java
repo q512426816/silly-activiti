@@ -78,7 +78,7 @@ public class SillyProcessNodeFlowOptionProperty extends BaseSillyProcessNodeOpti
     }
 
     public Map<String, Object> getSearchData() {
-        return searchData;
+        return handleValue(searchData);
     }
 
     public void setSearchData(Map<String, Object> searchData) {

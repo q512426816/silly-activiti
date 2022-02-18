@@ -10,10 +10,12 @@ package com.iqiny.silly.core.config.property.option;
 
 import com.iqiny.silly.core.config.property.SillyPropertyHandle;
 
+import java.io.Serializable;
+
 /**
  * 傻瓜流程节点 操作配置
  */
-public interface SillyProcessNodeOptionProperty {
+public interface SillyProcessNodeOptionProperty extends Serializable {
 
     /**
      * 操作Key值

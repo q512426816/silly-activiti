@@ -42,7 +42,7 @@ public class DefaultSillyActivitiEngineService extends BaseSillyActivitiEngineSe
 
     private String category;
     private SqlSessionFactory sqlSessionFactory;
-    public static final String DEFAULT_MYBATIS_MAPPING_FILE = "iqiny/silly/mappings.xml";
+    private final String DEFAULT_MYBATIS_MAPPING_FILE = "iqiny/silly/mappings.xml";
 
     protected SqlSessionFactory initSqlSessionFactory() {
         DataSource dataSource = sillyContext.getBean(usedCategory(), DataSource.class);

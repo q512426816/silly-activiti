@@ -8,9 +8,8 @@
  */
 package com.iqiny.silly.core.savehandle;
 
-import com.iqiny.silly.core.base.core.SillyMaster;
-import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
+import com.iqiny.silly.core.config.SillyCategoryConfig;
 
 
 /**
@@ -25,11 +24,9 @@ public interface SillyVariableSaveHandle {
 
     /**
      * 处置执行具体内容
-     * @param master 业务主表对象
-     * @param node 当前节点对象
      * @param variables 当前保存数据集合
      * @return 是否保存
      */
-    boolean handle(SillyMaster master, SillyNode node, SillyVariable variables);
+    boolean handle(SillyCategoryConfig sillyConfig,  SillyNodeSourceData sourceData, SillyVariable variables);
 
 }

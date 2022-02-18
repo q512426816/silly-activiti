@@ -11,7 +11,6 @@ package com.iqiny.silly.core.savehandle.node;
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.StringUtils;
-import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.config.SillyCategoryConfig;
@@ -50,41 +49,26 @@ public class SillyNodeVariableHandleSaveHandle extends BaseSillyNodeSaveHandle {
 
     @Override
     protected void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
-
-        SillyMaster master = sourceData.getMaster();
         SillyNode node = sourceData.getNode();
-        SillyPropertyHandle propertyHandle = sourceData.getPropertyHandle();
-
-        Map<String, SillyVariableSaveHandle> handleMap = sillyConfig.getSillyVariableSaveHandleMap();
-        List<? extends SillyVariable> sillyVariables = variableSaveHandle(master, node, propertyHandle, handleMap);
-        node.setVariableList(sillyVariables);
-    }
-
-    protected <V extends SillyVariable> List<? extends SillyVariable> variableSaveHandle(
-            SillyMaster master, SillyNode node, SillyPropertyHandle propertyHandle,
-            Map<String, SillyVariableSaveHandle> handleMap) {
-
-        List<V> vs = node.getVariableList();
-        List<V> needSaveList = new ArrayList<>();
-        for (V v : vs) {
-            boolean needSaveFlag = batchSaveHandle(master, node, v, propertyHandle, handleMap);
+        List<SillyVariable> vs = node.getVariableList();
+        List<SillyVariable> needSaveList = new ArrayList<>();
+        for (SillyVariable v : vs) {
+            boolean needSaveFlag = batchSaveHandle(sillyConfig, sourceData, v);
             if (needSaveFlag) {
                 needSaveList.add(v);
             }
         }
-        return needSaveList;
+        node.setVariableList(needSaveList);
     }
 
 
     /**
      * 批量保存处置类处理
-     *
-     * @param node
-     * @param variables
-     * @return
      */
-    protected boolean batchSaveHandle(SillyMaster master, SillyNode node, SillyVariable variables
-            , SillyPropertyHandle propertyHandle, Map<String, SillyVariableSaveHandle> handleMap) {
+    protected boolean batchSaveHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData, SillyVariable variables) {
+        SillyPropertyHandle propertyHandle = sourceData.getPropertyHandle();
+        Map<String, SillyVariableSaveHandle> handleMap = sillyConfig.getSillyVariableSaveHandleMap();
+
         String saveHandleNames = variables.getSaveHandleName();
         SillyAssert.notEmpty(saveHandleNames, "批处理数据保存不可为空");
         String[] saveHandleNameArr = StringUtils.split(saveHandleNames, SillyConstant.ARRAY_SPLIT_STR);
@@ -94,7 +78,7 @@ public class SillyNodeVariableHandleSaveHandle extends BaseSillyNodeSaveHandle {
             if (StringUtils.isNotEmpty(stringValue)) {
                 SillyVariableSaveHandle saveHandle = handleMap.get(stringValue);
                 SillyAssert.notNull(saveHandle, "此saveHandle未定义" + stringValue);
-                lastFlag = saveHandle.handle(master, node, variables);
+                lastFlag = saveHandle.handle(sillyConfig, sourceData, variables);
             }
         }
         return lastFlag;
