@@ -8,6 +8,8 @@
  */
 package com.iqiny.silly.core.base.core;
 
-public interface SillyEntity {
+import java.io.Serializable;
+
+public interface SillyEntity extends Serializable {
 
 }

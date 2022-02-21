@@ -12,6 +12,7 @@ import com.iqiny.silly.common.exception.SillyException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.*;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
@@ -41,6 +42,41 @@ public class SillyReflectUtil {
             return (M) clazz.getConstructor().newInstance();
         } catch (Exception e) {
             throw SillyException.newInstance("实例化对象失败！" + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 序列化克隆对象（深克隆）
+     *
+     * @param serializable
+     * @param <M>
+     * @return
+     */
+    public static <M extends Serializable> M serializeCloneObj(M serializable) {
+        ByteArrayInputStream in = null;
+        ObjectInputStream ois = null;
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream();
+             ObjectOutputStream oos = new ObjectOutputStream(out);
+        ) {
+            oos.writeObject(serializable);
+            in = new ByteArrayInputStream(out.toByteArray());
+            ois = new ObjectInputStream(in);
+            return (M) ois.readObject();
+        } catch (Exception e) {
+            throw new SillyException("序列化克隆对象错误" + e.getMessage(), e);
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException ignore) {
+                }
+            }
+            if (ois != null) {
+                try {
+                    ois.close();
+                } catch (IOException ignore) {
+                }
+            }
         }
     }
 

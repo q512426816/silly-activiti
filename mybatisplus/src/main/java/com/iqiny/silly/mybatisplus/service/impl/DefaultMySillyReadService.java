@@ -14,7 +14,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.core.toolkit.GlobalConfigUtils;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
-import com.iqiny.silly.common.exception.SillyException;
+import com.iqiny.silly.common.util.SillyReflectUtil;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
 import com.iqiny.silly.core.config.property.SillyPropertyHandle;
@@ -27,10 +27,6 @@ import com.iqiny.silly.mybatisplus.service.BaseMySillyReadService;
 import org.apache.ibatis.session.SqlSession;
 import org.mybatis.spring.SqlSessionUtils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.*;
 
 
@@ -94,19 +90,10 @@ public class DefaultMySillyReadService<M extends BaseMySillyMaster<M>, N extends
         Map<String, SillyProcessNodeOptionProperty> sillyOption = nodeProperty.getSillyOption();
         Set<Map.Entry<String, SillyProcessNodeOptionProperty>> entries = sillyOption.entrySet();
         for (Map.Entry<String, SillyProcessNodeOptionProperty> entry : entries) {
-            try {
-                SillyProcessNodeOptionProperty value = entry.getValue();
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                ObjectOutputStream oos = new ObjectOutputStream(out);
-                oos.writeObject(value);
-                ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-                ObjectInputStream ois = new ObjectInputStream(in);
-                SillyProcessNodeOptionProperty optionProperty = (SillyProcessNodeOptionProperty) ois.readObject();
-                optionProperty.setHandle(propertyHandle);
-                list.add(optionProperty);
-            } catch (Exception e) {
-                throw new SillyException("序列化错误" + e.getMessage(), e);
-            }
+            SillyProcessNodeOptionProperty value = entry.getValue();
+            SillyProcessNodeOptionProperty optionProperty = SillyReflectUtil.serializeCloneObj(value);
+            optionProperty.setHandle(propertyHandle);
+            list.add(optionProperty);
         }
         return list;
     }

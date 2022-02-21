@@ -284,6 +284,7 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
 
     protected void initSillyConvertorList() {
         addSillyVariableConvertor(new SillyStringConvertor());
+        addSillyVariableConvertor(new SillyListConvertor());
         addSillyVariableConvertor(new SillyDateConvertor());
         addSillyVariableConvertor(new SillyDateTimeConvertor());
         hookInitSillyConvertorList();
