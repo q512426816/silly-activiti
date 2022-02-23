@@ -11,14 +11,12 @@ package com.iqiny.silly.activiti;
 import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.exception.SillyException;
 import com.iqiny.silly.common.util.StringUtils;
-import com.iqiny.silly.core.base.SillyMasterTask;
+import com.iqiny.silly.core.base.SillyContext;
 import com.iqiny.silly.core.base.core.SillyMaster;
-import com.iqiny.silly.core.base.core.SillyNode;
-import com.iqiny.silly.core.base.core.SillyVariable;
 import com.iqiny.silly.core.engine.SillyEngineService;
 import com.iqiny.silly.core.engine.SillyTask;
 import com.iqiny.silly.core.group.BaseSillyTaskGroupHandle;
-import com.iqiny.silly.core.service.base.AbstractSillyService;
+import com.iqiny.silly.core.read.MySillyMasterTask;
 import org.activiti.engine.*;
 import org.activiti.engine.delegate.Expression;
 import org.activiti.engine.history.HistoricProcessInstance;
@@ -39,8 +37,7 @@ import java.util.*;
  * 集成activiti 工作流引擎服务
  */
 public abstract class BaseSillyActivitiEngineService
-        extends AbstractSillyService<SillyMaster, SillyNode<SillyVariable>, SillyVariable>
-        implements SillyEngineService<SillyActivitiTask> {
+        implements SillyEngineService<SillyActivitiTask, MySillyMasterTask> {
 
     protected ManagementService managementService;
     protected RuntimeService runtimeService;
@@ -48,8 +45,8 @@ public abstract class BaseSillyActivitiEngineService
     protected TaskService taskService;
     protected RepositoryService repositoryService;
 
-    @Override
-    public void otherInit() {
+  
+    public void otherInit(SillyContext sillyContext) {
         this.managementService = sillyContext.getBean(ManagementService.class);
         this.runtimeService = sillyContext.getBean(RuntimeService.class);
         this.historyService = sillyContext.getBean(HistoryService.class);
@@ -88,7 +85,6 @@ public abstract class BaseSillyActivitiEngineService
         if (variableMap == null) {
             variableMap = new HashMap<>();
         }
-        variableMap.putIfAbsent("createUserId", sillyCurrentUserUtil.currentUserId());
         final ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(master.processKey(), master.getId(), variableMap);
         return processInstance.getId();
     }
@@ -128,18 +124,7 @@ public abstract class BaseSillyActivitiEngineService
         managementService.executeCommand(
                 new RejectToAnyWhereTaskCmd(task.getExecutionId(), pointActivity, value, currActivity, findProcessDefinitionEntityByTaskId(taskId))
         );
-       /* // 清空当前流向
-        List<PvmTransition> oriPvmTransitionList = clearTransition(currActivity);
-        // 创建新流向
-        TransitionImpl newTransition = currActivity.createOutgoingTransition();
-        // 设置新流向的目标节点
-        newTransition.setDestination(pointActivity);
-        // 执行转向任务
-        taskService.complete(taskId, value);
-        // 删除目标节点新流入
-        pointActivity.getIncomingTransitions().remove(newTransition);
-        // 还原以前流向
-        restoreTransition(currActivity, oriPvmTransitionList);*/
+
         return findTaskByProcessInstanceId(processInstanceId);
     }
 
@@ -321,11 +306,8 @@ public abstract class BaseSillyActivitiEngineService
     }
 
     @Override
-    public List<SillyMasterTask> findMyTaskByMasterId(String category, String userId, String masterId) {
-        if (StringUtils.isEmpty(userId)) {
-            userId = sillyCurrentUserUtil.currentUserId();
-        }
-        return getMyDoingMasterTaskId(category, userId, masterId);
+    public List<MySillyMasterTask> findMyTaskByMasterId(String category, String userId, String masterId, Set<String> allGroupId) {
+        return getMyDoingMasterTaskId(category, userId, masterId, allGroupId);
     }
 
     @Override

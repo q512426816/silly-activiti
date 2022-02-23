@@ -9,8 +9,9 @@
 package com.iqiny.silly.activiti;
 
 import com.iqiny.silly.common.exception.SillyException;
-import com.iqiny.silly.common.util.SillyAssert;
-import com.iqiny.silly.core.base.SillyMasterTask;
+import com.iqiny.silly.core.base.SillyCategory;
+import com.iqiny.silly.core.base.SillyContext;
+import com.iqiny.silly.core.read.MySillyMasterTask;
 import org.activiti.engine.impl.db.IbatisVariableTypeHandler;
 import org.activiti.engine.impl.util.ReflectUtil;
 import org.activiti.engine.impl.variable.VariableType;
@@ -26,7 +27,6 @@ import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.type.JdbcType;
 import org.mybatis.spring.transaction.SpringManagedTransactionFactory;
 
-
 import javax.sql.DataSource;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -36,7 +36,7 @@ import java.util.*;
 /**
  * 集成activiti 工作流引擎服务
  */
-public class DefaultSillyActivitiEngineService extends BaseSillyActivitiEngineService {
+public class DefaultSillyActivitiEngineService extends BaseSillyActivitiEngineService implements SillyCategory {
 
     private final static Log log = LogFactory.getLog(DefaultSillyActivitiEngineService.class);
 
@@ -44,7 +44,7 @@ public class DefaultSillyActivitiEngineService extends BaseSillyActivitiEngineSe
     private SqlSessionFactory sqlSessionFactory;
     private final String DEFAULT_MYBATIS_MAPPING_FILE = "iqiny/silly/mappings.xml";
 
-    protected SqlSessionFactory initSqlSessionFactory() {
+    protected void initSqlSessionFactory(SillyContext sillyContext) {
         DataSource dataSource = sillyContext.getBean(usedCategory(), DataSource.class);
         TransactionFactory transactionFactory = sillyContext.getBean(usedCategory(), TransactionFactory.class);
         if (transactionFactory == null) {
@@ -61,18 +61,21 @@ public class DefaultSillyActivitiEngineService extends BaseSillyActivitiEngineSe
             configuration.setEnvironment(environment);
             configuration.getTypeHandlerRegistry().register(VariableType.class, JdbcType.VARCHAR, new IbatisVariableTypeHandler());
             configuration = parser.parse();
-            return new SqlSessionFactoryBuilder().build(configuration);
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
         } catch (Exception e) {
             throw new SillyException("Error while building ibatis SqlSessionFactory: " + e.getMessage(), e);
         }
     }
 
     @Override
-    public void otherInit() {
-        super.otherInit();
+    public void init() {
+        SillyContext sillyContext = usedConfig().getSillyContext();
+        init(sillyContext);
+    }
 
-        this.sqlSessionFactory = initSqlSessionFactory();
-        SillyAssert.notNull(sqlSessionFactory, "sqlSessionFactory 不可为空[需要配置MyBatis]");
+    public void init(SillyContext sillyContext) {
+        initSqlSessionFactory(sillyContext);
+        otherInit(sillyContext);
     }
 
     @Override
@@ -81,12 +84,12 @@ public class DefaultSillyActivitiEngineService extends BaseSillyActivitiEngineSe
     }
 
     @Override
-    public List<SillyMasterTask> getDoingMasterTask(String category, String userId) {
-        return getMyDoingMasterTaskId(category, userId, null);
+    public List<MySillyMasterTask> getDoingMasterTask(String category, String userId, Set<String> allGroupId) {
+        return getMyDoingMasterTaskId(category, userId, null, allGroupId);
     }
 
     @Override
-    public List<SillyMasterTask> getHistoryMasterTask(String category, String userId) {
+    public List<MySillyMasterTask> getHistoryMasterTask(String category, String userId) {
         Map<String, Object> param = new HashMap<>();
         param.put("category", category);
         param.put("userId", userId);
@@ -100,15 +103,9 @@ public class DefaultSillyActivitiEngineService extends BaseSillyActivitiEngineSe
     }
 
     @Override
-    public List<SillyMasterTask> getMyDoingMasterTaskId(String category, String userId, String masterId) {
+    public List<MySillyMasterTask> getMyDoingMasterTaskId(String category, String userId, String masterId, Set<String> allGroupId) {
         Map<String, Object> param = new HashMap<>();
-        if (sillyCurrentUserUtil.isAdmin(userId)) {
-            userId = null;
-        } else {
-            // 计算用户所拥有的 流程 GROUP_ID
-            Set<String> allGroupId = sillyTaskGroupHandle.getAllGroupId(category, userId);
-            param.put("allGroupId", allGroupId);
-        }
+        param.put("allGroupId", allGroupId);
         param.put("category", category);
         param.put("businessKey", masterId);
         param.put("userId", userId);

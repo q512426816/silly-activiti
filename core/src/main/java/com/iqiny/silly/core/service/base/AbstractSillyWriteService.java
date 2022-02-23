@@ -188,7 +188,9 @@ public abstract class AbstractSillyWriteService<M extends SillyMaster, N extends
      * @return
      */
     protected SillyMasterTask setNodeMyTaskId(String masterId, N node) {
-        SillyMasterTask task = sillyEngineService.getOneTask(usedCategory(), sillyCurrentUserUtil.currentUserId(), masterId);
+        String currentUserId = sillyCurrentUserUtil.currentUserId();
+        Set<String> allGroupIds = sillyTaskGroupHandle.getAllGroupId(usedCategory(), currentUserId);
+        SillyMasterTask task = sillyEngineService.getOneTask(usedCategory(), currentUserId, masterId, allGroupIds);
         SillyAssert.notNull(task, "未找到您需要处置的任务" + usedCategory());
 
         node.setTaskId(task.getTaskId());

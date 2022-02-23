@@ -6,10 +6,11 @@
  *  project name：silly-mybatisplus
  *  project description：top silly project pom.xml file
  */
-package com.iqiny.silly.mybatisplus.handle;
+package com.iqiny.silly.spring.handle;
 
 import com.iqiny.silly.common.util.SillyMapUtils;
 import com.iqiny.silly.core.base.core.SillyMaster;
+import com.iqiny.silly.mybatisplus.handle.SillyMasterConvertorReadHandle;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;

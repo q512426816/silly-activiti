@@ -14,11 +14,12 @@ import com.iqiny.silly.core.service.SillyService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 傻瓜流程引擎服务 （流程控制服务，一般都结合第三方框架实现，比如 Activiti）
  */
-public interface SillyEngineService<T extends SillyTask> extends SillyService {
+public interface SillyEngineService<T extends SillyTask, S extends SillyMasterTask> extends SillyService {
 
     /**
      * 启动流程
@@ -125,7 +126,7 @@ public interface SillyEngineService<T extends SillyTask> extends SillyService {
      * @param userId
      * @return
      */
-    List<SillyMasterTask> getDoingMasterTask(String category, String userId);
+    List<S> getDoingMasterTask(String category, String userId, Set<String> allGroupId);
 
     /**
      * 获取历史的主表ID
@@ -134,7 +135,7 @@ public interface SillyEngineService<T extends SillyTask> extends SillyService {
      * @param userId
      * @return
      */
-    List<SillyMasterTask> getHistoryMasterTask(String category, String userId);
+    List<S> getHistoryMasterTask(String category, String userId);
 
     /**
      * 获取此分类下的单业务数据 用户的任务信息
@@ -144,7 +145,7 @@ public interface SillyEngineService<T extends SillyTask> extends SillyService {
      * @param masterId
      * @return
      */
-    List<SillyMasterTask> getMyDoingMasterTaskId(String category, String userId, String masterId);
+    List<S> getMyDoingMasterTaskId(String category, String userId, String masterId, Set<String> allGroupId);
 
     /**
      * 获取某个用户下某业务的一个任务
@@ -152,8 +153,8 @@ public interface SillyEngineService<T extends SillyTask> extends SillyService {
      * @param masterId
      * @return
      */
-    default SillyMasterTask getOneTask(String category, String userId, String masterId) {
-        List<SillyMasterTask> list = getMyDoingMasterTaskId(category, userId, masterId);
+    default S getOneTask(String category, String userId, String masterId, Set<String> allGroupId) {
+        List<S> list = getMyDoingMasterTaskId(category, userId, masterId, allGroupId);
         return list.isEmpty() ? null : list.get(0);
     }
 
@@ -173,7 +174,7 @@ public interface SillyEngineService<T extends SillyTask> extends SillyService {
      * @param masterId
      * @return
      */
-    List<SillyMasterTask> findMyTaskByMasterId(String category, String userId, String masterId);
+    List<S> findMyTaskByMasterId(String category, String userId, String masterId, Set<String> allGroupId);
 
     /**
      * 调整任务执行人
@@ -201,6 +202,7 @@ public interface SillyEngineService<T extends SillyTask> extends SillyService {
 
     /**
      * 删除任务
+     *
      * @param taskId
      */
     void deleteTask(String taskId);

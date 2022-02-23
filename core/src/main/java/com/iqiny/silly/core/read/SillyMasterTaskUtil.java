@@ -20,8 +20,8 @@ public class SillyMasterTaskUtil<S extends SillyMasterTask> {
      */
     private Map<String, Set<S>> masterTaskMap;
 
-    public static SillyMasterTaskUtil<? extends SillyMasterTask> create(List<SillyMasterTask> masterTasks) {
-        SillyMasterTaskUtil<SillyMasterTask> taskUtil = new SillyMasterTaskUtil<>();
+    public static SillyMasterTaskUtil<? extends SillyMasterTask> create(List<? extends SillyMasterTask> masterTasks) {
+        SillyMasterTaskUtil taskUtil = new SillyMasterTaskUtil();
         taskUtil.setMasterTaskList(masterTasks);
         return taskUtil;
     }

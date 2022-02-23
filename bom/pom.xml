@@ -15,6 +15,14 @@
 
     <properties>
         <silly.version>1.0.6-RELEASE</silly.version>
+
+        <apache.commons.version>3.12.0</apache.commons.version>
+        <commons-io.version>2.11.0</commons-io.version>
+        <commons-collections.version>3.2.1</commons-collections.version>
+        <commons-logging.version>1.2</commons-logging.version>
+        <fastjson.version>1.2.76</fastjson.version>
+        <guava.version>29.0-jre</guava.version>
+        <jackson-annotations.version>2.9.10</jackson-annotations.version>
         <activiti.version>5.15.1</activiti.version>
         <mybatis-plus.version>3.1.2</mybatis-plus.version>
 
@@ -63,6 +71,45 @@
                 <version>${silly.version}</version>
             </dependency>
 
+            <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${apache.commons.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-collections</groupId>
+                <artifactId>commons-collections</artifactId>
+                <version>${commons-collections.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>${commons-logging.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson-annotations.version}</version>
+            </dependency>
+            
             <!-- activiti-engine -->
             <dependency>
                 <groupId>org.activiti</groupId>

@@ -21,10 +21,7 @@ import com.iqiny.silly.core.engine.SillyEngineService;
 import com.iqiny.silly.core.engine.SillyTask;
 import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 流程启动处理器
@@ -80,7 +77,9 @@ public class SillyProcessStartSaveHandle extends BaseSillyNodeSaveHandle {
 
         if (startFlag) {
             // 设置当前任务ID
-            SillyMasterTask masterTask = engineService.getOneTask(category, node.getNodeUserId(), master.getId());
+            String nodeUserId = node.getNodeUserId();
+            Set<String> allGroupIds = sillyConfig.getSillyTaskGroupHandle().getAllGroupId(category, nodeUserId);
+            SillyMasterTask masterTask = engineService.getOneTask(category, nodeUserId, master.getId(), allGroupIds);
             SillyAssert.notNull(masterTask, "未找到您需要处置的任务" + category);
             SillyTask nowTask = engineService.findTaskById(masterTask.getTaskId());
             SillyAssert.notNull(nowTask, "未找到任务" + masterTask.getTaskId());

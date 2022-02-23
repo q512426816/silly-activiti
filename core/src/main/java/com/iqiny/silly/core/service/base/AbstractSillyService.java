@@ -14,6 +14,7 @@ import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyCategory;
 import com.iqiny.silly.core.base.SillyContext;
 import com.iqiny.silly.core.base.SillyFactory;
+import com.iqiny.silly.core.base.SillyMasterTask;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.base.core.SillyVariable;
@@ -54,7 +55,7 @@ public abstract class AbstractSillyService<M extends SillyMaster, N extends Sill
 
     protected SillyFactory<M, N, V, ? extends SillyResume> sillyFactory;
 
-    protected SillyEngineService<? extends SillyTask> sillyEngineService;
+    protected SillyEngineService<? extends SillyTask, ? extends SillyMasterTask> sillyEngineService;
 
     protected SillyCurrentUserUtil sillyCurrentUserUtil;
 
