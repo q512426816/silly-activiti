@@ -20,6 +20,7 @@ import com.iqiny.silly.core.config.property.SillyProcessMasterProperty;
 import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
 import com.iqiny.silly.core.config.property.option.SillyProcessNodeOptionProperty;
 import com.iqiny.silly.core.config.property.option.impl.*;
+import com.iqiny.silly.core.savehandle.node.*;
 
 import java.util.*;
 
@@ -53,7 +54,53 @@ public class DefaultProcessNodeProperty implements SillyProcessNodeProperty<Defa
      */
     private String nodeName;
 
+    /**
+     * 忽略的属性名称
+     */
     private List<String> ignoreFieldNames;
+
+    /**
+     * 前置 节点保存处理器名称（支持SPEL）
+     *
+     * @see com.iqiny.silly.core.savehandle.SillyNodeSaveHandle
+     */
+    private List<String> beforeSaveHandleNames;
+    
+    /**
+     * 默认节点保存处理器名称（支持SPEL）
+     *
+     * @see com.iqiny.silly.core.savehandle.SillyNodeSaveHandle
+     */
+    private List<String> saveHandleNames = Arrays.asList(
+            SillyLoadNodeInfoSaveHandle.NAME,
+            SillyMapToVarSaveHandle.NAME,
+            SillyCheckVariableFieldsSaveHandle.NAME,
+            SillyVarToProcessMapSaveHandle.NAME,
+            SillyProcessStartSaveHandle.NAME,
+            SillyVarToMasterSaveHandle.NAME,
+            SillyVarToNodeSaveHandle.NAME,
+            SillyVariableToHistorySaveHandle.NAME,
+            SillyNodeToHistorySaveHandle.NAME,
+            SillyNodeInsertSaveHandle.NAME,
+            SillyNodeVariableHandleSaveHandle.NAME,
+            SillyNodeVariableConvertorSaveHandle.NAME,
+            SillyNodeVariableInsertSaveHandle.NAME,
+            SillyProcessSubmitSaveHandle.NAME,
+            SillyLoadNextTaskSaveHandle.NAME,
+            SillyAfterCompleteSaveHandle.NAME,
+            SillyAfterCloseSaveHandle.NAME,
+            SillyResumeCreateSaveHandle.NAME,
+            SillyResumeRecordSaveHandle.NAME,
+            SillyMasterUpdateSaveHandle.NAME,
+            SillyUpdateCachePropertyHandleRootSaveHandle.NAME
+    );
+
+    /**
+     * 后置 节点保存处理器名称（支持SPEL）
+     *
+     * @see com.iqiny.silly.core.savehandle.SillyNodeSaveHandle
+     */
+    private List<String> afterSaveHandleNames;
 
     /**
      * 属性名称： 对应的配置参数
@@ -196,4 +243,30 @@ public class DefaultProcessNodeProperty implements SillyProcessNodeProperty<Defa
         return sillyOption;
     }
 
+    @Override
+    public List<String> getSaveHandleNames() {
+        return saveHandleNames;
+    }
+
+    public void setSaveHandleNames(List<String> saveHandleNames) {
+        this.saveHandleNames = saveHandleNames;
+    }
+
+    @Override
+    public List<String> getBeforeSaveHandleNames() {
+        return beforeSaveHandleNames;
+    }
+
+    public void setBeforeSaveHandleNames(List<String> beforeSaveHandleNames) {
+        this.beforeSaveHandleNames = beforeSaveHandleNames;
+    }
+
+    @Override
+    public List<String> getAfterSaveHandleNames() {
+        return afterSaveHandleNames;
+    }
+
+    public void setAfterSaveHandleNames(List<String> afterSaveHandleNames) {
+        this.afterSaveHandleNames = afterSaveHandleNames;
+    }
 }

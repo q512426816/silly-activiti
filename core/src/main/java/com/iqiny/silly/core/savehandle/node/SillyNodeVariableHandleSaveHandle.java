@@ -27,18 +27,11 @@ import java.util.Map;
  */
 public class SillyNodeVariableHandleSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyNodeInsertSaveHandle.ORDER + 100;
-
     public static final String NAME = "silly_19_nodeVariableHandle";
 
     @Override
     public String name() {
         return NAME;
-    }
-
-    @Override
-    public int order() {
-        return ORDER;
     }
 
     @Override

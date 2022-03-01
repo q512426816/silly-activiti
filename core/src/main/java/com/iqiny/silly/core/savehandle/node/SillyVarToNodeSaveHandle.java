@@ -22,18 +22,11 @@ import java.util.List;
  */
 public class SillyVarToNodeSaveHandle<T extends SillyNode> extends BaseSillyNodeBelongSaveHandle<T> {
 
-    public static final int ORDER = SillyProcessStartSaveHandle.ORDER + 100;
-
     public static final String NAME = "silly_15_varToNode";
 
     @Override
     public String name() {
         return NAME;
-    }
-
-    @Override
-    public int order() {
-        return ORDER;
     }
 
     @Override

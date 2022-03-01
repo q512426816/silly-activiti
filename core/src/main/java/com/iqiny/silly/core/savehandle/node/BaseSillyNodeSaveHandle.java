@@ -20,14 +20,13 @@ import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
 public abstract class BaseSillyNodeSaveHandle implements SillyNodeSaveHandle {
 
     @Override
-    public SillyNodeSaveHandle handle(SillyNodeSourceData sourceData) {
+    public void handle(SillyNodeSourceData sourceData) {
         String category = sourceData.getCategory();
         SillyCategoryConfig sillyConfig = SillyConfigUtil.getSillyConfig(category);
         boolean canHandleFlag = canHandle(sourceData);
         if (canHandleFlag) {
             doHandle(sillyConfig, sourceData);
         }
-        return next(sillyConfig, sourceData);
     }
 
     protected void doHandle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
@@ -40,15 +39,6 @@ public abstract class BaseSillyNodeSaveHandle implements SillyNodeSaveHandle {
      */
     protected boolean canHandle(SillyNodeSourceData sourceData) {
         return !sourceData.ignoreHandle(name()) && canDo(sourceData);
-    }
-
-    protected SillyNodeSaveHandle next(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
-        SillyNodeSaveHandle handle = sourceData.popAnchorPoint();
-        if (handle == null) {
-            handle = this;
-        }
-
-        return sillyConfig.getSillyContext().getNextBean(handle, sourceData.getCategory(), SillyNodeSaveHandle.class);
     }
 
     protected abstract boolean canDo(SillyNodeSourceData sourceData);

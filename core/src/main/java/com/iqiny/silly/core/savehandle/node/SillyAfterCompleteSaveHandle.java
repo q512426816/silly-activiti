@@ -29,18 +29,11 @@ import java.util.Set;
  */
 public class SillyAfterCompleteSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyLoadNextTaskSaveHandle.ORDER + 100;
-
     public static final String NAME = "silly_24_afterComplete";
 
     @Override
     public String name() {
         return NAME;
-    }
-
-    @Override
-    public int order() {
-        return ORDER;
     }
 
     @Override

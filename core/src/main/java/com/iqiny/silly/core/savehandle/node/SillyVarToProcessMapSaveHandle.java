@@ -24,18 +24,11 @@ import java.util.Map;
  */
 public class SillyVarToProcessMapSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyCheckVariableFieldsSaveHandle.ORDER + 100;
-
     public static final String NAME = "silly_12_varToProcessMap";
 
     @Override
     public String name() {
         return NAME;
-    }
-
-    @Override
-    public int order() {
-        return ORDER;
     }
 
     @Override

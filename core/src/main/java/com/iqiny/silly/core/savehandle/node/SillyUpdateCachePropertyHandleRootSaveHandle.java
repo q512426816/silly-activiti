@@ -23,18 +23,11 @@ import java.util.Map;
  */
 public class SillyUpdateCachePropertyHandleRootSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyMasterUpdateSaveHandle.ORDER + 100;
-
     public static final String NAME = "silly_29_updateCachePropertyHandleRoot";
 
     @Override
     public String name() {
         return NAME;
-    }
-
-    @Override
-    public int order() {
-        return ORDER;
     }
 
     @Override

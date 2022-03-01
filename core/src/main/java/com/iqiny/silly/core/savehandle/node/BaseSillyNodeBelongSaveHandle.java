@@ -24,11 +24,6 @@ import java.util.Objects;
 public abstract class BaseSillyNodeBelongSaveHandle<T> extends BaseSillyNodeSaveHandle {
 
     @Override
-    public int order() {
-        return SillyVarToNodeSaveHandle.ORDER + AFTER;
-    }
-
-    @Override
     protected boolean canDo(SillyNodeSourceData sourceData) {
         List<? extends SillyVariable> variables = sourceData.getVariables();
         if (variables == null) {

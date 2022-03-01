@@ -24,6 +24,7 @@ import com.iqiny.silly.core.engine.SillyEngineService;
 import com.iqiny.silly.core.group.SillyTaskGroupHandle;
 import com.iqiny.silly.core.resume.SillyResume;
 import com.iqiny.silly.core.resume.SillyResumeService;
+import com.iqiny.silly.core.savehandle.SillyNodeSaveHandle;
 import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
 import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
 import com.iqiny.silly.core.service.SillyReadService;
@@ -85,6 +86,13 @@ public interface SillyCategoryConfig<M extends SillyMaster, N extends SillyNode<
     Map<String, SillyVariableSaveHandle> getSillyVariableSaveHandleMap();
 
     SillyCategoryConfig<M, N, V> setSillyVariableSaveHandleMap(Map<String, SillyVariableSaveHandle> sillyVariableSaveHandleMap);
+
+    /**
+     * 傻瓜节点数据保存处置类
+     */
+    Map<String, SillyNodeSaveHandle> getSillyNodeSaveHandleMap();
+
+    SillyCategoryConfig<M, N, V> setSillyNodeSaveHandleMap(Map<String, SillyNodeSaveHandle> sillyNodeSaveHandleMap);
 
     /**
      * 傻瓜履历服务接口

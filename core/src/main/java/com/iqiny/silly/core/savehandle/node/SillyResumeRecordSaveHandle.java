@@ -18,18 +18,11 @@ import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
  */
 public class SillyResumeRecordSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyResumeCreateSaveHandle.ORDER + 100;
-
     public static final String NAME = "silly_27_resumeRecord";
 
     @Override
     public String name() {
         return NAME;
-    }
-
-    @Override
-    public int order() {
-        return ORDER;
     }
 
     @Override

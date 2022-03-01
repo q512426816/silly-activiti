@@ -19,18 +19,11 @@ import com.iqiny.silly.core.service.SillyWriteService;
  */
 public class SillyMasterUpdateSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyResumeRecordSaveHandle.ORDER + 100;
-
     public static final String NAME = "silly_28_masterUpdate";
 
     @Override
     public String name() {
         return NAME;
-    }
-
-    @Override
-    public int order() {
-        return ORDER;
     }
 
     @Override

@@ -27,6 +27,7 @@ import com.iqiny.silly.core.engine.SillyEngineService;
 import com.iqiny.silly.core.group.SillyTaskGroupHandle;
 import com.iqiny.silly.core.resume.SillyResume;
 import com.iqiny.silly.core.resume.SillyResumeService;
+import com.iqiny.silly.core.savehandle.SillyNodeSaveHandle;
 import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
 import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
 import com.iqiny.silly.core.service.SillyReadService;
@@ -72,6 +73,11 @@ public class DefaultSillyCategoryConfig<M extends SillyMaster, N extends SillyNo
      * 流程变量 类型转换器
      */
     protected Map<String, SillyVariableSaveHandle> sillyVariableSaveHandleMap;
+
+    /**
+     * 流程变量 类型转换器
+     */
+    protected Map<String, SillyNodeSaveHandle> sillyNodeSaveHandleMap;
 
     /**
      * 傻瓜工厂工厂
@@ -224,6 +230,11 @@ public class DefaultSillyCategoryConfig<M extends SillyMaster, N extends SillyNo
     }
 
     @Override
+    public Map<String, SillyNodeSaveHandle> getSillyNodeSaveHandleMap() {
+        return sillyNodeSaveHandleMap;
+    }
+
+    @Override
     public SillyFactory<M, N, V, SillyResume> getSillyFactory() {
         return sillyFactory;
     }
@@ -324,6 +335,12 @@ public class DefaultSillyCategoryConfig<M extends SillyMaster, N extends SillyNo
     @Override
     public DefaultSillyCategoryConfig setSillyVariableSaveHandleMap(Map<String, SillyVariableSaveHandle> sillyVariableSaveHandleMap) {
         this.sillyVariableSaveHandleMap = sillyVariableSaveHandleMap;
+        return this;
+    }
+
+    @Override
+    public DefaultSillyCategoryConfig setSillyNodeSaveHandleMap(Map<String, SillyNodeSaveHandle> sillyNodeSaveHandleMap) {
+        this.sillyNodeSaveHandleMap = sillyNodeSaveHandleMap;
         return this;
     }
 

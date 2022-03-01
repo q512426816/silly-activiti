@@ -22,18 +22,11 @@ import java.util.Map;
  */
 public class SillyLoadNodePropertyByNotTaskSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyLoadNodePropertyByTaskSaveHandle.ORDER + 100;
-
     public static final String NAME = "silly_08_loadNodePropertyByNotTask";
 
     @Override
     public String name() {
         return NAME;
-    }
-
-    @Override
-    public int order() {
-        return ORDER;
     }
 
     @Override

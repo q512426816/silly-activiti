@@ -22,18 +22,11 @@ import java.util.Date;
  */
 public class SillyLoadNodeInfoSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyLoadNodePropertyByNotTaskSaveHandle.ORDER + 100;
-
     public static final String NAME = "silly_09_loadNodeInfo";
 
     @Override
     public String name() {
         return NAME;
-    }
-
-    @Override
-    public int order() {
-        return ORDER;
     }
 
     @Override

@@ -9,14 +9,11 @@
 package com.iqiny.silly.core.read;
 
 import com.iqiny.silly.common.SillyConstant;
-import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.SillyMasterTask;
-import com.iqiny.silly.core.config.SillyConfigUtil;
 import org.apache.commons.collections.MapUtils;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class MySillyMasterTask implements SillyMasterTask {
 
@@ -140,16 +137,6 @@ public class MySillyMasterTask implements SillyMasterTask {
     }
 
     public String getChangeFlag() {
-        if (StringUtils.isEmpty(MapUtils.getString(getParams(), "changeFlag"))) {
-            String userId = getUserId();
-            String assignee = getAssignee();
-            String currUserId = SillyConfigUtil.getSillyConfig(category).getSillyCurrentUserUtil().currentUserId();
-            if (Objects.equals(currUserId, userId) || Objects.equals(currUserId, assignee)) {
-                setChangeFlag(SillyConstant.YesOrNo.YES);
-            } else {
-                setChangeFlag(SillyConstant.YesOrNo.NO);
-            }
-        }
         return MapUtils.getString(getParams(), "changeFlag");
     }
 

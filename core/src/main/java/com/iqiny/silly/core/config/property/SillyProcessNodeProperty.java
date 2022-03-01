@@ -10,6 +10,7 @@ package com.iqiny.silly.core.config.property;
 
 import com.iqiny.silly.core.config.property.option.SillyProcessNodeOptionProperty;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -72,4 +73,19 @@ public interface SillyProcessNodeProperty<VP extends SillyProcessVariablePropert
      */
     Map<String, SillyProcessNodeOptionProperty> getSillyOption();
     
+    /**
+     * 数据处理保存的处理方法 （默认方法名称）
+     */
+    List<String> getSaveHandleNames();
+
+    /**
+     * 前置 数据处理保存的处理方法 （支持 EL）
+     */
+    List<String> getBeforeSaveHandleNames();
+
+    /**
+     *  后置 节点保存处理器名称（支持 EL）
+     */
+    List<String> getAfterSaveHandleNames();
+
 }

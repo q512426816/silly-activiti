@@ -130,7 +130,9 @@ public class SpringSillyContext implements SillyContext, ApplicationContextAware
         if (applicationContext.containsBean(beanName)) {
             // 若有相同名称的移出此Bean
             beanFactory.removeBeanDefinition(beanName);
-            log.info("移出 BeanDefinition: " + beanName);
+            if (log.isDebugEnabled()) {
+                log.debug("移出 BeanDefinition: " + beanName);
+            }
         }
         BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clazz);
         if (consumer != null) {
@@ -139,7 +141,9 @@ public class SpringSillyContext implements SillyContext, ApplicationContextAware
 
         BeanDefinition beanDefinition = beanDefinitionBuilder.getRawBeanDefinition();
         beanFactory.registerBeanDefinition(beanName, beanDefinition);
-        log.info("动态注册Bean 成功：" + beanName);
+        if (log.isDebugEnabled()) {
+            log.debug("动态注册Bean 成功：" + beanName);
+        }
         return applicationContext.getBean(beanName, clazz);
     }
 

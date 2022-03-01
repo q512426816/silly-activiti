@@ -8,6 +8,7 @@
  */
 package com.iqiny.silly.core.savehandle;
 
+import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.util.SillyMapUtils;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
@@ -37,11 +38,6 @@ public class SillyNodeSourceData {
      * 忽略的处置器名称
      */
     private final Set<String> ignoreHandleName = new LinkedHashSet<>();
-
-    /**
-     * 处置锚点, 下一步范围开始
-     */
-    private final Stack<SillyNodeSaveHandle> anchorPoint = new Stack<>();
 
     /**
      * 创建参数
@@ -241,17 +237,6 @@ public class SillyNodeSourceData {
         this.resume = resume;
     }
 
-    public SillyNodeSaveHandle popAnchorPoint() {
-        if (anchorPoint.isEmpty()) {
-            return null;
-        }
-        return anchorPoint.pop();
-    }
-
-    public void pushAnchorPoint(SillyNodeSaveHandle anchorPoint) {
-        this.anchorPoint.push(anchorPoint);
-    }
-
     public void addIgnoreHandleName(String name) {
         ignoreHandleName.add(name);
     }
@@ -262,5 +247,47 @@ public class SillyNodeSourceData {
             sj.add("【(" + (i + 1) + ")" + handleLinkName.get(i) + "】");
         }
         return sj.toString();
+    }
+
+    public String getVariableText(String variableName) {
+        if (variables == null) {
+            return null;
+        }
+
+        StringJoiner sj = new StringJoiner(SillyConstant.ARRAY_SPLIT_STR);
+        for (SillyVariable variable : variables) {
+            if (Objects.equals(variable.getVariableName(), variableName)) {
+                sj.add(variable.getVariableText());
+            }
+        }
+        return sj.toString();
+    }
+
+    public List<String> getVariableTexts(String variableName) {
+        List<String> list = new ArrayList<>();
+        if (variables == null) {
+            return list;
+        }
+
+        for (SillyVariable variable : variables) {
+            if (Objects.equals(variable.getVariableName(), variableName)) {
+                list.add(variable.getVariableText());
+            }
+        }
+        return list;
+    }
+
+    public <V extends SillyVariable> List<V> getVariables(String variableName) {
+        List<V> list = new ArrayList<>();
+        if (variables == null) {
+            return list;
+        }
+
+        for (SillyVariable variable : variables) {
+            if (Objects.equals(variable.getVariableName(), variableName)) {
+                list.add((V)variable);
+            }
+        }
+        return list;
     }
 }

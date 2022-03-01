@@ -26,8 +26,6 @@ import java.util.StringJoiner;
  */
 public class SillyCheckVariableFieldsSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyMapToVarSaveHandle.ORDER + 100;
-
     public static final String NAME = "silly_11_checkVariableFields";
 
     @Override
@@ -35,10 +33,6 @@ public class SillyCheckVariableFieldsSaveHandle extends BaseSillyNodeSaveHandle 
         return NAME;
     }
 
-    @Override
-    public int order() {
-        return ORDER;
-    }
 
     @Override
     protected boolean canDo(SillyNodeSourceData sourceData) {

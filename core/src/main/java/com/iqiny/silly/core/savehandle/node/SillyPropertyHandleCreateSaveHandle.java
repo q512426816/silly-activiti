@@ -17,18 +17,11 @@ import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
  */
 public class SillyPropertyHandleCreateSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyLoadMasterByTaskSaveHandle.ORDER + 100;
-
     public static final String NAME = "silly_05_propertyHandleCreate";
 
     @Override
     public String name() {
         return NAME;
-    }
-
-    @Override
-    public int order() {
-        return ORDER;
     }
 
     @Override

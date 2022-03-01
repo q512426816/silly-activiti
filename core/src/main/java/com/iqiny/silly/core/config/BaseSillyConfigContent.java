@@ -27,6 +27,7 @@ import com.iqiny.silly.core.engine.SillyEngineService;
 import com.iqiny.silly.core.group.SillyTaskCategoryGroup;
 import com.iqiny.silly.core.group.SillyTaskGroupHandle;
 import com.iqiny.silly.core.resume.SillyResumeService;
+import com.iqiny.silly.core.savehandle.SillyNodeSaveHandle;
 import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
 import com.iqiny.silly.core.savehandle.node.*;
 import com.iqiny.silly.core.service.SillyReadService;
@@ -129,9 +130,14 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
     protected final List<SillyVariableConvertor> sillyConvertorList = new ArrayList<>();
 
     /**
-     * Name 流程变量 类型转换器
+     * 变量保存处理器
      */
     protected final List<SillyVariableSaveHandle> sillyVariableSaveHandleList = new ArrayList<>();
+
+    /**
+     * 节点保存处理器
+     */
+    protected final List<SillyNodeSaveHandle> sillyNodeSaveHandleList = new ArrayList<>();
 
     /**
      * 傻瓜任务组处理类
@@ -291,72 +297,72 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
     }
 
     protected void initSillySaveHandleList() {
-        registerSillyNodeSaveHandle();
+        hookInitSillyNodeSaveHandleList();
         hookInitSillyVariableSaveHandleList();
     }
 
     private void registerSillyNodeSaveHandle() {
         // 加载 任务及主表数据
-        sillyContext.registerBean(SillyLoadNowTaskSaveHandle.class);
-        sillyContext.registerBean(SillyLoadMasterByNewSaveHandle.class);
-        sillyContext.registerBean(SillyLoadMasterByIdSaveHandle.class);
-        sillyContext.registerBean(SillyLoadMasterByTaskSaveHandle.class);
+        sillyContext.registerBean(SillyLoadNowTaskSaveHandle.NAME, SillyLoadNowTaskSaveHandle.class);
+        sillyContext.registerBean(SillyLoadMasterByNewSaveHandle.NAME, SillyLoadMasterByNewSaveHandle.class);
+        sillyContext.registerBean(SillyLoadMasterByIdSaveHandle.NAME, SillyLoadMasterByIdSaveHandle.class);
+        sillyContext.registerBean(SillyLoadMasterByTaskSaveHandle.NAME, SillyLoadMasterByTaskSaveHandle.class);
 
         // 生成参数读取处理器
-        sillyContext.registerBean(SillyPropertyHandleCreateSaveHandle.class);
+        sillyContext.registerBean(SillyPropertyHandleCreateSaveHandle.NAME, SillyPropertyHandleCreateSaveHandle.class);
 
         // 获取节点配置信息
-        sillyContext.registerBean(SillyLoadNodePropertyByTaskSaveHandle.class);
-        sillyContext.registerBean(SillyLoadNodePropertyByNotTaskSaveHandle.class);
+        sillyContext.registerBean(SillyLoadNodePropertyByTaskSaveHandle.NAME, SillyLoadNodePropertyByTaskSaveHandle.class);
+        sillyContext.registerBean(SillyLoadNodePropertyByNotTaskSaveHandle.NAME, SillyLoadNodePropertyByNotTaskSaveHandle.class);
 
         // 创建节点对象信息
-        sillyContext.registerBean(SillyLoadNodeInfoSaveHandle.class);
+        sillyContext.registerBean(SillyLoadNodeInfoSaveHandle.NAME, SillyLoadNodeInfoSaveHandle.class);
 
         // 提交对象Map ->转-> 数据集合varList
-        sillyContext.registerBean(SillyMapToVarSaveHandle.class);
-        sillyContext.registerBean(SillyCheckVariableFieldsSaveHandle.class);
+        sillyContext.registerBean(SillyMapToVarSaveHandle.NAME, SillyMapToVarSaveHandle.class);
+        sillyContext.registerBean(SillyCheckVariableFieldsSaveHandle.NAME, SillyCheckVariableFieldsSaveHandle.class);
 
         // 生成流程变量数据
-        sillyContext.registerBean(SillyVarToProcessMapSaveHandle.class);
+        sillyContext.registerBean(SillyVarToProcessMapSaveHandle.NAME, SillyVarToProcessMapSaveHandle.class);
 
         // 启动流程
-        sillyContext.registerBean(SillyProcessStartSaveHandle.class);
+        sillyContext.registerBean(SillyProcessStartSaveHandle.NAME, SillyProcessStartSaveHandle.class);
 
         // 根据varList 生成 主对象属性  节点对象属性
-        sillyContext.registerBean(SillyVarToMasterSaveHandle.class);
-        sillyContext.registerBean(SillyVarToNodeSaveHandle.class);
+        sillyContext.registerBean(SillyVarToMasterSaveHandle.NAME, SillyVarToMasterSaveHandle.class);
+        sillyContext.registerBean(SillyVarToNodeSaveHandle.NAME, SillyVarToNodeSaveHandle.class);
 
         // 节点数据 及 变量数据 转 历史数据
-        sillyContext.registerBean(SillyVariableToHistorySaveHandle.class);
-        sillyContext.registerBean(SillyNodeToHistorySaveHandle.class);
+        sillyContext.registerBean(SillyVariableToHistorySaveHandle.NAME, SillyVariableToHistorySaveHandle.class);
+        sillyContext.registerBean(SillyNodeToHistorySaveHandle.NAME, SillyNodeToHistorySaveHandle.class);
 
         // 节点数据 保存
-        sillyContext.registerBean(SillyNodeInsertSaveHandle.class);
+        sillyContext.registerBean(SillyNodeInsertSaveHandle.NAME, SillyNodeInsertSaveHandle.class);
 
         // 节点变量数据设置 及 变量 variableSaveHandle 执行 (变量数量 可能变少)
-        sillyContext.registerBean(SillyNodeVariableHandleSaveHandle.class);
+        sillyContext.registerBean(SillyNodeVariableHandleSaveHandle.NAME, SillyNodeVariableHandleSaveHandle.class);
 
         // 节点变量数据设置 及 变量 variableConvertor 执行  (变量数量 可能变多)
-        sillyContext.registerBean(SillyNodeVariableConvertorSaveHandle.class);
+        sillyContext.registerBean(SillyNodeVariableConvertorSaveHandle.NAME, SillyNodeVariableConvertorSaveHandle.class);
 
         // 节点变量数据 保存
-        sillyContext.registerBean(SillyNodeVariableInsertSaveHandle.class);
+        sillyContext.registerBean(SillyNodeVariableInsertSaveHandle.NAME, SillyNodeVariableInsertSaveHandle.class);
 
         // 流程提交
-        sillyContext.registerBean(SillyProcessSubmitSaveHandle.class);
+        sillyContext.registerBean(SillyProcessSubmitSaveHandle.NAME, SillyProcessSubmitSaveHandle.class);
 
         // 提交之后的 处置
-        sillyContext.registerBean(SillyLoadNextTaskSaveHandle.class);
-        sillyContext.registerBean(SillyAfterCompleteSaveHandle.class);
-        sillyContext.registerBean(SillyAfterCloseSaveHandle.class);
+        sillyContext.registerBean(SillyLoadNextTaskSaveHandle.NAME, SillyLoadNextTaskSaveHandle.class);
+        sillyContext.registerBean(SillyAfterCompleteSaveHandle.NAME, SillyAfterCompleteSaveHandle.class);
+        sillyContext.registerBean(SillyAfterCloseSaveHandle.NAME, SillyAfterCloseSaveHandle.class);
 
         // 履历记录
-        sillyContext.registerBean(SillyResumeCreateSaveHandle.class);
-        sillyContext.registerBean(SillyResumeRecordSaveHandle.class);
+        sillyContext.registerBean(SillyResumeCreateSaveHandle.NAME, SillyResumeCreateSaveHandle.class);
+        sillyContext.registerBean(SillyResumeRecordSaveHandle.NAME, SillyResumeRecordSaveHandle.class);
 
         // 更新主表 及 root 信息
-        sillyContext.registerBean(SillyMasterUpdateSaveHandle.class);
-        sillyContext.registerBean(SillyUpdateCachePropertyHandleRootSaveHandle.class);
+        sillyContext.registerBean(SillyMasterUpdateSaveHandle.NAME, SillyMasterUpdateSaveHandle.class);
+        sillyContext.registerBean(SillyUpdateCachePropertyHandleRootSaveHandle.NAME, SillyUpdateCachePropertyHandleRootSaveHandle.class);
 
     }
 
@@ -368,6 +374,10 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
         sillyVariableSaveHandleList.add(saveHandle);
     }
 
+    protected void addSillyNodeSaveHandle(SillyNodeSaveHandle saveHandle) {
+        sillyNodeSaveHandleList.add(saveHandle);
+    }
+
     /**
      * 初始完成 傻瓜转换器 回调方法
      */
@@ -376,6 +386,7 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
 
     protected abstract void hookInitSillyVariableSaveHandleList();
 
+    protected abstract void hookInitSillyNodeSaveHandleList();
 
     protected void initSillyHtmlTagTemplateList() {
         hookInitSillyHtmlTagTemplateList();
@@ -588,6 +599,14 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
         return map;
     }
 
+    public Map<String, SillyNodeSaveHandle> getSillyNodeSaveHandleMap(String category) {
+        Map<String, SillyNodeSaveHandle> map = new HashMap<>();
+        SillyCoreUtil.availableThen(category, sillyNodeSaveHandleList, (v) -> {
+            map.put(v.name(), v);
+        });
+        return map;
+    }
+
     public SillyResumeService getSillyResumeService(String category) {
         return SillyCoreUtil.availableOne(category, sillyResumeServiceList);
     }
@@ -661,6 +680,7 @@ public abstract class BaseSillyConfigContent implements SillyConfigContent {
                 .setSillyTaskGroupHandle(getSillyTaskGroupHandle(category))
                 .setSillyConvertorMap(getSillyConvertorMap(category))
                 .setSillyVariableSaveHandleMap(getSillyVariableSaveHandleMap(category))
+                .setSillyNodeSaveHandleMap(getSillyNodeSaveHandleMap(category))
                 .setSillyCurrentUserUtil(getCurrentUserUtil(category))
                 .setSillyEngineService(getSillyEngineService(category))
                 .setSillyFactory(getSillyFactory(category))

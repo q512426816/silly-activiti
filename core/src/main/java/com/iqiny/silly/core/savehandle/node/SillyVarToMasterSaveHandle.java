@@ -19,18 +19,11 @@ import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
  */
 public class SillyVarToMasterSaveHandle<T extends SillyMaster> extends BaseSillyNodeBelongSaveHandle<T> {
 
-    public static final int ORDER = SillyVarToProcessMapSaveHandle.ORDER + 100;
-
     public static final String NAME = "silly_14_varToMaster";
 
     @Override
     public String name() {
         return NAME;
-    }
-
-    @Override
-    public int order() {
-        return ORDER;
     }
 
     @Override

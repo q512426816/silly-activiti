@@ -30,18 +30,11 @@ import java.util.*;
  */
 public class SillyMapToVarSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyLoadNodeInfoSaveHandle.ORDER + 100;
-
     public static final String NAME = "silly_10_mapToVar";
 
     @Override
     public String name() {
         return NAME;
-    }
-
-    @Override
-    public int order() {
-        return ORDER;
     }
 
     @Override

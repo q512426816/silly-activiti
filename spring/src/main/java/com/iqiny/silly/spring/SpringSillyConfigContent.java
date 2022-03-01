@@ -30,8 +30,13 @@ import com.iqiny.silly.core.group.SillyTaskCategoryGroup;
 import com.iqiny.silly.core.group.SillyTaskGroup;
 import com.iqiny.silly.core.group.SillyTaskGroupHandle;
 import com.iqiny.silly.core.resume.SillyResumeService;
+import com.iqiny.silly.core.savehandle.SillyNodeSaveHandle;
 import com.iqiny.silly.core.savehandle.SillyVariableSaveHandle;
-import com.iqiny.silly.core.savehandle.variable.*;
+import com.iqiny.silly.core.savehandle.node.*;
+import com.iqiny.silly.core.savehandle.variable.DataJoinVariableSaveHandle;
+import com.iqiny.silly.core.savehandle.variable.OverwriteVariableSaveHandle;
+import com.iqiny.silly.core.savehandle.variable.SaveVariableSaveHandle;
+import com.iqiny.silly.core.savehandle.variable.SkipVariableSaveHandle;
 import com.iqiny.silly.core.service.SillyReadService;
 import com.iqiny.silly.core.service.SillyWriteService;
 import org.apache.commons.io.IOUtils;
@@ -144,6 +149,80 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent implements 
         final List<SillyVariableSaveHandle> beanList = sillyContext.getBeanList(SillyVariableSaveHandle.class);
         for (SillyVariableSaveHandle saveHandle : beanList) {
             addSillyVariableSaveHandle(saveHandle);
+        }
+    }
+
+    @Override
+    protected void hookInitSillyNodeSaveHandleList() {
+
+        // ======================== 初始化处置器 ========================================
+        // 加载 任务及主表数据
+        addSillyNodeSaveHandle(new SillyLoadNowTaskSaveHandle());
+        addSillyNodeSaveHandle(new SillyLoadMasterByNewSaveHandle());
+        addSillyNodeSaveHandle(new SillyLoadMasterByIdSaveHandle());
+        addSillyNodeSaveHandle(new SillyLoadMasterByTaskSaveHandle());
+
+        // 生成参数读取处理器
+        addSillyNodeSaveHandle(new SillyPropertyHandleCreateSaveHandle());
+
+        // 获取节点配置信息
+        addSillyNodeSaveHandle(new SillyLoadNodePropertyByTaskSaveHandle());
+        addSillyNodeSaveHandle(new SillyLoadNodePropertyByNotTaskSaveHandle());
+
+
+        // ======================== 执行处置器 =========================================
+        // 创建节点对象信息
+        addSillyNodeSaveHandle(new SillyLoadNodeInfoSaveHandle());
+
+        // 提交对象Map ->转-> 数据集合varList
+        addSillyNodeSaveHandle(new SillyMapToVarSaveHandle());
+        addSillyNodeSaveHandle(new SillyCheckVariableFieldsSaveHandle());
+
+        // 生成流程变量数据
+        addSillyNodeSaveHandle(new SillyVarToProcessMapSaveHandle());
+
+        // 启动流程
+        addSillyNodeSaveHandle(new SillyProcessStartSaveHandle());
+
+        // 根据varList 生成 主对象属性  节点对象属性
+        addSillyNodeSaveHandle(new SillyVarToMasterSaveHandle());
+        addSillyNodeSaveHandle(new SillyVarToNodeSaveHandle());
+
+        // 节点数据 及 变量数据 转 历史数据
+        addSillyNodeSaveHandle(new SillyVariableToHistorySaveHandle());
+        addSillyNodeSaveHandle(new SillyNodeToHistorySaveHandle());
+
+        // 节点数据 保存
+        addSillyNodeSaveHandle(new SillyNodeInsertSaveHandle());
+
+        // 节点变量数据设置 及 变量 variableSaveHandle 执行 (变量数量 可能变少)
+        addSillyNodeSaveHandle(new SillyNodeVariableHandleSaveHandle());
+
+        // 节点变量数据设置 及 变量 variableConvertor 执行  (变量数量 可能变多)
+        addSillyNodeSaveHandle(new SillyNodeVariableConvertorSaveHandle());
+
+        // 节点变量数据 保存
+        addSillyNodeSaveHandle(new SillyNodeVariableInsertSaveHandle());
+
+        // 流程提交
+        addSillyNodeSaveHandle(new SillyProcessSubmitSaveHandle());
+
+        // 提交之后的 处置
+        addSillyNodeSaveHandle(new SillyLoadNextTaskSaveHandle());
+        addSillyNodeSaveHandle(new SillyAfterCompleteSaveHandle());
+        addSillyNodeSaveHandle(new SillyAfterCloseSaveHandle());
+
+        // 履历记录
+        addSillyNodeSaveHandle(new SillyResumeCreateSaveHandle());
+        addSillyNodeSaveHandle(new SillyResumeRecordSaveHandle());
+
+        // 更新主表 及 root 信息
+        addSillyNodeSaveHandle(new SillyMasterUpdateSaveHandle());
+        addSillyNodeSaveHandle(new SillyUpdateCachePropertyHandleRootSaveHandle());
+
+        final List<SillyNodeSaveHandle> beanList = sillyContext.getBeanList(SillyNodeSaveHandle.class);
+        for (SillyNodeSaveHandle saveHandle : beanList) {
+            addSillyNodeSaveHandle(saveHandle);
         }
     }
 

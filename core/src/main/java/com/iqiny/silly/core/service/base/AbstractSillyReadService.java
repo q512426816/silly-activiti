@@ -226,8 +226,13 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
 
     @Override
     public Object queryDoingPage(Map<String, Object> params) {
-        String currentUserId = sillyCurrentUserUtil.currentUserId();
-        Set<String> allGroupId = sillyTaskGroupHandle.getAllGroupId(usedCategory(), currentUserId);
+        String currentUserId = null;
+        Set<String> allGroupId = null;
+        if (!sillyCurrentUserUtil.isAdmin()) {
+            currentUserId = sillyCurrentUserUtil.currentUserId();
+            allGroupId = sillyTaskGroupHandle.getAllGroupId(usedCategory(), currentUserId);
+        }
+
         List<? extends SillyMasterTask> masterTasks = sillyEngineService.getDoingMasterTask(usedCategory(), currentUserId, allGroupId);
         final SillyMasterTaskUtil<? extends SillyMasterTask> masterTaskUtil = SillyMasterTaskUtil.create(masterTasks);
         List<String> masterIdList = masterTaskUtil.getMasterIds();
@@ -257,8 +262,12 @@ public abstract class AbstractSillyReadService<M extends SillyMaster, N extends 
 
     @Override
     public Object sourcePage(Map<String, Object> params) {
-        String currentUserId = sillyCurrentUserUtil.currentUserId();
-        Set<String> allGroupId = sillyTaskGroupHandle.getAllGroupId(usedCategory(), currentUserId);
+        String currentUserId = null;
+        Set<String> allGroupId = null;
+        if (!sillyCurrentUserUtil.isAdmin()) {
+            currentUserId = sillyCurrentUserUtil.currentUserId();
+            allGroupId = sillyTaskGroupHandle.getAllGroupId(usedCategory(), currentUserId);
+        }
         List<? extends SillyMasterTask> masterTasks = this.sillyEngineService.getDoingMasterTask(this.usedCategory(), currentUserId, allGroupId);
         SillyMasterTaskUtil<? extends SillyMasterTask> masterTaskUtil = SillyMasterTaskUtil.create(masterTasks);
         Set<String> masterIds = this.findMasterIdByMap(null, params);

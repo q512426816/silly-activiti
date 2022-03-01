@@ -15,6 +15,7 @@ import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.base.core.SillyNode;
 import com.iqiny.silly.core.config.SillyCategoryConfig;
 import com.iqiny.silly.core.config.SillyConfigUtil;
+import com.iqiny.silly.core.config.SillyCurrentUserUtil;
 import com.iqiny.silly.core.config.property.SillyProcessMasterProperty;
 import com.iqiny.silly.core.config.property.SillyProcessNodeProperty;
 import com.iqiny.silly.core.engine.SillyEngineService;
@@ -28,18 +29,11 @@ import java.util.*;
  */
 public class SillyProcessStartSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyVarToProcessMapSaveHandle.ORDER + 100;
-
     public static final String NAME = "silly_13_processStart";
 
     @Override
     public String name() {
         return NAME;
-    }
-
-    @Override
-    public int order() {
-        return ORDER;
     }
 
     @Override
@@ -78,8 +72,14 @@ public class SillyProcessStartSaveHandle extends BaseSillyNodeSaveHandle {
         if (startFlag) {
             // 设置当前任务ID
             String nodeUserId = node.getNodeUserId();
-            Set<String> allGroupIds = sillyConfig.getSillyTaskGroupHandle().getAllGroupId(category, nodeUserId);
-            SillyMasterTask masterTask = engineService.getOneTask(category, nodeUserId, master.getId(), allGroupIds);
+            Set<String> allGroupId = null;
+            SillyCurrentUserUtil sillyCurrentUserUtil = sillyConfig.getSillyCurrentUserUtil();
+            if (sillyCurrentUserUtil.isAdmin(nodeUserId)) {
+                nodeUserId = null;
+            } else {
+                allGroupId = sillyConfig.getSillyTaskGroupHandle().getAllGroupId(category, nodeUserId);
+            }
+            SillyMasterTask masterTask = engineService.getOneTask(category, nodeUserId, master.getId(), allGroupId);
             SillyAssert.notNull(masterTask, "未找到您需要处置的任务" + category);
             SillyTask nowTask = engineService.findTaskById(masterTask.getTaskId());
             SillyAssert.notNull(nowTask, "未找到任务" + masterTask.getTaskId());

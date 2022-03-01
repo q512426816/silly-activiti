@@ -22,18 +22,11 @@ import java.util.List;
  */
 public class SillyNodeVariableInsertSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyNodeVariableConvertorSaveHandle.ORDER + 100;
-
     public static final String NAME = "silly_21_nodeVariableInsert";
 
     @Override
     public String name() {
         return NAME;
-    }
-
-    @Override
-    public int order() {
-        return ORDER;
     }
 
     @Override

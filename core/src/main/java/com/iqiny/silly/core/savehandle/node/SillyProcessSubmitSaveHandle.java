@@ -22,18 +22,11 @@ import java.util.Map;
  */
 public class SillyProcessSubmitSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyNodeVariableInsertSaveHandle.ORDER + 100;
-
     public static final String NAME = "silly_22_processSubmit";
 
     @Override
     public String name() {
         return NAME;
-    }
-
-    @Override
-    public int order() {
-        return ORDER;
     }
 
     @Override

@@ -23,18 +23,11 @@ import java.util.Date;
  */
 public class SillyNodeInsertSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyNodeToHistorySaveHandle.ORDER + 100;
-
     public static final String NAME = "silly_18_nodeInsert";
 
     @Override
     public String name() {
         return NAME;
-    }
-
-    @Override
-    public int order() {
-        return ORDER;
     }
 
     @Override

@@ -8,7 +8,6 @@
  */
 package com.iqiny.silly.core.savehandle.node;
 
-import com.iqiny.silly.common.SillyConstant;
 import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.config.SillyCategoryConfig;
@@ -23,18 +22,11 @@ import java.util.List;
  */
 public class SillyLoadNowTaskSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyConstant.Order.BELONG_INTERNAL_VARIABLE_ORDER;
-
     public static final String NAME = "silly_01_loadNowTask";
 
     @Override
     public String name() {
         return NAME;
-    }
-
-    @Override
-    public int order() {
-        return ORDER;
     }
 
     @Override

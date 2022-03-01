@@ -21,18 +21,11 @@ import com.iqiny.silly.core.service.SillyWriteService;
  */
 public class SillyVariableToHistorySaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyNodeVariableHandleSaveHandle.ORDER + 100;
-
     public static final String NAME = "silly_16_variableToHistory";
 
     @Override
     public String name() {
         return NAME;
-    }
-
-    @Override
-    public int order() {
-        return ORDER;
     }
 
     @Override

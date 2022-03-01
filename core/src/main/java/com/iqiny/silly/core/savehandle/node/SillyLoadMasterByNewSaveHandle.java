@@ -20,18 +20,11 @@ import com.iqiny.silly.core.service.SillyWriteService;
  */
 public class SillyLoadMasterByNewSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyLoadNowTaskSaveHandle.ORDER + 100;
-
     public static final String NAME = "silly_02_loadMasterByNew";
 
     @Override
     public String name() {
         return NAME;
-    }
-
-    @Override
-    public int order() {
-        return ORDER;
     }
 
     @Override

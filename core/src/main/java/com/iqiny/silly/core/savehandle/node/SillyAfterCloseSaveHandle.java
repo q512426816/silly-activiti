@@ -24,18 +24,11 @@ import java.util.Objects;
  */
 public class SillyAfterCloseSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final int ORDER = SillyAfterCompleteSaveHandle.ORDER + 100;
-
     public static final String NAME = "silly_25_afterClose";
 
     @Override
     public String name() {
         return NAME;
-    }
-
-    @Override
-    public int order() {
-        return ORDER;
     }
 
     @Override
