@@ -37,9 +37,9 @@ public abstract class InternalSillyWriteService<M extends SillyMaster, N extends
     private final static Log log = LogFactory.getLog(InternalSillyWriteService.class);
 
     public static final List<String> INIT_SOURCE_DATA_HANDLE_NAMES = Arrays.asList(SillyLoadNowTaskSaveHandle.NAME,
-            SillyLoadMasterByNewSaveHandle.NAME,
             SillyLoadMasterByIdSaveHandle.NAME,
             SillyLoadMasterByTaskSaveHandle.NAME,
+            SillyLoadMasterByNewSaveHandle.NAME,
             SillyPropertyHandleCreateSaveHandle.NAME,
             SillyLoadNodePropertyByTaskSaveHandle.NAME,
             SillyLoadNodePropertyByNotTaskSaveHandle.NAME);

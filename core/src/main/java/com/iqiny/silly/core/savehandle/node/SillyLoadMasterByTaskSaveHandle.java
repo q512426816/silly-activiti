@@ -21,7 +21,7 @@ import com.iqiny.silly.core.service.SillyReadService;
  */
 public class SillyLoadMasterByTaskSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final String NAME = "silly_04_loadMasterByTask";
+    public static final String NAME = "silly_03_loadMasterByTask";
 
     @Override
     public String name() {

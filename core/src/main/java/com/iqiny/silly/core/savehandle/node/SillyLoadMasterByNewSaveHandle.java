@@ -9,7 +9,6 @@
 package com.iqiny.silly.core.savehandle.node;
 
 import com.iqiny.silly.common.exception.SillyException;
-import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.config.SillyCategoryConfig;
 import com.iqiny.silly.core.savehandle.SillyNodeSourceData;
@@ -20,7 +19,7 @@ import com.iqiny.silly.core.service.SillyWriteService;
  */
 public class SillyLoadMasterByNewSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final String NAME = "silly_02_loadMasterByNew";
+    public static final String NAME = "silly_04_loadMasterByNew";
 
     @Override
     public String name() {
@@ -29,15 +28,14 @@ public class SillyLoadMasterByNewSaveHandle extends BaseSillyNodeSaveHandle {
 
     @Override
     protected boolean canDo(SillyNodeSourceData sourceData) {
-        return StringUtils.isEmpty(sourceData.masterId()) && StringUtils.isEmpty(sourceData.taskId());
+        return sourceData.getMaster() == null;
     }
 
     @Override
     protected void handle(SillyCategoryConfig sillyConfig, SillyNodeSourceData sourceData) {
-        SillyMaster master = sourceData.getMaster();
-        if (master == null) {
-            master = sillyConfig.getSillyFactory().newMaster();
-        }
+
+        SillyMaster master = sillyConfig.getSillyFactory().newMaster();
+        master.setId(sourceData.masterId());
         // 保存 主表数据
         SillyWriteService writeService = sillyConfig.getSillyWriteService();
         // 插入主表

@@ -57,7 +57,13 @@ public class DefaultProcessNodeProperty implements SillyProcessNodeProperty<Defa
     /**
      * 忽略的属性名称
      */
-    private List<String> ignoreFieldNames;
+    private List<String> ignoreFieldNames = Arrays.asList(
+            "id",
+            "taskId",
+            "submit",
+            "startProcess",
+            "processKey",
+            "nodeKey");
 
     /**
      * 前置 节点保存处理器名称（支持SPEL）
@@ -65,7 +71,7 @@ public class DefaultProcessNodeProperty implements SillyProcessNodeProperty<Defa
      * @see com.iqiny.silly.core.savehandle.SillyNodeSaveHandle
      */
     private List<String> beforeSaveHandleNames;
-    
+
     /**
      * 默认节点保存处理器名称（支持SPEL）
      *

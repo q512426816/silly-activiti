@@ -327,13 +327,14 @@ public class SpringSillyConfigContent extends BaseSillyConfigContent implements 
 
     protected void loadSillyProcessProperty(Resource resource) {
         if (resource == null || !resource.isReadable()) {
-            log.warn(resource.getFilename() + "不可读取，将跳过加载");
+            log.warn(resource== null? "无数据" : resource.getFilename() + "不可读取，将跳过加载");
             return;
         }
-        try {
+        try (
+                InputStream inputStream = resource.getInputStream();
+                StringWriter writer = new StringWriter();
+        ) {
             // 生成jar后必须以流的形式读取
-            InputStream inputStream = resource.getInputStream();
-            StringWriter writer = new StringWriter();
             IOUtils.copy(inputStream, writer, StandardCharsets.UTF_8.name());
             String json = writer.toString();
             String fileName = resource.getFilename();

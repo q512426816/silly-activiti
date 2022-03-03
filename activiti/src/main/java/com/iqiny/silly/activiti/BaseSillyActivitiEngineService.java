@@ -230,7 +230,7 @@ public abstract class BaseSillyActivitiEngineService
         ProcessDefinitionEntity processDefinition = findProcessDefinitionEntityByTaskId(taskId);
 
         // 获取当前活动节点ID
-        if (nodeKey == null || "".equals(nodeKey)) {
+        if (StringUtils.isEmpty(nodeKey)) {
             nodeKey = findTaskById(taskId).getTaskDefinitionKey();
         }
         // 根据节点ID，获取对应的活动节点

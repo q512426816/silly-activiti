@@ -66,14 +66,6 @@ public class SillyMapToVarSaveHandle extends BaseSillyNodeSaveHandle {
 
         Map<String, Object> map = new HashMap<>(saveMap);
 
-        // 忽略这些变量值
-        map.remove("id");
-        map.remove("taskId");
-        map.remove("submit");
-        map.remove("startProcess");
-        map.remove("processKey");
-        map.remove("nodeKey");
-
         List<V> list = new ArrayList<>();
         Map<String, ? extends SillyProcessVariableProperty> variableMap = nodeProperty.getVariable();
         Set<String> keySet = variableMap.keySet();

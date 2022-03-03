@@ -8,7 +8,6 @@
  */
 package com.iqiny.silly.core.savehandle.node;
 
-import com.iqiny.silly.common.util.SillyAssert;
 import com.iqiny.silly.common.util.StringUtils;
 import com.iqiny.silly.core.base.core.SillyMaster;
 import com.iqiny.silly.core.config.SillyCategoryConfig;
@@ -20,7 +19,7 @@ import com.iqiny.silly.core.service.SillyReadService;
  */
 public class SillyLoadMasterByIdSaveHandle extends BaseSillyNodeSaveHandle {
 
-    public static final String NAME = "silly_03_loadMasterById";
+    public static final String NAME = "silly_02_loadMasterById";
 
     @Override
     public String name() {
@@ -37,7 +36,6 @@ public class SillyLoadMasterByIdSaveHandle extends BaseSillyNodeSaveHandle {
         SillyReadService sillyReadService = sillyConfig.getSillyReadService();
         String masterId = sourceData.masterId();
         SillyMaster master = sillyReadService.getMaster(masterId);
-        SillyAssert.notNull(master, "根据 masterId 获取数据失败 " + masterId);
         sourceData.setMaster(master);
     }
 
